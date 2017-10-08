@@ -1,0 +1,5 @@
+- hosts: edi
+  roles:
+    - role: sample_role
+      become: True
+      become_user: root
