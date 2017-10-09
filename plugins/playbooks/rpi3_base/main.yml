@@ -1,5 +1,8 @@
 - hosts: edi
   roles:
+    - role: repositories 
+      become: True
+      become_user: root
     - role: essential_packages 
       become: True
       become_user: root

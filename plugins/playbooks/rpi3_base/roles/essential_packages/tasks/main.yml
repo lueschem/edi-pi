@@ -1,4 +1,19 @@
 ---
 - name: Install packages that are essential for running on bare metal.
   apt: name={{ item }} state=present install_recommends=no
-  with_items: "{{ bare_metal_packages }}" 
+  with_items: "{{ bare_metal_packages }}"
+
+- name: Create temporary firmware directory within boot folder.
+  file: path=/boot/firmware_temp state=directory
+  
+- name: Create /boot/firmware mountpoint to enable installation of firmware package.
+  mount: opts=bind fstype=none state=mounted path=/boot/firmware src=/boot/firmware_temp
+
+- name: Install packages form unstable that are essential for running on bare metal.
+  apt: name={{ item }} state=present install_recommends=no default_release=unstable
+  with_items: "{{ bare_metal_packages_unstable }}" 
+
+- name: Remove /boot/firmware mountpoint.
+  mount: state=absent path=/boot/firmware
+
+
