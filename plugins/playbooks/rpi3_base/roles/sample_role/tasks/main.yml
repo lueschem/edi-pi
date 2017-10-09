@@ -1,3 +1,0 @@
----
-- name: A sample task in a sample role.
-  debug: msg="Start customizing your project!"

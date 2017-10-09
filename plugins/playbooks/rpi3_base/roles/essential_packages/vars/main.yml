@@ -1,0 +1,2 @@
+---
+bare_metal_packages: [raspi3-firmware, linux-image-arm64, cloud-init]

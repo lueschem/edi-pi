@@ -1,0 +1,4 @@
+---
+- name: Install packages that are essential for running on bare metal.
+  apt: name={{ item }} state=present install_recommends=no
+  with_items: "{{ bare_metal_packages }}" 
