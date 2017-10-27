@@ -1,7 +1,4 @@
 ---
-- name: Prevent service startup during installation.
-  copy: src=policy-rc.d dest=/usr/sbin/ mode=755
-
 - name: Create temporary firmware directory within boot folder.
   file: path=/boot/firmware_temp state=directory
   
@@ -19,7 +16,5 @@
 - name: Remove /boot/firmware mountpoint.
   mount: state=absent path=/boot/firmware
 
-- name: Remove service startup prevention.
-  file: dest=/usr/sbin/policy-rc.d state=absent
 
 

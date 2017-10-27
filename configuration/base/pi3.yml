@@ -31,5 +31,7 @@ playbooks:
         path: playbooks/debian/development_user_facilities/main.yml
     050_rpi3_base:
         path: playbooks/rpi3_base/main.yml
+    900_base_system_cleanup:
+        path: playbooks/debian/base_system_cleanup/main.yml
 
 
