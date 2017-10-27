@@ -3,8 +3,8 @@ general:
 
 bootstrap:
     architecture: arm64
-    repository: deb http://httpredir.debian.org/debian/ buster main
-    repository_key: https://ftp-master.debian.org/keys/archive-key-9.asc
+    repository: deb http://httpredir.debian.org/debian/ stretch main
+    repository_key: https://ftp-master.debian.org/keys/archive-key-8.asc
 
 shared_folders:
     edi_workspace:

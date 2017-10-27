@@ -6,4 +6,4 @@
     - role: essential_bare_metal_packages 
       become: True
       become_user: root
-      when: {{ edi_create_distributable_image }}
+      when: edi_create_distributable_image
