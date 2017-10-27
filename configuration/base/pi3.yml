@@ -1,0 +1,34 @@
+general:
+    edi_required_minimal_edi_version: 0.7.3
+
+bootstrap:
+    tool: debootstrap
+
+lxc_profiles:
+    010_lxc_networking:
+        path: lxc_profiles/general/lxc_networking/default_interface.yml
+
+{% if edi_lxd_version is defined and (edi_lxd_version.split('.')[0] | int >= 3 or edi_lxd_version.split('.')[1] | int >= 9) %}
+    020_default_root_device:
+        path: lxc_profiles/general/default_root_device/default_root_device.yml
+{% endif %}
+
+lxc_templates:
+    010_etc_hostname:
+        path: lxc_templates/debian/hostname/hostname.yml
+    020_etc_hosts:
+        path: lxc_templates/debian/hosts/hosts.yml
+
+playbooks:
+    010_inherit_host_proxy_settings:
+        path: playbooks/debian/inherit_host_proxy_settings/main.yml
+    020_lxc_networking:
+        path: playbooks/debian/lxc_networking/main.yml
+    030_base_system:
+        path: playbooks/debian/base_system/main.yml
+    040_development_user_facilities:
+        path: playbooks/debian/development_user_facilities/main.yml
+    050_rpi3_base:
+        path: playbooks/rpi3_base/main.yml
+
+

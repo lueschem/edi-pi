@@ -1,6 +1,0 @@
-general:
-    edi_compression: gz
-
-playbooks:
-    040_development_user_facilities:
-        skip: True

@@ -1,5 +1,4 @@
 # edi build artifacts
 
-*bootstrap.tar.*
-*lxc.tar.*
-qemu-*-static
+artifacts/*
+main.retry

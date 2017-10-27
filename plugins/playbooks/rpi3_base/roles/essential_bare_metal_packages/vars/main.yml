@@ -1,0 +1,3 @@
+---
+bare_metal_packages: [dosfstools, raspi3-firmware, linux-image-arm64]
+

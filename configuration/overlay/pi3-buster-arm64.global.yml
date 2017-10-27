@@ -1,0 +1,12 @@
+general:
+    edi_compression: gz
+
+bootstrap:
+    architecture: arm64
+    repository: deb http://httpredir.debian.org/debian/ buster main
+    repository_key: https://ftp-master.debian.org/keys/archive-key-9.asc
+
+shared_folders:
+    edi_workspace:
+        folder: edi-workspace
+        mountpoint: edi-workspace

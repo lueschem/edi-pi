@@ -1,5 +1,0 @@
----
-bare_metal_packages: [cloud-init, dosfstools]
-
-bare_metal_packages_unstable: [raspi3-firmware, linux-image-arm64]
-

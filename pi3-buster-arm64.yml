@@ -2,9 +2,6 @@ general:
     edi_required_minimal_edi_version: 0.7.3
 
 bootstrap:
-    architecture: arm64
-    repository: deb http://ftp.ch.debian.org/debian/ stretch main
-    repository_key: https://ftp-master.debian.org/keys/archive-key-8.asc
     tool: debootstrap
 
 lxc_profiles:
