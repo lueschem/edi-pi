@@ -1,4 +1,7 @@
 ---
+- name: Prevent service startup during installation.
+  copy: src=policy-rc.d dest=/usr/sbin/ mode=755
+
 - name: Create temporary firmware directory within boot folder.
   file: path=/boot/firmware_temp state=directory
   
@@ -9,7 +12,14 @@
   apt: name={{ item }} state=present install_recommends=no
   with_items: "{{ bare_metal_packages }}"
 
+- name: Install backports packages that are essential for running on bare metal.
+  apt: name={{ item }} state=present install_recommends=no default_release=stretch-backports
+  with_items: "{{ bare_metal_backports_packages }}"
+
 - name: Remove /boot/firmware mountpoint.
   mount: state=absent path=/boot/firmware
+
+- name: Remove service startup prevention.
+  file: dest=/usr/sbin/policy-rc.d state=absent
 
 
