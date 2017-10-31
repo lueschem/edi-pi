@@ -1,0 +1,4 @@
+#!/bin/bash
+
+{{ edi_current_plugin_directory }}/lxd2rpi --input {{ edi_input_artifact }} --output {{ edi_output_artifact }} --workdir {{ edi_work_directory }}
+

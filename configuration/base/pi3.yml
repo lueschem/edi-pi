@@ -34,4 +34,8 @@ playbooks:
     900_base_system_cleanup:
         path: playbooks/debian/base_system_cleanup/main.yml
 
-
+postprocessing_commands:
+    100_lxd2rpi:
+        path: postprocessing_commands/image/lxd2rpi.edi
+        require_root: True
+        output: {{ edi_configuration_name }}-image

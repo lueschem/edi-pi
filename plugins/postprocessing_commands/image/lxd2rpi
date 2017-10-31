@@ -1,0 +1,91 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+print_usage()
+{
+    cat <<EOF
+Convert a LXD image into a Raspberry Pi image.
+
+Required arguments:
+ -i FILE, --input=FILE              : LXD container archive that contains the root file system.
+ -o FILE, --output=FILE             : Name of the file that will contain the resulting Raspberry Pi image.
+Optional arguments:
+ -h, --help                         : Print help text.
+ -w DIRECTORY, --workdir=DIRECTORY  : Working directory.
+EOF
+}
+
+print_error_and_exit()
+{
+    local MESSAGE=${1}
+    >&2 echo -e "\n\033[91mError: ${MESSAGE}\033[0m"
+    exit 1
+}
+
+unexpected_exit()
+{
+    local TEMPDIR=${1}
+    clean_up ${TEMPDIR}
+    trap - EXIT
+    print_error_and_exit "Abnormal script termination."
+}
+
+clean_up()
+{
+    local TEMPDIR=${1}
+    rm -rf ${TEMPDIR}
+}
+
+if ! options=$(getopt -o hi:o:w: -l help,input:,output:,workdir: -- "$@")
+then
+    print_usage
+    print_error_and_exit "Invalid option."
+fi
+eval set -- "$options"
+
+WORKDIR=$(pwd)
+SCRIPTDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+INPUT_ARCHIVE=""
+OUTPUT_ARCHIVE=""
+
+while true
+do
+    case "$1" in
+        -h|--help)          print_usage && exit 0;;
+        -i|--input)         INPUT_ARCHIVE=$2; shift 2;;
+        -o|--output)        OUTPUT_ARCHIVE=$2; shift 2;;
+        -w|--workdir)       WORKDIR=$2; shift 2;;
+        *)                  break ;;
+    esac
+done
+
+if [[ ${EUID} -ne 0 ]]; then
+   print_error_and_exit "This script must be run as root."
+fi
+
+if [ -z "${INPUT_ARCHIVE}" ]
+then
+    print_usage
+    print_error_and_exit "Missing input archive."
+fi
+
+if [ -z "${OUTPUT_ARCHIVE}" ]
+then
+    print_usage
+    print_error_and_exit "Missing output archive."
+fi
+
+TEMPDIR=$(mktemp -p ${WORKDIR} -d -t tmp.XXXXXXXX)
+trap "unexpected_exit ${TEMPDIR}" EXIT
+
+LXD_EXTRACTED="${TEMPDIR}/lxd"
+mkdir "${LXD_EXTRACTED}"
+echo "Extracting LXD image to ${LXD_EXTRACTED}."
+tar --numeric-owner -C "${LXD_EXTRACTED}" -xf ${INPUT_ARCHIVE}
+
+clean_up ${TEMPDIR}
+trap - EXIT
+
