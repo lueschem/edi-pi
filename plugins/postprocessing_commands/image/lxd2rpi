@@ -1,5 +1,29 @@
 #!/bin/bash
 
+# Copyright (C) 2017 Matthias Luescher
+#
+# Authors:
+#  Matthias Luescher
+#
+# Acknowledgement:
+#  The non trivial part of this script is heavily inspired by rpi23-gen-image
+#  written by Jan Wagner. See https://github.com/drtyhlpr/rpi23-gen-image.
+#
+# This file is part of edi-pi.
+#
+# edi-pi is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# edi-pi is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with edi.  If not, see <http://www.gnu.org/licenses/>.
+
 set -o errexit
 set -o pipefail
 set -o nounset
@@ -36,6 +60,27 @@ unexpected_exit()
 clean_up()
 {
     local TEMPDIR=${1}
+
+    if [ "${FIRMWARE_MOUNT}" != "unused" ]
+    then
+        umount "${FIRMWARE_MOUNT}"
+    fi
+
+    if [ "${ROOT_MOUNT}" != "unused" ]
+    then
+        umount "${ROOT_MOUNT}"
+    fi
+
+    if [ "${ROOT_LOOP}" != "unused" ]
+    then
+        losetup -d "${ROOT_LOOP}"
+    fi
+
+    if [ "${FRMW_LOOP}" != "unused" ]
+    then
+        losetup -d "${FRMW_LOOP}"
+    fi
+
     rm -rf ${TEMPDIR}
 }
 
@@ -79,13 +124,80 @@ then
 fi
 
 TEMPDIR=$(mktemp -p ${WORKDIR} -d -t tmp.XXXXXXXX)
+ROOT_LOOP="unused"
+FRMW_LOOP="unused"
+ROOT_MOUNT="unused"
+FIRMWARE_MOUNT="unused"
 trap "unexpected_exit ${TEMPDIR}" EXIT
 
 LXD_EXTRACTED="${TEMPDIR}/lxd"
 mkdir "${LXD_EXTRACTED}"
 echo "Extracting LXD image to ${LXD_EXTRACTED}."
-tar --numeric-owner -C "${LXD_EXTRACTED}" -xf ${INPUT_ARCHIVE}
+tar --numeric-owner -C "${LXD_EXTRACTED}" -xf "${INPUT_ARCHIVE}"
+LXD_ROOTFS="${LXD_EXTRACTED}/rootfs"
+mv ${LXD_ROOTFS}/boot/firmware_temp/ ${LXD_ROOTFS}/boot/firmware/
 
-clean_up ${TEMPDIR}
+LXD_ROOTFS_SIZE=$(expr `du -s "${LXD_ROOTFS}" | awk '{ print $1 }'`)
+echo "LXD rootfs is ${LXD_ROOTFS_SIZE}kb big."
+
+set -x
+
+# Calculate the amount of needed 512 byte sectors
+TABLE_SECTORS=$(expr 1 \* 1024 \* 1024 \/ 512)
+FRMW_SECTORS=$(expr 64 \* 1024 \* 1024 \/ 512)
+ROOT_OFFSET=$(expr ${TABLE_SECTORS} + ${FRMW_SECTORS})
+
+# The root partition is ext4
+# This means more space than the actual used space of the chroot is used.
+# As overhead for journaling and reserved blocks 25% are added.
+ROOT_SECTORS=$(expr $(expr ${LXD_ROOTFS_SIZE} + ${LXD_ROOTFS_SIZE} \/ 100 \* 25) \* 1024 \/ 512)
+
+# Calculate required image size in 512 Byte sectors
+IMAGE_SECTORS=$(expr ${TABLE_SECTORS} + ${FRMW_SECTORS} + ${ROOT_SECTORS})
+
+IMAGE_NAME="${WORKDIR}/rpi-image"
+
+# Prepare image file
+dd if=/dev/zero of="${IMAGE_NAME}.img" bs=512 count=${TABLE_SECTORS}
+dd if=/dev/zero of="${IMAGE_NAME}.img" bs=512 count=0 seek=${IMAGE_SECTORS}
+
+# Write partition table
+sfdisk -q -L -uS -f "${IMAGE_NAME}.img" 2> /dev/null <<EOM
+${TABLE_SECTORS},${FRMW_SECTORS},c,*
+${ROOT_OFFSET},${ROOT_SECTORS},83
+EOM
+
+# Setup temporary loop devices
+echo "Setting up loop devices."
+FRMW_LOOP="$(losetup -o 1M --sizelimit 64M -f --show ${IMAGE_NAME}.img)"
+ROOT_LOOP="$(losetup -o 65M -f --show ${IMAGE_NAME}.img)"
+
+# Build filesystems
+mkfs.vfat "${FRMW_LOOP}"
+mkfs.ext4 "${ROOT_LOOP}"
+
+# Mount the temporary loop devices
+ROOT_MOUNT="${TEMPDIR}/loop_mnt"
+mkdir -p "${ROOT_MOUNT}"
+mount "${ROOT_LOOP}" "${ROOT_MOUNT}"
+
+FIRMWARE_MOUNT="${ROOT_MOUNT}/boot/firmware"
+mkdir -p "${FIRMWARE_MOUNT}"
+mount "${FRMW_LOOP}" "${FIRMWARE_MOUNT}"
+
+# Copy all files from the LXD rootfs to the loop device mount point directory
+rsync -a "${LXD_ROOTFS}/" "${ROOT_MOUNT}/"
+
+touch ${ROOT_MOUNT}/boot/firmware/bingo
+cat ${ROOT_MOUNT}/boot/firmware/cmdline.txt
+echo "bingo" > ${ROOT_MOUNT}/boot/bongo
+cat ${ROOT_MOUNT}/boot/bongo
+echo "${ROOT_MOUNT}/boot/bongo"
+
+clean_up "${TEMPDIR}"
+
+# Create block map file for bmaptool
+bmaptool create -o "${IMAGE_NAME}.bmap" "${IMAGE_NAME}.img"
+
 trap - EXIT
 
