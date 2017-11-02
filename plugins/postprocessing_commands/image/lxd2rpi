@@ -53,6 +53,8 @@ unexpected_exit()
 {
     local TEMPDIR=${1}
     clean_up ${TEMPDIR}
+    if [ -f "${IMAGE_NAME}.img" ] ; then rm "${IMAGE_NAME}.img" ; fi
+    if [ -f "${IMAGE_NAME}.bmap" ] ; then rm "${IMAGE_NAME}.bmap" ; fi
     trap - EXIT
     print_error_and_exit "Abnormal script termination."
 }
@@ -61,26 +63,10 @@ clean_up()
 {
     local TEMPDIR=${1}
 
-    if [ "${FIRMWARE_MOUNT}" != "unused" ]
-    then
-        umount "${FIRMWARE_MOUNT}"
-    fi
-
-    if [ "${ROOT_MOUNT}" != "unused" ]
-    then
-        umount "${ROOT_MOUNT}"
-    fi
-
-    if [ "${ROOT_LOOP}" != "unused" ]
-    then
-        losetup -d "${ROOT_LOOP}"
-    fi
-
-    if [ "${FRMW_LOOP}" != "unused" ]
-    then
-        losetup -d "${FRMW_LOOP}"
-    fi
-
+    if [ "${FIRMWARE_MNT}" != "unused" ] ; then umount "${FIRMWARE_MNT}" ; fi
+    if [ "${ROOT_MNT}" != "unused" ] ; then umount "${ROOT_MNT}" ; fi
+    if [ "${ROOT_LD}" != "unused" ] ; then losetup -d "${ROOT_LD}" ; fi
+    if [ "${FIRMWARE_LD}" != "unused" ]; then losetup -d "${FIRMWARE_LD}" ; fi
     rm -rf ${TEMPDIR}
 }
 
@@ -93,15 +79,15 @@ eval set -- "$options"
 
 WORKDIR=$(pwd)
 SCRIPTDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-INPUT_ARCHIVE=""
-OUTPUT_ARCHIVE=""
+LXD_ARCHIVE=""
+RPI_IMAGE=""
 
 while true
 do
     case "$1" in
         -h|--help)          print_usage && exit 0;;
-        -i|--input)         INPUT_ARCHIVE=$2; shift 2;;
-        -o|--output)        OUTPUT_ARCHIVE=$2; shift 2;;
+        -i|--input)         LXD_ARCHIVE=$2; shift 2;;
+        -o|--output)        RPI_IMAGE=$2; shift 2;;
         -w|--workdir)       WORKDIR=$2; shift 2;;
         *)                  break ;;
     esac
@@ -111,88 +97,87 @@ if [[ ${EUID} -ne 0 ]]; then
    print_error_and_exit "This script must be run as root."
 fi
 
-if [ -z "${INPUT_ARCHIVE}" ]
+if [ -z "${LXD_ARCHIVE}" ]
 then
     print_usage
     print_error_and_exit "Missing input archive."
 fi
 
-if [ -z "${OUTPUT_ARCHIVE}" ]
+if [ -z "${RPI_IMAGE}" ]
 then
     print_usage
     print_error_and_exit "Missing output archive."
 fi
 
 TEMPDIR=$(mktemp -p ${WORKDIR} -d -t tmp.XXXXXXXX)
-ROOT_LOOP="unused"
-FRMW_LOOP="unused"
-ROOT_MOUNT="unused"
-FIRMWARE_MOUNT="unused"
+
+ROOT_LD="unused"
+FIRMWARE_LD="unused"
+ROOT_MNT="unused"
+FIRMWARE_MNT="unused"
+IMAGE_NAME="${RPI_IMAGE%.img}"
+
 trap "unexpected_exit ${TEMPDIR}" EXIT
+
+set -x
 
 LXD_EXTRACTED="${TEMPDIR}/lxd"
 mkdir "${LXD_EXTRACTED}"
 echo "Extracting LXD image to ${LXD_EXTRACTED}."
-tar --numeric-owner -C "${LXD_EXTRACTED}" -xf "${INPUT_ARCHIVE}"
+tar --numeric-owner -C "${LXD_EXTRACTED}" -xf "${LXD_ARCHIVE}"
 LXD_ROOTFS="${LXD_EXTRACTED}/rootfs"
+# Fix naming of firmware directory.
 mv ${LXD_ROOTFS}/boot/firmware_temp/ ${LXD_ROOTFS}/boot/firmware/
 
 LXD_ROOTFS_SIZE=$(expr `du -s "${LXD_ROOTFS}" | awk '{ print $1 }'`)
 echo "LXD rootfs is ${LXD_ROOTFS_SIZE}kb big."
 
-set -x
+# Calculate the amount of needed 512 byte sectors:
+TABLE_SECTOR_SIZE=1
+FIRMWARE_SECTOR_SIZE=128
+LOSETUP_ROOT_OFFSET=$(expr ${TABLE_SECTOR_SIZE} + ${FIRMWARE_SECTOR_SIZE})
+TABLE_SECTORS=$(expr ${TABLE_SECTOR_SIZE} \* 1024 \* 1024 \/ 512)
+FIRMWARE_SECTORS=$(expr ${FIRMWARE_SECTOR_SIZE} \* 1024 \* 1024 \/ 512)
+ROOT_OFFSET=$(expr ${TABLE_SECTORS} + ${FIRMWARE_SECTORS})
 
-# Calculate the amount of needed 512 byte sectors
-TABLE_SECTORS=$(expr 1 \* 1024 \* 1024 \/ 512)
-FRMW_SECTORS=$(expr 64 \* 1024 \* 1024 \/ 512)
-ROOT_OFFSET=$(expr ${TABLE_SECTORS} + ${FRMW_SECTORS})
-
-# The root partition is ext4
+# The root partition is ext4.
 # This means more space than the actual used space of the chroot is used.
 # As overhead for journaling and reserved blocks 25% are added.
 ROOT_SECTORS=$(expr $(expr ${LXD_ROOTFS_SIZE} + ${LXD_ROOTFS_SIZE} \/ 100 \* 25) \* 1024 \/ 512)
 
-# Calculate required image size in 512 Byte sectors
-IMAGE_SECTORS=$(expr ${TABLE_SECTORS} + ${FRMW_SECTORS} + ${ROOT_SECTORS})
+# Calculate required image size in 512 Byte sectors:
+IMAGE_SECTORS=$(expr ${TABLE_SECTORS} + ${FIRMWARE_SECTORS} + ${ROOT_SECTORS})
 
-IMAGE_NAME="${WORKDIR}/rpi-image"
-
-# Prepare image file
+# Prepare the image file.
 dd if=/dev/zero of="${IMAGE_NAME}.img" bs=512 count=${TABLE_SECTORS}
 dd if=/dev/zero of="${IMAGE_NAME}.img" bs=512 count=0 seek=${IMAGE_SECTORS}
 
 # Write partition table
 sfdisk -q -L -uS -f "${IMAGE_NAME}.img" 2> /dev/null <<EOM
-${TABLE_SECTORS},${FRMW_SECTORS},c,*
+${TABLE_SECTORS},${FIRMWARE_SECTORS},c,*
 ${ROOT_OFFSET},${ROOT_SECTORS},83
 EOM
 
-# Setup temporary loop devices
+# Setup temporary loop devices:
 echo "Setting up loop devices."
-FRMW_LOOP="$(losetup -o 1M --sizelimit 64M -f --show ${IMAGE_NAME}.img)"
-ROOT_LOOP="$(losetup -o 65M -f --show ${IMAGE_NAME}.img)"
+FIRMWARE_LD="$(losetup -o ${TABLE_SECTOR_SIZE}M --sizelimit ${FIRMWARE_SECTOR_SIZE}M -f --show ${IMAGE_NAME}.img)"
+ROOT_LD="$(losetup -o ${LOSETUP_ROOT_OFFSET}M -f --show ${IMAGE_NAME}.img)"
 
 # Build filesystems
-mkfs.vfat "${FRMW_LOOP}"
-mkfs.ext4 "${ROOT_LOOP}"
+mkfs.vfat "${FIRMWARE_LD}"
+mkfs.ext4 "${ROOT_LD}"
 
 # Mount the temporary loop devices
-ROOT_MOUNT="${TEMPDIR}/loop_mnt"
-mkdir -p "${ROOT_MOUNT}"
-mount "${ROOT_LOOP}" "${ROOT_MOUNT}"
+ROOT_MNT="${TEMPDIR}/loop_mnt"
+mkdir -p "${ROOT_MNT}"
+mount "${ROOT_LD}" "${ROOT_MNT}"
 
-FIRMWARE_MOUNT="${ROOT_MOUNT}/boot/firmware"
-mkdir -p "${FIRMWARE_MOUNT}"
-mount "${FRMW_LOOP}" "${FIRMWARE_MOUNT}"
+FIRMWARE_MNT="${ROOT_MNT}/boot/firmware"
+mkdir -p "${FIRMWARE_MNT}"
+mount "${FIRMWARE_LD}" "${FIRMWARE_MNT}"
 
 # Copy all files from the LXD rootfs to the loop device mount point directory
-rsync -a "${LXD_ROOTFS}/" "${ROOT_MOUNT}/"
-
-touch ${ROOT_MOUNT}/boot/firmware/bingo
-cat ${ROOT_MOUNT}/boot/firmware/cmdline.txt
-echo "bingo" > ${ROOT_MOUNT}/boot/bongo
-cat ${ROOT_MOUNT}/boot/bongo
-echo "${ROOT_MOUNT}/boot/bongo"
+rsync -a "${LXD_ROOTFS}/" "${ROOT_MNT}/"
 
 clean_up "${TEMPDIR}"
 
