@@ -140,6 +140,8 @@ tar --numeric-owner -C "${LXD_EXTRACTED}" -xf "${LXD_ARCHIVE}"
 LXD_ROOTFS="${LXD_EXTRACTED}/rootfs"
 # Fix naming of firmware directory.
 mv ${LXD_ROOTFS}/boot/firmware_temp/ ${LXD_ROOTFS}/boot/firmware/
+# Add fstab.
+cp ${SCRIPTDIR}/fstab ${LXD_ROOTFS}/etc/
 
 LXD_ROOTFS_SIZE=$(expr `du -s "${LXD_ROOTFS}" | awk '{ print $1 }'`)
 echo "LXD rootfs is ${LXD_ROOTFS_SIZE}kb big."
