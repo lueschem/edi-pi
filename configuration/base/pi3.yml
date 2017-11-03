@@ -1,5 +1,5 @@
 general:
-    edi_required_minimal_edi_version: 0.7.3
+    edi_required_minimal_edi_version: 0.9.0
     edi_lxc_network_interface_name: eth0
 
 bootstrap:
