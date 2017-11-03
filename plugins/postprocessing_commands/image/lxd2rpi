@@ -38,20 +38,28 @@ Required arguments:
  -o FILE, --output=FILE             : Name of the file that will contain the resulting Raspberry Pi image.
 Optional arguments:
  -h, --help                         : Print help text.
+ --log=LEVEL                        : Use --log=DEBUG to trace all commands.
  -w DIRECTORY, --workdir=DIRECTORY  : Working directory.
 EOF
+}
+
+print_error()
+{
+    local MESSAGE=${1}
+    >&2 echo -e "\033[91mError: ${MESSAGE}\033[0m"
 }
 
 print_error_and_exit()
 {
     local MESSAGE=${1}
-    >&2 echo -e "\n\033[91mError: ${MESSAGE}\033[0m"
+    print_error "${MESSAGE}"
     exit 1
 }
 
 unexpected_exit()
 {
     local TEMPDIR=${1}
+    print_error "Going to clean up after abnormal script termination."
     clean_up ${TEMPDIR}
     if [ -f "${IMAGE_NAME}.img" ] ; then rm "${IMAGE_NAME}.img" ; fi
     if [ -f "${IMAGE_NAME}.bmap" ] ; then rm "${IMAGE_NAME}.bmap" ; fi
@@ -63,14 +71,14 @@ clean_up()
 {
     local TEMPDIR=${1}
 
-    if [ "${FIRMWARE_MNT}" != "unused" ] ; then umount "${FIRMWARE_MNT}" ; fi
-    if [ "${ROOT_MNT}" != "unused" ] ; then umount "${ROOT_MNT}" ; fi
-    if [ "${ROOT_LD}" != "unused" ] ; then losetup -d "${ROOT_LD}" ; fi
-    if [ "${FIRMWARE_LD}" != "unused" ]; then losetup -d "${FIRMWARE_LD}" ; fi
+    if [ "${FIRMWARE_MNT}" != "unused" ] ; then umount "${FIRMWARE_MNT}"; FIRMWARE_MNT="unused" ; fi
+    if [ "${ROOT_MNT}" != "unused" ] ; then umount "${ROOT_MNT}"; ROOT_MNT="unused" ; fi
+    if [ "${ROOT_LD}" != "unused" ] ; then losetup -d "${ROOT_LD}"; ROOT_LD="unused" ; fi
+    if [ "${FIRMWARE_LD}" != "unused" ]; then losetup -d "${FIRMWARE_LD}"; FIRMWARE_LD="unused" ; fi
     rm -rf ${TEMPDIR}
 }
 
-if ! options=$(getopt -o hi:o:w: -l help,input:,output:,workdir: -- "$@")
+if ! options=$(getopt -o hi:o:w: -l help,log:,input:,output:,workdir: -- "$@")
 then
     print_usage
     print_error_and_exit "Invalid option."
@@ -81,6 +89,7 @@ WORKDIR=$(pwd)
 SCRIPTDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 LXD_ARCHIVE=""
 RPI_IMAGE=""
+LOG_LEVEL="INFO"
 
 while true
 do
@@ -89,9 +98,14 @@ do
         -i|--input)         LXD_ARCHIVE=$2; shift 2;;
         -o|--output)        RPI_IMAGE=$2; shift 2;;
         -w|--workdir)       WORKDIR=$2; shift 2;;
+        --log)              LOG_LEVEL=$2; shift 2;;
         *)                  break ;;
     esac
 done
+
+if [ "${LOG_LEVEL}" == "DEBUG" ]; then
+    set -x
+fi
 
 if [[ ${EUID} -ne 0 ]]; then
    print_error_and_exit "This script must be run as root."
@@ -118,8 +132,6 @@ FIRMWARE_MNT="unused"
 IMAGE_NAME="${RPI_IMAGE%.img}"
 
 trap "unexpected_exit ${TEMPDIR}" EXIT
-
-set -x
 
 LXD_EXTRACTED="${TEMPDIR}/lxd"
 mkdir "${LXD_EXTRACTED}"
