@@ -1,9 +1,9 @@
 ---
 - name: Create temporary firmware directory within boot folder.
-  file: path=/boot/firmware_temp state=directory
+  file: dest=/boot/firmware_temp state=directory
   
-- name: Create /boot/firmware mountpoint to enable installation of firmware package.
-  mount: opts=bind fstype=none state=mounted path=/boot/firmware src=/boot/firmware_temp
+- name: Create /boot/firmware mount to enable installation of firmware package.
+  mount: opts=bind fstype=none state=mounted name=/boot/firmware src=/boot/firmware_temp
 
 - name: Install packages that are essential for running on bare metal.
   apt: name={{ item }} state=present install_recommends=no
@@ -13,8 +13,6 @@
   apt: name={{ item }} state=present install_recommends=no default_release=stretch-backports
   with_items: "{{ bare_metal_backports_packages }}"
 
-- name: Remove /boot/firmware mountpoint.
-  mount: state=absent path=/boot/firmware
-
-
-
+# Remark: With Ansible >= 2.4 the following two tasks can be simplified using the mount module.
+- name: Unmount /boot/firmware.
+  command: umount /boot/firmware
