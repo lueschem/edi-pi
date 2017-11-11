@@ -123,7 +123,7 @@ then
     print_error_and_exit "Missing output archive."
 fi
 
-TEMPDIR=$(mktemp -p ${WORKDIR} -d -t tmp.XXXXXXXX)
+TEMPDIR=$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)
 
 ROOT_LD="unused"
 FIRMWARE_LD="unused"
@@ -139,7 +139,11 @@ echo "Extracting LXD image to ${LXD_EXTRACTED}."
 tar --numeric-owner -C "${LXD_EXTRACTED}" -xf "${LXD_ARCHIVE}"
 LXD_ROOTFS="${LXD_EXTRACTED}/rootfs"
 # Fix naming of firmware directory.
+rmdir "${LXD_ROOTFS}/boot/firmware"
 mv ${LXD_ROOTFS}/boot/firmware_temp/ ${LXD_ROOTFS}/boot/firmware/
+# Remove temporary files.
+rm -rf "${LXD_ROOTFS}/run/*"
+rm -rf "${LXD_ROOTFS}/tmp/*"
 # Add fstab.
 cp ${SCRIPTDIR}/fstab ${LXD_ROOTFS}/etc/
 
