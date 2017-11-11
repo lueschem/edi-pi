@@ -13,6 +13,6 @@
   apt: name={{ item }} state=present install_recommends=no default_release=stretch-backports
   with_items: "{{ bare_metal_backports_packages }}"
 
-# Remark: With Ansible >= 2.4 the following two tasks can be simplified using the mount module.
+# Remark: With Ansible >= 2.4 the unmounting can be done using the mount module.
 - name: Unmount /boot/firmware.
   command: umount /boot/firmware

@@ -7,7 +7,7 @@ bootstrap:
 
 lxc_profiles:
     100_disable_apparmor:
-        path: lxc_profiles/general/disable_apparmor/aa_unconfined.yml
+        path: lxc_profiles/general/security/disable_apparmor.yml
 
     200_privileged:
         path: lxc_profiles/general/security/privileged.yml
