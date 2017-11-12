@@ -1,0 +1,11 @@
+[Unit]
+Description=resize root file system
+After=systemd-remount-fs.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/pi-resize-rootfs
+
+[Install]
+WantedBy=multi-user.target
+

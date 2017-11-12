@@ -1,0 +1,101 @@
+#!/bin/bash
+
+# Copyright (C) 2017 Matthias Luescher
+#
+# Authors:
+#  Matthias Luescher
+#
+# Acknowledgement:
+#  This script is based on the ideas of various open source developers.
+#
+# This file is part of edi-pi.
+#
+# edi-pi is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# edi-pi is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with edi.  If not, see <http://www.gnu.org/licenses/>.
+
+# ----------------------------------------------------------------------------
+# resizes the root file system in order to use the full available disk space
+#
+# ATTENTION: Resizing file systems can lead to data loss!
+# ----------------------------------------------------------------------------
+
+set -o nounset
+set -o errexit
+set -o pipefail
+
+print_and_exit()
+{
+    local TYPE=$1
+    local MESSAGE=$2
+    trap - EXIT
+    if [ "${TYPE}" == "ERROR" ] ; then
+        >&2 echo "error: ${MESSAGE}"
+        exit 1
+    else
+        echo "${MESSAGE}"
+        exit 0
+    fi
+}
+
+abnormal_termination()
+{
+    print_and_exit "ERROR" "failed to resize rootfs due to abnormal script termination"
+}
+
+trap "abnormal_termination" EXIT
+
+echo "going to expand root partition"
+
+CONTROL_FILE="/etc/pi-resize-rootfs.done"
+
+if [ -f "${CONTROL_FILE}" ] ; then
+    print_and_exit "INFO" "rootfs is already resized - not going to resize rootfs again"
+fi
+
+if systemd-detect-virt --container > /dev/null ; then
+    print_and_exit "INFO" "detected container virtualization - not going to resize rootfs"
+fi
+
+if [[ $EUID -ne 0 ]]; then
+   print_and_exit "ERROR" "use root user to execute this script"
+fi
+
+ROOT_PART=$(mount | sed -n 's|^/dev/\(.*\) on / .*|\1|p')
+if [ -z "${ROOT_PART}" ] ; then
+    print_and_exit "ERROR" "unable to detect root partition device"
+fi
+
+case "${ROOT_PART}" in
+    mmcblk0*) ROOT_DEV=mmcblk0 ;;
+    sda*)     ROOT_DEV=sda ;;
+esac
+
+PART_NUM=$(echo ${ROOT_PART} | grep -o '[1-9][0-9]*$')
+if [ "${PART_NUM}" = "${ROOT_PART}" ] ; then
+    print_and_exit "ERROR" "${ROOT_PART} does not look like an SD card - not going to resize rootfs"
+fi
+
+LAST_PART_NUM=$(parted /dev/${ROOT_DEV} -ms unit s p | tail -n 1 | cut -f 1 -d:)
+if [ ${LAST_PART_NUM} -ne ${PART_NUM} ]; then
+    print_and_exit "ERROR" "${ROOT_PART} is not the last partition - not going to resize rootfs"
+fi
+
+echo ", +" | sfdisk --no-reread -N ${PART_NUM} /dev/${ROOT_DEV}
+
+partprobe
+resize2fs /dev/${ROOT_PART}
+
+touch ${CONTROL_FILE}
+
+print_and_exit "INFO" "root partition ${ROOT_PART} successfully resized."
+
