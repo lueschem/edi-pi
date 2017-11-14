@@ -1,0 +1,16 @@
+- hosts: edi
+  
+  vars:
+    install_development_tools: False
+    install_cross_development_tools: False
+    cross_architecture: arm64
+
+  roles:
+    - role: multiarch_support
+      become: True
+      become_user: root
+      when: install_cross_development_tools 
+    - role: tools
+      become: True
+      become_user: root
+      when: install_development_tools or install_cross_development_tools

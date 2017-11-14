@@ -1,0 +1,26 @@
+---
+base_development_tools:
+  - apt-utils
+  - base-files
+  - bash-completion
+  - bc
+  - debhelper
+  - devscripts
+  - dh-python
+  - dh-make
+  - dpkg-dev
+  - git
+  - fakeroot
+  - m4
+  - vim
+  - build-essential
+
+cross_development_tools:
+  - crossbuild-essential-{{ cross_architecture }}
+  - dpkg-cross
+  - qemu-user-static
+
+foreign_base_libraries:
+  - "libc6:{{ cross_architecture }}"
+  - "libstdc++6:{{ cross_architecture }}"
+

@@ -1,0 +1,16 @@
+---
+- name: Install base development tools.
+  apt: name={{ item }} state=present
+  with_items: "{{ base_development_tools }}"
+  when: install_development_tools
+
+- name: Install cross development tools.
+  apt: name={{ item }} state=present
+  with_items: "{{ cross_development_tools }}"
+  when: install_cross_development_tools
+
+- name: Install foreign base libraries.
+  apt: name={{ item }} state=present
+  with_items: "{{ foreign_base_libraries }}"
+  when: install_cross_development_tools
+

@@ -1,22 +1,16 @@
 general:
-    edi_required_minimal_edi_version: 0.9.0
+    edi_required_minimal_edi_version: 0.10.0
     edi_lxc_network_interface_name: eth0
 
 bootstrap:
     tool: debootstrap
 
 lxc_profiles:
-    100_disable_apparmor:
-        path: lxc_profiles/general/security/disable_apparmor.yml
-
-    200_privileged:
-        path: lxc_profiles/general/security/privileged.yml
-
-    300_lxc_networking:
+    100_lxc_networking:
         path: lxc_profiles/general/lxc_networking/default_interface.yml
 
 {% if edi_lxd_version is defined and (edi_lxd_version.split('.')[0] | int >= 3 or edi_lxd_version.split('.')[1] | int >= 9) %}
-    400_default_root_device:
+    200_default_root_device:
         path: lxc_profiles/general/default_root_device/default_root_device.yml
 {% endif %}
 
@@ -39,6 +33,8 @@ playbooks:
         path: playbooks/debian/development_user_facilities/main.yml
     300_rpi3_base:
         path: playbooks/rpi3_base/main.yml
+    400_development_tools:
+        path: playbooks/development_tools/main.yml
     900_base_system_cleanup:
         path: playbooks/debian/base_system_cleanup/main.yml
         parameters:

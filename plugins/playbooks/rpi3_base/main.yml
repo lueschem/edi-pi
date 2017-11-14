@@ -6,8 +6,8 @@
     - role: essential_bare_metal_packages 
       become: True
       become_user: root
-      when: edi_create_distributable_image
+      when: edi_create_distributable_image and edi_bootstrap_architecture == 'arm64'
     - role: resize_rootfs
       become: True
       become_user: root
-      when: edi_create_distributable_image
+      when: edi_create_distributable_image and edi_bootstrap_architecture == 'arm64'
