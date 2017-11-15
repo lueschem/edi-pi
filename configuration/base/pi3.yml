@@ -41,9 +41,8 @@ playbooks:
             hostname: raspberry
 
 postprocessing_commands:
-    100_lxd2rpi:
-        path: postprocessing_commands/image/lxd2rpi.edi
+    100_lxd2rootfs:
+        path: postprocessing_commands/rootfs/lxd2rootfs.edi
         require_root: True
         output: 
-            pi3_image: {{ edi_configuration_name }}.img
-            pi3_bmap: {{ edi_configuration_name }}.bmap
+            pi3_rootfs: {{ edi_configuration_name }}_rootfs

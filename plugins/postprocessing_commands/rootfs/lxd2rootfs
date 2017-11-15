@@ -1,0 +1,141 @@
+#!/bin/bash
+
+# Copyright (C) 2017 Matthias Luescher
+#
+# Authors:
+#  Matthias Luescher
+#
+# Acknowledgement:
+#  The non trivial part of this script is heavily inspired by rpi23-gen-image
+#  written by Jan Wagner. See https://github.com/drtyhlpr/rpi23-gen-image.
+#
+# This file is part of edi-pi.
+#
+# edi-pi is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# edi-pi is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with edi.  If not, see <http://www.gnu.org/licenses/>.
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+print_usage()
+{
+    cat <<EOF
+Extract and postprocess the root file system of a lxd image.
+
+Required arguments:
+ -i FILE, --input=FILE              : LXD container archive that contains the root file system.
+ -o DIRECTORY, --output=DIRECTORY   : Name of the directory that will receive the root file system.
+Optional arguments:
+ -h, --help                         : Print help text.
+ --log=LEVEL                        : Use --log=DEBUG to trace all commands.
+ -w DIRECTORY, --workdir=DIRECTORY  : Working directory.
+EOF
+}
+
+print_error()
+{
+    local MESSAGE=${1}
+    >&2 echo -e "\033[91mError: ${MESSAGE}\033[0m"
+}
+
+print_error_and_exit()
+{
+    local MESSAGE=${1}
+    print_error "${MESSAGE}"
+    exit 1
+}
+
+unexpected_exit()
+{
+    local TEMPDIR=${1}
+    print_error "Going to clean up after abnormal script termination."
+    clean_up ${TEMPDIR}
+    trap - EXIT
+    print_error_and_exit "Abnormal script termination."
+}
+
+clean_up()
+{
+    local TEMPDIR=${1}
+    rm -rf ${TEMPDIR}
+}
+
+if ! options=$(getopt -o hi:o:w: -l help,log:,input:,output:,workdir: -- "$@")
+then
+    print_usage
+    print_error_and_exit "Invalid option."
+fi
+eval set -- "$options"
+
+WORKDIR=$(pwd)
+SCRIPTDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+LXD_ARCHIVE=""
+ROOTFSDIR=""
+LOG_LEVEL="INFO"
+
+while true
+do
+    case "$1" in
+        -h|--help)          print_usage && exit 0;;
+        -i|--input)         LXD_ARCHIVE=$2; shift 2;;
+        -o|--output)        ROOTFSDIR=$2; shift 2;;
+        -w|--workdir)       WORKDIR=$2; shift 2;;
+        --log)              LOG_LEVEL=$2; shift 2;;
+        *)                  break ;;
+    esac
+done
+
+if [ "${LOG_LEVEL}" == "DEBUG" ]; then
+    set -x
+fi
+
+if [[ ${EUID} -ne 0 ]]; then
+   print_error_and_exit "This script must be run as root."
+fi
+
+if [ -z "${LXD_ARCHIVE}" ]
+then
+    print_usage
+    print_error_and_exit "Missing input archive."
+fi
+
+if [ -z "${ROOTFSDIR}" ]
+then
+    print_usage
+    print_error_and_exit "Missing output directory."
+fi
+
+TEMPDIR=$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)
+
+trap "unexpected_exit ${TEMPDIR}" EXIT
+
+LXD_EXTRACTED="${TEMPDIR}/lxd"
+mkdir "${LXD_EXTRACTED}"
+echo "Extracting LXD image to ${LXD_EXTRACTED}."
+tar --numeric-owner -C "${LXD_EXTRACTED}" -xf "${LXD_ARCHIVE}"
+LXD_ROOTFS="${LXD_EXTRACTED}/rootfs"
+# Fix naming of firmware directory.
+rmdir "${LXD_ROOTFS}/boot/firmware"
+mv ${LXD_ROOTFS}/boot/firmware_temp/ ${LXD_ROOTFS}/boot/firmware/
+# Remove temporary files.
+rm -rf "${LXD_ROOTFS}/run/*"
+rm -rf "${LXD_ROOTFS}/tmp/*"
+# Add fstab.
+cp ${SCRIPTDIR}/fstab ${LXD_ROOTFS}/etc/
+mv ${LXD_ROOTFS} ${ROOTFSDIR}
+
+clean_up "${TEMPDIR}"
+
+trap - EXIT
+

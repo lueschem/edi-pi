@@ -1,0 +1,4 @@
+#!/bin/bash
+
+{{ edi_current_plugin_directory }}/lxd2rpi --input {{ edi_input_artifact }} --output {{ pi3_image }} --workdir {{ edi_work_directory }} --log {{ edi_log_level }}
+
