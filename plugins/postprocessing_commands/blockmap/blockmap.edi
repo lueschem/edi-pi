@@ -1,0 +1,3 @@
+#!/bin/bash
+
+bmaptool create -o "{{ pi3_bmap }}" "{{ pi3_image }}"

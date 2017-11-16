@@ -31,10 +31,10 @@ set -o nounset
 print_usage()
 {
     cat <<EOF
-Convert a LXD image into a Raspberry Pi image.
+Convert a root file system into a Raspberry Pi image.
 
 Required arguments:
- -i FILE, --input=FILE              : LXD container archive that contains the root file system.
+ -i DIRECTORY, --input=DIRECTORY    : Directory that contains the root file system.
  -o FILE, --output=FILE             : Name of the file that will contain the resulting Raspberry Pi image.
 Optional arguments:
  -h, --help                         : Print help text.
@@ -45,37 +45,36 @@ EOF
 
 print_error()
 {
-    local MESSAGE=${1}
+    local MESSAGE="${1}"
     >&2 echo -e "\033[91mError: ${MESSAGE}\033[0m"
 }
 
 print_error_and_exit()
 {
-    local MESSAGE=${1}
+    local MESSAGE="${1}"
     print_error "${MESSAGE}"
     exit 1
 }
 
 unexpected_exit()
 {
-    local TEMPDIR=${1}
+    local TEMPDIR="${1}"
     print_error "Going to clean up after abnormal script termination."
-    clean_up ${TEMPDIR}
-    if [ -f "${IMAGE_NAME}.img" ] ; then rm "${IMAGE_NAME}.img" ; fi
-    if [ -f "${IMAGE_NAME}.bmap" ] ; then rm "${IMAGE_NAME}.bmap" ; fi
+    clean_up "${TEMPDIR}"
+    rm -f "${RPI_IMAGE}"
     trap - EXIT
     print_error_and_exit "Abnormal script termination."
 }
 
 clean_up()
 {
-    local TEMPDIR=${1}
+    local TEMPDIR="${1}"
 
     if [ "${FIRMWARE_MNT}" != "unused" ] ; then umount "${FIRMWARE_MNT}"; FIRMWARE_MNT="unused" ; fi
     if [ "${ROOT_MNT}" != "unused" ] ; then umount "${ROOT_MNT}"; ROOT_MNT="unused" ; fi
     if [ "${ROOT_LD}" != "unused" ] ; then losetup -d "${ROOT_LD}"; ROOT_LD="unused" ; fi
     if [ "${FIRMWARE_LD}" != "unused" ]; then losetup -d "${FIRMWARE_LD}"; FIRMWARE_LD="unused" ; fi
-    rm -rf ${TEMPDIR}
+    rm -rf "${TEMPDIR}"
 }
 
 if ! options=$(getopt -o hi:o:w: -l help,log:,input:,output:,workdir: -- "$@")
@@ -85,20 +84,20 @@ then
 fi
 eval set -- "$options"
 
-WORKDIR=$(pwd)
-SCRIPTDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
-LXD_ARCHIVE=""
+WORKDIR="$(pwd)"
+SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOTFS_DIR=""
 RPI_IMAGE=""
 LOG_LEVEL="INFO"
 
 while true
 do
-    case "$1" in
+    case "${1}" in
         -h|--help)          print_usage && exit 0;;
-        -i|--input)         LXD_ARCHIVE=$2; shift 2;;
-        -o|--output)        RPI_IMAGE=$2; shift 2;;
-        -w|--workdir)       WORKDIR=$2; shift 2;;
-        --log)              LOG_LEVEL=$2; shift 2;;
+        -i|--input)         ROOTFS_DIR="${2}"; shift 2;;
+        -o|--output)        RPI_IMAGE="${2}"; shift 2;;
+        -w|--workdir)       WORKDIR="${2}"; shift 2;;
+        --log)              LOG_LEVEL="${2}"; shift 2;;
         *)                  break ;;
     esac
 done
@@ -111,10 +110,10 @@ if [[ ${EUID} -ne 0 ]]; then
    print_error_and_exit "This script must be run as root."
 fi
 
-if [ -z "${LXD_ARCHIVE}" ]
+if [ -z "${ROOTFS_DIR}" ]
 then
     print_usage
-    print_error_and_exit "Missing input archive."
+    print_error_and_exit "Missing rootfs directory parameter."
 fi
 
 if [ -z "${RPI_IMAGE}" ]
@@ -123,32 +122,17 @@ then
     print_error_and_exit "Missing output archive."
 fi
 
-TEMPDIR=$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)
+TEMPDIR="$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)"
 
 ROOT_LD="unused"
 FIRMWARE_LD="unused"
 ROOT_MNT="unused"
 FIRMWARE_MNT="unused"
-IMAGE_NAME="${RPI_IMAGE%.img}"
 
 trap "unexpected_exit ${TEMPDIR}" EXIT
 
-LXD_EXTRACTED="${TEMPDIR}/lxd"
-mkdir "${LXD_EXTRACTED}"
-echo "Extracting LXD image to ${LXD_EXTRACTED}."
-tar --numeric-owner -C "${LXD_EXTRACTED}" -xf "${LXD_ARCHIVE}"
-LXD_ROOTFS="${LXD_EXTRACTED}/rootfs"
-# Fix naming of firmware directory.
-rmdir "${LXD_ROOTFS}/boot/firmware"
-mv ${LXD_ROOTFS}/boot/firmware_temp/ ${LXD_ROOTFS}/boot/firmware/
-# Remove temporary files.
-rm -rf "${LXD_ROOTFS}/run/*"
-rm -rf "${LXD_ROOTFS}/tmp/*"
-# Add fstab.
-cp ${SCRIPTDIR}/fstab ${LXD_ROOTFS}/etc/
-
-LXD_ROOTFS_SIZE=$(expr `du -s "${LXD_ROOTFS}" | awk '{ print $1 }'`)
-echo "LXD rootfs is ${LXD_ROOTFS_SIZE}kb big."
+ROOTFS_SIZE=$(expr `du -s "${ROOTFS_DIR}" | awk '{ print $1 }'`)
+echo "Source rootfs is ${ROOTFS_SIZE}kb big."
 
 # Calculate the amount of needed 512 byte sectors:
 TABLE_SECTOR_SIZE=1
@@ -161,25 +145,25 @@ ROOT_OFFSET=$(expr ${TABLE_SECTORS} + ${FIRMWARE_SECTORS})
 # The root partition is ext4.
 # This means more space than the actual used space of the chroot is used.
 # As overhead for journaling and reserved blocks 25% are added.
-ROOT_SECTORS=$(expr $(expr ${LXD_ROOTFS_SIZE} + ${LXD_ROOTFS_SIZE} \/ 100 \* 25) \* 1024 \/ 512)
+ROOT_SECTORS=$(expr $(expr ${ROOTFS_SIZE} + ${ROOTFS_SIZE} \/ 100 \* 25) \* 1024 \/ 512)
 
 # Calculate required image size in 512 Byte sectors:
 IMAGE_SECTORS=$(expr ${TABLE_SECTORS} + ${FIRMWARE_SECTORS} + ${ROOT_SECTORS})
 
 # Prepare the image file.
-dd if=/dev/zero of="${IMAGE_NAME}.img" bs=512 count=${TABLE_SECTORS}
-dd if=/dev/zero of="${IMAGE_NAME}.img" bs=512 count=0 seek=${IMAGE_SECTORS}
+dd if=/dev/zero of="${RPI_IMAGE}" bs=512 count=${TABLE_SECTORS}
+dd if=/dev/zero of="${RPI_IMAGE}" bs=512 count=0 seek=${IMAGE_SECTORS}
 
 # Write partition table
-sfdisk -q -L -uS -f "${IMAGE_NAME}.img" 2> /dev/null <<EOM
+sfdisk -q -L -uS -f "${RPI_IMAGE}" 2> /dev/null <<EOM
 ${TABLE_SECTORS},${FIRMWARE_SECTORS},c,*
 ${ROOT_OFFSET},${ROOT_SECTORS},83
 EOM
 
 # Setup temporary loop devices:
 echo "Setting up loop devices."
-FIRMWARE_LD="$(losetup -o ${TABLE_SECTOR_SIZE}M --sizelimit ${FIRMWARE_SECTOR_SIZE}M -f --show ${IMAGE_NAME}.img)"
-ROOT_LD="$(losetup -o ${LOSETUP_ROOT_OFFSET}M -f --show ${IMAGE_NAME}.img)"
+FIRMWARE_LD="$(losetup -o ${TABLE_SECTOR_SIZE}M --sizelimit ${FIRMWARE_SECTOR_SIZE}M -f --show ${RPI_IMAGE})"
+ROOT_LD="$(losetup -o ${LOSETUP_ROOT_OFFSET}M -f --show ${RPI_IMAGE})"
 
 # Build filesystems
 mkfs.vfat "${FIRMWARE_LD}"
@@ -195,12 +179,9 @@ mkdir -p "${FIRMWARE_MNT}"
 mount "${FIRMWARE_LD}" "${FIRMWARE_MNT}"
 
 # Copy all files from the LXD rootfs to the loop device mount point directory
-rsync -a "${LXD_ROOTFS}/" "${ROOT_MNT}/"
+rsync -a "${ROOTFS_DIR}/" "${ROOT_MNT}/"
 
 clean_up "${TEMPDIR}"
-
-# Create block map file for bmaptool
-bmaptool create -o "${IMAGE_NAME}.bmap" "${IMAGE_NAME}.img"
 
 trap - EXIT
 

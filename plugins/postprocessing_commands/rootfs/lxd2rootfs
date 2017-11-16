@@ -45,30 +45,30 @@ EOF
 
 print_error()
 {
-    local MESSAGE=${1}
+    local MESSAGE="${1}"
     >&2 echo -e "\033[91mError: ${MESSAGE}\033[0m"
 }
 
 print_error_and_exit()
 {
-    local MESSAGE=${1}
+    local MESSAGE="${1}"
     print_error "${MESSAGE}"
     exit 1
 }
 
 unexpected_exit()
 {
-    local TEMPDIR=${1}
+    local TEMPDIR="${1}"
     print_error "Going to clean up after abnormal script termination."
-    clean_up ${TEMPDIR}
+    clean_up "${TEMPDIR}"
     trap - EXIT
     print_error_and_exit "Abnormal script termination."
 }
 
 clean_up()
 {
-    local TEMPDIR=${1}
-    rm -rf ${TEMPDIR}
+    local TEMPDIR="${1}"
+    rm -rf "${TEMPDIR}"
 }
 
 if ! options=$(getopt -o hi:o:w: -l help,log:,input:,output:,workdir: -- "$@")
@@ -78,20 +78,20 @@ then
 fi
 eval set -- "$options"
 
-WORKDIR=$(pwd)
-SCRIPTDIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+WORKDIR="$(pwd)"
+SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LXD_ARCHIVE=""
 ROOTFSDIR=""
 LOG_LEVEL="INFO"
 
 while true
 do
-    case "$1" in
+    case "${1}" in
         -h|--help)          print_usage && exit 0;;
-        -i|--input)         LXD_ARCHIVE=$2; shift 2;;
-        -o|--output)        ROOTFSDIR=$2; shift 2;;
-        -w|--workdir)       WORKDIR=$2; shift 2;;
-        --log)              LOG_LEVEL=$2; shift 2;;
+        -i|--input)         LXD_ARCHIVE="${2}"; shift 2;;
+        -o|--output)        ROOTFSDIR="${2}"; shift 2;;
+        -w|--workdir)       WORKDIR="${2}"; shift 2;;
+        --log)              LOG_LEVEL="${2}"; shift 2;;
         *)                  break ;;
     esac
 done
@@ -116,7 +116,7 @@ then
     print_error_and_exit "Missing output directory."
 fi
 
-TEMPDIR=$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)
+TEMPDIR="$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)"
 
 trap "unexpected_exit ${TEMPDIR}" EXIT
 
@@ -127,13 +127,13 @@ tar --numeric-owner -C "${LXD_EXTRACTED}" -xf "${LXD_ARCHIVE}"
 LXD_ROOTFS="${LXD_EXTRACTED}/rootfs"
 # Fix naming of firmware directory.
 rmdir "${LXD_ROOTFS}/boot/firmware"
-mv ${LXD_ROOTFS}/boot/firmware_temp/ ${LXD_ROOTFS}/boot/firmware/
+mv "${LXD_ROOTFS}/boot/firmware_temp/" "${LXD_ROOTFS}/boot/firmware/"
 # Remove temporary files.
 rm -rf "${LXD_ROOTFS}/run/*"
 rm -rf "${LXD_ROOTFS}/tmp/*"
 # Add fstab.
-cp ${SCRIPTDIR}/fstab ${LXD_ROOTFS}/etc/
-mv ${LXD_ROOTFS} ${ROOTFSDIR}
+cp "${SCRIPTDIR}/fstab" "${LXD_ROOTFS}/etc/"
+mv "${LXD_ROOTFS}" "${ROOTFSDIR}"
 
 clean_up "${TEMPDIR}"
 
