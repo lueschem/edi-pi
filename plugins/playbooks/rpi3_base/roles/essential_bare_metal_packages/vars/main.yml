@@ -5,3 +5,7 @@ bare_metal_backports_packages: [linux-image-arm64]
 
 bare_metal_buster_packages: [raspi3-firmware]
 
+default_release_file: /etc/apt/apt.conf.d/08default-release
+
+buster_list: /etc/apt/sources.list.d/buster.list
+
