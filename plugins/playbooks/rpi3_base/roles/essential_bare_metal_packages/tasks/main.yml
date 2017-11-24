@@ -36,6 +36,9 @@
 - name: Remove stretch default release setting.
   file: dest={{ default_release_file }} state=absent
 
+- name: Update apt cache.
+  apt: update_cache=yes
+
 # Remark: With Ansible >= 2.4 the unmounting can be done using the mount module.
 - name: Unmount /boot/firmware.
   command: umount /boot/firmware
