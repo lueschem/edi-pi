@@ -8,3 +8,12 @@
 - name: Update apt cache.
   apt: update_cache=yes
 
+- name: Set stretch as default release.
+  copy: src=08default-release dest=/etc/apt/apt.conf.d/
+
+- name: Add buster repository for latest firmware.
+  copy: src=buster.list dest=/etc/apt/sources.list.d/
+
+- name: Update apt cache.
+  apt: update_cache=yes
+

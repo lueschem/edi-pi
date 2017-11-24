@@ -17,6 +17,10 @@
   apt: name={{ item }} state=present install_recommends=no default_release=stretch-backports
   with_items: "{{ bare_metal_backports_packages }}"
 
+- name: Install buster packages that are essential for running on bare metal.
+  apt: name={{ item }} state=present install_recommends=no default_release=buster
+  with_items: "{{ bare_metal_buster_packages }}"
+
 # Remark: With Ansible >= 2.4 the unmounting can be done using the mount module.
 - name: Unmount /boot/firmware.
   command: umount /boot/firmware
