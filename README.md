@@ -115,4 +115,7 @@ As above, you can access the container as follows (the password is _ChangeMe!_):
 lxc exec edi-pi-dev -- login ${USER}
 ```
 
+### More Information
 
+For more information please read the [edi documentation](http://docs.get-edi.io) and 
+[this blog post](http://www.get-edi.io/A-new-Approach-to-Operating-System-Image-Generation/).
