@@ -39,13 +39,6 @@
 - name: Update apt cache.
   apt: update_cache=yes
 
-- name: Send console output to tty0 instead of ttyAMA0 (bluetooth).
-  lineinfile:
-    dest: /boot/firmware_temp/cmdline.txt
-    regexp: '^console=ttyAMA0,115200(.*)$'
-    line: 'console=tty0\1'
-    backrefs: yes
-
 # Remark: With Ansible >= 2.4 the unmounting can be done using the mount module.
 - name: Unmount /boot/firmware.
   command: umount /boot/firmware
