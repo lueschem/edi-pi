@@ -18,5 +18,9 @@ playbooks:
             install_cross_development_tools: True
 
 postprocessing_commands:
-    100_lxd2rpi:
+    100_lxd2rootfs:
+        skip: True
+    200_rootfs2image:
+        skip: True
+    300_blockmap:
         skip: True
