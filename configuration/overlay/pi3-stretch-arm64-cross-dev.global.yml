@@ -3,7 +3,7 @@ general:
 
 bootstrap:
     architecture: amd64
-    repository: deb http://httpredir.debian.org/debian/ stretch main
+    repository: deb http://deb.debian.org/debian/ stretch main
     repository_key: https://ftp-master.debian.org/keys/archive-key-8.asc
 
 shared_folders:
