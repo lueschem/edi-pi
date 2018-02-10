@@ -131,6 +131,11 @@ mv "${LXD_ROOTFS}/boot/firmware_temp/" "${LXD_ROOTFS}/boot/firmware/"
 # Remove temporary files.
 rm -rf "${LXD_ROOTFS}/run/*"
 rm -rf "${LXD_ROOTFS}/tmp/*"
+# Remove qemu.
+rm -f "${LXD_ROOTFS}/usr/bin/qemu-arm-static"
+rm -f "${LXD_ROOTFS}/usr/bin/qemu-aarch64-static"
+# Remove /etc/machine-id (it should be unique for each system).
+rm "${LXD_ROOTFS}/etc/machine-id"
 # Add fstab.
 cp "${SCRIPTDIR}/fstab" "${LXD_ROOTFS}/etc/"
 mv "${LXD_ROOTFS}" "${ROOTFSDIR}"
