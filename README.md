@@ -44,6 +44,9 @@ Special thanks go to the people behind those two projects:
 Prior to using edi-pi you have to install [edi](http://www.get-edi.io)
 according to
 [this instructions](http://docs.get-edi.io/en/latest/getting_started.html).
+Please take a careful look at the "Setting up ssh Keys" section since you
+will need a proper ssh key setup in order to access the container or
+the Rasperry Pi using ssh.
 
 The image post processing commands require some additional tools. On
 Ubuntu 16.04 those tools can be installed as follows:
@@ -71,11 +74,15 @@ sudo bmaptool copy artifacts/pi3-stretch-arm64.img /dev/mmcblk0
 If the command fails, unmount the flash card and repeat the above command.
 
 Once you have booted the Raspberry Pi 3 using this SD card you can
-access it using ssh (password is _raspberry_):
+access it using ssh (the access should be granted thanks to to your
+ssh keys):
 
 ``` bash
 ssh pi@IP_ADDRESS
 ```
+
+The password for the user _pi_ is _raspberry_ (just in case you want to
+execute a command using `sudo` or login via a local terminal).
 
 ### Creating a Cross Development LXD Container
 

@@ -1,5 +1,5 @@
 general:
-    edi_required_minimal_edi_version: 0.10.0
+    edi_required_minimal_edi_version: 0.11.0
     edi_lxc_network_interface_name: eth0
 
 bootstrap:
@@ -29,6 +29,7 @@ playbooks:
             # password is raspberry
             default_user_password: "$6$UFxTVMw7t4D3xPRl$GikrlPLW3hr34zssKC1w9rP9kUoSoa1UPoGMIylT8qb3fYM2lDAe9Mvr7hl1VRjz8wR84tfEkZ6.uot.K2B/F0"
             install_openssh_server: True
+            disable_ssh_password_authentication: True
     200_development_user_facilities:
         path: playbooks/debian/development_user_facilities/main.yml
     300_rpi3_base:
