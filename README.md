@@ -1,14 +1,14 @@
 # edi-pi
 
-Debian tool chain and image generation for the Raspberry Pi 3.
+Debian tool chain and image generation for the Raspberry Pi 2 and 3.
 
 ## Introduction
 
 The edi configuration contained in this repository can be used to
 generate the following artifacts:
 
-* A pure Debian stretch arm64 image for the Raspberry Pi 3.
-* A pure Debian stretch armhf image for the Raspberry Pi 2 or 3.
+* A pure Debian stretch arm64 (64bit) image suitable for the Raspberry Pi 3.
+* A pure Debian stretch armhf (32bit) image suitable for the Raspberry Pi 2 or 3.
 * An amd64/arm64 or amd64/armhf based LXD container with a pre-installed
 cross development toolchain for C and C++.
 * An emulated arm64 or armhf LXD container.
@@ -56,25 +56,41 @@ Ubuntu 16.04 those tools can be installed as follows:
 sudo apt install e2fsprogs dosfstools bmap-tools
 ```
 
-### Creating a Raspberry Pi 3 Image
+### Creating a Raspberry Pi Image
 
-A Raspberry Pi 3 image can be created using the following command:
+A Raspberry Pi image can be created using the following command:
+
+For Raspberry Pi 3, arm64:
 
 ``` bash
 sudo edi -v image create pi3-stretch-arm64.yml
+```
+
+For Raspberry Pi 2 or 3, armhf:
+
+``` bash
+sudo edi -v image create pi23-stretch-armhf.yml
 ```
 
 The resulting image can be copied to a SD card (here /dev/mmcblk0)
 using the following command
 (**Please note that everything on the SD card will be erased!**):
 
+For Raspberry Pi 3, arm64:
+
 ``` bash
 sudo bmaptool copy artifacts/pi3-stretch-arm64.img /dev/mmcblk0
 ```
 
+For Raspberry Pi 2 or 3, armhf:
+
+``` bash
+sudo bmaptool copy artifacts/pi23-stretch-armhf.img /dev/mmcblk0
+```
+
 If the command fails, unmount the flash card and repeat the above command.
 
-Once you have booted the Raspberry Pi 3 using this SD card you can
+Once you have booted the Raspberry Pi using this SD card you can
 access it using ssh (the access should be granted thanks to to your
 ssh keys):
 
@@ -87,11 +103,19 @@ execute a command using `sudo` or login via a local terminal).
 
 ### Creating a Cross Development LXD Container
 
-An amd64/arm64 cross development container can be created using the
+A cross development container can be created using the
 following command:
+
+For the Raspberry Pi 3, amd64/arm64:
 
 ``` bash
 sudo edi -v lxc configure edi-pi-cross-dev pi3-stretch-arm64-cross-dev.yml
+```
+
+For the Raspberry Pi 2 or 3, amd64/armhf:
+
+``` bash
+sudo edi -v lxc configure edi-pi-cross-dev pi23-stretch-armhf-cross-dev.yml
 ```
 
 The container can be accessed as follows (the password is _ChangeMe!_):
@@ -102,8 +126,17 @@ lxc exec edi-pi-cross-dev -- login ${USER}
 
 You can directly start to cross compile applications:
 
+
+For the Raspberry Pi 3, arm64:
+
 ``` bash
 aarch64-linux-gnu-g++ ...
+```
+
+For the Raspberry Pi 2 or 3, armhf:
+
+``` bash
+arm-linux-gnueabihf-g++
 ```
 
 For your convenience, the LXD container shares the folder _edi-workspace_
@@ -111,10 +144,18 @@ with the host operating system.
 
 ### Creating an Emulated Development LXD Container
 
-The following command generates an emulated arm64 container:
+The following command generates an emulated container:
+
+For the Raspberry Pi 3, arm64:
 
 ``` bash
 sudo edi -v lxc configure edi-pi-dev pi3-stretch-arm64-dev.yml
+```
+
+For the Raspberry Pi 2 or 3, armhf:
+
+``` bash
+sudo edi -v lxc configure edi-pi-dev pi23-stretch-armhf-dev.yml
 ```
 
 As above, you can access the container as follows (the password is _ChangeMe!_):
