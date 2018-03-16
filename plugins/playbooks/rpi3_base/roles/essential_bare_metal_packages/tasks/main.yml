@@ -20,18 +20,18 @@
 - name: Set stretch as default release.
   copy: src=08default-release dest={{ default_release_file }}
 
-- name: Add buster repository for latest firmware.
-  copy: src=buster.list dest={{ buster_list }}
+- name: Add sid repository for latest firmware.
+  copy: src=sid.list dest={{ sid_list }}
 
 - name: Update apt cache.
   apt: update_cache=yes
 
-- name: Install buster packages that are essential for running on bare metal.
-  apt: name={{ item }} state=present install_recommends=no default_release=buster
-  with_items: "{{ bare_metal_buster_packages }}"
+- name: Install sid packages that are essential for running on bare metal.
+  apt: name={{ item }} state=present install_recommends=no default_release=sid
+  with_items: "{{ bare_metal_sid_packages }}"
 
-- name: Remove buster repository.
-  file: dest={{ buster_list }} state=absent
+- name: Remove sid repository.
+  file: dest={{ sid_list }} state=absent
 
 - name: Remove stretch default release setting.
   file: dest={{ default_release_file }} state=absent
