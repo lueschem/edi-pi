@@ -1,7 +1,7 @@
 ---
 bare_metal_packages: [dosfstools, initramfs-tools, udev]
 
-bare_metal_backports_packages: [linux-image-arm64]
+bare_metal_backports_packages: ["{{ kernel_image }}"]
 
 bare_metal_sid_packages: [raspi3-firmware]
 

@@ -8,9 +8,10 @@ The edi configuration contained in this repository can be used to
 generate the following artifacts:
 
 * A pure Debian stretch arm64 image for the Raspberry Pi 3.
-* An amd64/arm64 based LXD container with a pre-installed cross development
-toolchain for C and C++.
-* An emulated arm64 LXD container.
+* A pure Debian stretch armhf image for the Raspberry Pi 2 or 3.
+* An amd64/arm64 or amd64/armhf based LXD container with a pre-installed
+cross development toolchain for C and C++.
+* An emulated arm64 or armhf LXD container.
 
 ## Important Note
 

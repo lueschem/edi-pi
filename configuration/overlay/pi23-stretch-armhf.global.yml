@@ -1,0 +1,17 @@
+general:
+    edi_compression: gz
+
+bootstrap:
+    architecture: armhf
+    repository: deb http://deb.debian.org/debian/ stretch main
+    repository_key: https://ftp-master.debian.org/keys/archive-key-8.asc
+
+playbooks:
+    300_rpi3_base:
+        parameters:
+            kernel_image: linux-image-armmp-lpae
+
+shared_folders:
+    edi_workspace:
+        folder: edi-workspace
+        mountpoint: edi-workspace
