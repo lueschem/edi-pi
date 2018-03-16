@@ -1,14 +1,4 @@
 ---
-- name: Create temporary and real firmware directory within boot folder.
-  file: dest=/boot/{{ item }} state=directory
-  with_items:
-  - firmware_temp
-  - firmware
-
-# Do mount directly to avoid fstab entry:
-- name: Create /boot/firmware mount to enable installation of firmware package.
-  command: mount --bind /boot/firmware_temp /boot/firmware
-
 - name: Install packages that are essential for running on bare metal.
   apt: name={{ item }} state=present install_recommends=no
   with_items: "{{ bare_metal_packages }}"
@@ -38,7 +28,3 @@
 
 - name: Update apt cache.
   apt: update_cache=yes
-
-# Remark: With Ansible >= 2.4 the unmounting can be done using the mount module.
-- name: Unmount /boot/firmware.
-  command: umount /boot/firmware

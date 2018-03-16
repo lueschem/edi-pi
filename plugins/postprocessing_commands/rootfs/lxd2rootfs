@@ -125,9 +125,6 @@ mkdir "${LXD_EXTRACTED}"
 echo "Extracting LXD image to ${LXD_EXTRACTED}."
 tar --numeric-owner -C "${LXD_EXTRACTED}" -xf "${LXD_ARCHIVE}"
 LXD_ROOTFS="${LXD_EXTRACTED}/rootfs"
-# Fix naming of firmware directory.
-rmdir "${LXD_ROOTFS}/boot/firmware"
-mv "${LXD_ROOTFS}/boot/firmware_temp/" "${LXD_ROOTFS}/boot/firmware/"
 # Remove temporary files.
 find "${LXD_ROOTFS}/run/" -mindepth 1 -delete
 find "${LXD_ROOTFS}/tmp/" -mindepth 1 -delete
