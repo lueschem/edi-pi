@@ -42,9 +42,9 @@ Special thanks go to the people behind those two projects:
 
 ### Preparation
 
-Prior to using edi-pi you have to install [edi](http://www.get-edi.io)
+Prior to using edi-pi you have to install [edi](https://www.get-edi.io)
 according to
-[this instructions](http://docs.get-edi.io/en/latest/getting_started.html).
+[this instructions](https://docs.get-edi.io/en/latest/getting_started.html).
 Please take a careful look at the "Setting up ssh Keys" section since you
 will need a proper ssh key setup in order to access the container or
 the Rasperry Pi using ssh.
@@ -166,5 +166,5 @@ lxc exec edi-pi-dev -- login ${USER}
 
 ### More Information
 
-For more information please read the [edi documentation](http://docs.get-edi.io) and 
-[this blog post](http://www.get-edi.io/A-new-Approach-to-Operating-System-Image-Generation/).
+For more information please read the [edi documentation](https://docs.get-edi.io) and 
+[this blog post](https://www.get-edi.io/A-new-Approach-to-Operating-System-Image-Generation/).
