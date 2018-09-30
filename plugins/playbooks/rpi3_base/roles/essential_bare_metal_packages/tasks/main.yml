@@ -28,3 +28,8 @@
 
 - name: Update apt cache.
   apt: update_cache=yes
+
+- name: Fixup - add the missing Pi 3B+ dtb.
+  script: pi3b-dtb-fixup
+  args:
+    creates: /boot/firmware/bcm2710-rpi-3-b-plus.dtb

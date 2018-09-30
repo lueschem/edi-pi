@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Temporary fixup script that copies the Pi 3B+ dtb to the /boot/firmware folder
+
+set -o errexit
+set -o nounset
+
+latest_kernel=$(ls -1 /boot/vmlinuz-* | grep -v '\.dpkg-bak$' | sort -V -r | head -1)
+
+arch=$(dpkg --print-architecture)
+if [ "arm64" = "$arch" ]; then
+  dtb_path="/usr/lib/linux-image-${latest_kernel#/boot/vmlinuz-}/broadcom"
+else
+  dtb_path="/usr/lib/linux-image-${latest_kernel#/boot/vmlinuz-}"
+fi
+
+pi3b_plus_dtb=${dtb_path}/bcm2837-rpi-3-b-plus.dtb
+
+[ -e "${pi3b_plus_dtb}" ] && cp "${pi3b_plus_dtb}" /boot/firmware/bcm2710-rpi-3-b-plus.dtb
+
