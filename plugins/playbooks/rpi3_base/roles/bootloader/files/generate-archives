@@ -1,0 +1,108 @@
+#!/bin/bash
+
+# Small helper utility that creates Broadcom Raspberry Pi
+# and u-boot bootloader archives.
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+echo_usage()
+{
+    echo "Usage: generate-archives BOOTLOADER_TYPE VERSION_LABEL"
+    echo "Example: generate-archives raspberrypi 1.20180924"
+    echo "Example: generate-archives u-boot v2018.09"
+}
+
+cleanup()
+{
+    rm -rf ${TEMPDIR}
+}
+
+cleanup_and_error()
+{
+    cleanup
+    >&2 echo "Error: Abnormal script termination."
+}
+
+create_raspberrypi_archive()
+{
+    echo "Going to create raspberrypi archive!"
+    tar -xf "${UPSTREAM_ARCHIVE}" -C "${TEMPDIR}/"
+    
+    BOOTLOADER_FILES=( "bootcode.bin" "LICENCE.broadcom" "fixup_cd.dat" "start_cd.elf" "fixup.dat"
+                       "start_db.elf" "fixup_db.dat" "start.elf" "fixup_x.dat" "start_x.elf" )
+
+    mkdir ${TEMPDIR}/output
+    for file in "${BOOTLOADER_FILES[@]}"
+    do
+        cp "${TEMPDIR}/firmware-${VERSION_LABEL}/boot/${file}" "${TEMPDIR}/output"
+    done
+
+    echo "${VERSION_LABEL}" > "${TEMPDIR}/output/raspberrypi-bootloader.version"
+    
+    FINAL_ARCHIVE="${SCRIPTDIR}/raspberrypi-bootloader.tar.gz"
+    tar -cf "${FINAL_ARCHIVE}" -C "${TEMPDIR}/output" "."
+    echo "Successfully created ${FINAL_ARCHIVE}!"
+}
+
+create_u_boot_archive()
+{
+    local ARCHITECTURE=$1
+    echo "Going to create u-boot (${ARCHITECTURE}) archive!"
+}
+
+if [[ "$#" -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]
+then
+    echo_usage
+    exit 0
+fi
+
+if [ "$#" -ne 2 ]
+then
+    >&2 echo "Error: Illegal number of parameters."
+    echo_usage
+    exit 1
+fi
+
+if [[ $EUID -eq 0 ]]
+then
+    >&2 echo "Error: Do not run this script as root."
+    exit 1
+fi
+
+SCRIPTDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+TEMPDIR="$(mktemp -p ${SCRIPTDIR} -d -t .tmp.XXXXXXXX)"
+
+trap cleanup_and_error EXIT
+
+BOOTLOADER_TYPE=$1
+VERSION_LABEL=$2
+
+if [[ "${BOOTLOADER_TYPE}" == "raspberrypi" ]]
+then
+    ARCHIVE_URL="https://github.com/raspberrypi/firmware/archive/${VERSION_LABEL}.tar.gz"
+    PROCESSING_INSTRUCTIONS=( "create_raspberrypi_archive" )
+elif [[ "${BOOTLOADER_TYPE}" == "u-boot" ]]
+then
+    ARCHIVE_URL="https://github.com/u-boot/u-boot/archive/${VERSION_LABEL}.tar.gz"
+    PROCESSING_INSTRUCTIONS=( "create_u_boot_archive armhf" "create_u_boot_archive arm64" )
+else
+    >&2 echo "Error: Unknown bootloader type ${BOOTLOADER_TYPE}."
+    exit 1
+fi
+
+UPSTREAM_ARCHIVE="${SCRIPTDIR}/upstream-${BOOTLOADER_TYPE}-${VERSION_LABEL}.tar.gz"
+if [ ! -f "${UPSTREAM_ARCHIVE}" ]
+then
+    wget -O "${UPSTREAM_ARCHIVE}" "${ARCHIVE_URL}"
+fi
+
+for item in "${PROCESSING_INSTRUCTIONS[@]}"
+do
+    ${item}
+done
+
+cleanup
+trap - EXIT
+
