@@ -49,7 +49,30 @@ create_raspberrypi_archive()
 create_u_boot_archive()
 {
     local ARCHITECTURE=$1
+    local CONFIGURATION=$2
+    local COMPILER_PREFIX=$3
+
     echo "Going to create u-boot (${ARCHITECTURE}) archive!"
+    WORKDIR="${TEMPDIR}/u-boot-${VERSION_LABEL#"v"}"
+    rm -rf "${WORKDIR}"
+
+    tar -xf "${UPSTREAM_ARCHIVE}" -C "${TEMPDIR}/"
+
+    cd "${WORKDIR}"
+    export CROSS_COMPILE="${COMPILER_PREFIX}"
+
+    make "${CONFIGURATION}"
+
+    make -j8
+
+    mkdir -p ${TEMPDIR}/output/licenses.u-boot
+    cp u-boot.bin ${TEMPDIR}/output
+    cp Licenses/* ${TEMPDIR}/output/licenses.u-boot/
+    echo "${VERSION_LABEL}" > "${TEMPDIR}/output/u-boot-bootloader.version"
+    
+    FINAL_ARCHIVE="${SCRIPTDIR}/u-boot-bootloader.${ARCHITECTURE}.tar.gz"
+    tar -cf "${FINAL_ARCHIVE}" -C "${TEMPDIR}/output" "."
+    echo "Successfully created ${FINAL_ARCHIVE}!"
 }
 
 if [[ "$#" -eq 1 && ( "$1" == "-h" || "$1" == "--help" ) ]]
@@ -86,7 +109,10 @@ then
 elif [[ "${BOOTLOADER_TYPE}" == "u-boot" ]]
 then
     ARCHIVE_URL="https://github.com/u-boot/u-boot/archive/${VERSION_LABEL}.tar.gz"
-    PROCESSING_INSTRUCTIONS=( "create_u_boot_archive armhf" "create_u_boot_archive arm64" )
+    PROCESSING_INSTRUCTIONS=(
+        "create_u_boot_archive armhf rpi_3_32b_defconfig arm-linux-gnueabihf-"
+	"create_u_boot_archive arm64 rpi_3_defconfig aarch64-linux-gnu-"
+	)
 else
     >&2 echo "Error: Unknown bootloader type ${BOOTLOADER_TYPE}."
     exit 1
