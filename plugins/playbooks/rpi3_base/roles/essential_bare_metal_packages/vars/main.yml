@@ -3,8 +3,3 @@ bare_metal_packages: [dosfstools, initramfs-tools, udev]
 
 bare_metal_backports_packages: ["{{ kernel_image }}"]
 
-bare_metal_sid_packages: [raspi3-firmware]
-
-default_release_file: /etc/apt/apt.conf.d/08default-release
-
-sid_list: /etc/apt/sources.list.d/sid.list

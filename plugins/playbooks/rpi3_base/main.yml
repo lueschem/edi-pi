@@ -7,6 +7,10 @@
     - role: repositories
       become: True
       become_user: root
+    - role: bootloader 
+      become: True
+      become_user: root
+      when: edi_create_distributable_image and (edi_bootstrap_architecture == 'arm64' or edi_bootstrap_architecture == 'armhf')
     - role: essential_bare_metal_packages
       become: True
       become_user: root

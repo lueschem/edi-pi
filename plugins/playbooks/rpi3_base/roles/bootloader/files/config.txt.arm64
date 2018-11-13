@@ -1,0 +1,6 @@
+# Switch the CPU from ARMv7 into ARMv8 (aarch64) mode
+arm_control=0x200
+
+enable_uart=1
+
+kernel=u-boot.bin

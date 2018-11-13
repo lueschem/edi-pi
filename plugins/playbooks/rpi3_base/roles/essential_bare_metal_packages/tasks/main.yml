@@ -7,29 +7,3 @@
   apt: name={{ item }} state=present install_recommends=no default_release=stretch-backports
   with_items: "{{ bare_metal_backports_packages }}"
 
-- name: Set stretch as default release.
-  copy: src=08default-release dest={{ default_release_file }}
-
-- name: Add sid repository for latest firmware.
-  copy: src=sid.list dest={{ sid_list }}
-
-- name: Update apt cache.
-  apt: update_cache=yes
-
-- name: Install sid packages that are essential for running on bare metal.
-  apt: name={{ item }} state=present install_recommends=no default_release=sid
-  with_items: "{{ bare_metal_sid_packages }}"
-
-- name: Remove sid repository.
-  file: dest={{ sid_list }} state=absent
-
-- name: Remove stretch default release setting.
-  file: dest={{ default_release_file }} state=absent
-
-- name: Update apt cache.
-  apt: update_cache=yes
-
-- name: Fixup - add the missing Pi 3B+ dtb.
-  script: pi3b-dtb-fixup
-  args:
-    creates: /boot/firmware/bcm2710-rpi-3-b-plus.dtb
