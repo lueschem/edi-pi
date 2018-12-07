@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -e
+
+rm -f brcmfmac43*-sdio.txt
+wget https://raw.githubusercontent.com/RPi-Distro/firmware-nonfree/master/brcm/brcmfmac43430-sdio.txt
+wget https://raw.githubusercontent.com/RPi-Distro/firmware-nonfree/master/brcm/brcmfmac43455-sdio.txt

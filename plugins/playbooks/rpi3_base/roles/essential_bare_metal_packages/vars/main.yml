@@ -1,5 +1,7 @@
 ---
 bare_metal_packages: [dosfstools, initramfs-tools, udev]
 
-bare_metal_backports_packages: ["{{ kernel_image }}"]
+bare_metal_backports_packages: ["{{ kernel_image }}", firmware-brcm80211]
+
+wifi_firmware_config: [brcmfmac43430-sdio.txt, brcmfmac43455-sdio.txt]
 
