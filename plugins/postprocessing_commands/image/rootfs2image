@@ -151,11 +151,10 @@ ROOT_SECTORS=$(expr $(expr ${ROOTFS_SIZE} + ${ROOTFS_SIZE} \/ 100 \* 25) \* 1024
 IMAGE_SECTORS=$(expr ${TABLE_SECTORS} + ${FIRMWARE_SECTORS} + ${ROOT_SECTORS})
 
 # Prepare the image file.
-dd if=/dev/zero of="${RPI_IMAGE}" bs=512 count=${TABLE_SECTORS}
-dd if=/dev/zero of="${RPI_IMAGE}" bs=512 count=0 seek=${IMAGE_SECTORS}
+dd if=/dev/zero of="${RPI_IMAGE}" bs=512 count=${IMAGE_SECTORS}
 
 # Write partition table
-sfdisk -q -L -uS -f "${RPI_IMAGE}" 2> /dev/null <<EOM
+sfdisk -q "${RPI_IMAGE}" <<EOM
 ${TABLE_SECTORS},${FIRMWARE_SECTORS},c,*
 ${ROOT_OFFSET},${ROOT_SECTORS},83
 EOM
