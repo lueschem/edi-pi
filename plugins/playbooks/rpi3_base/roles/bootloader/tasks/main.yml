@@ -22,34 +22,60 @@
   apt: 
     update_cache: yes
 
+- name: Ensures edi-boot-shim config.d directory exists.
+  file:
+    path: /etc/edi-boot-shim/edi-boot-shim.cfg.d
+    state: directory
+
+- name: Configure edi-boot-shim for multiboot.
+  copy:
+    src: multiboot.cfg
+    dest: /etc/edi-boot-shim/edi-boot-shim.cfg.d
+
 - name: Install edi-boot-shim.
   apt:
     name: edi-boot-shim
     install_recommends: no
 
-- name: Create /boot/firmware directory.
+- name: Create boot firmware directory.
   file:
-    path: /boot/firmware
+    path: "{{ uboot_location }}"
     state: directory
 
 - name: Setup boot configuration.
   copy:
     src: config.txt.{{ edi_bootstrap_architecture }}
-    dest: /boot/firmware/config.txt
+    dest: "{{ uboot_location }}/config.txt"
 
 - name: Install the raspberrypi bootloader.
   unarchive: 
     src: raspberrypi-bootloader.tar.gz
-    dest: /boot/firmware 
+    dest: "{{ uboot_location }}"
     owner: root
     group: root 
-    creates: /boot/firmware/bootcode.bin
+    creates: "{{ uboot_location }}/bootcode.bin"
 
 - name: Install the u-boot bootloader.
   unarchive: 
     src: u-boot-bootloader.{{ edi_bootstrap_architecture }}.tar.gz
-    dest: /boot/firmware 
+    dest: "{{ uboot_location }}"
     owner: root
     group: root 
-    creates: /boot/firmware/u-boot.bin
+    creates: "{{ uboot_location }}/u-boot.bin"
+
+- name: Copy the raw boot script to the boot folder.
+  copy:
+    src: boot.scr.txt
+    dest: "{{ uboot_location }}"
+
+- name: Create boot script.
+  command: mkimage -A arm -T script -O linux -d boot.scr.txt boot.scr
+  args:
+    chdir: "{{ uboot_location }}"
+    creates: "{{ uboot_location }}/boot.scr"
+
+- name: Configure u-boot-tools.
+  template:
+    src: fw_env.config
+    dest: /etc
 
