@@ -24,7 +24,8 @@
 # along with edi.  If not, see <http://www.gnu.org/licenses/>.
 
 # ----------------------------------------------------------------------------
-# resizes the root file system in order to use the full available disk space
+# adds another partition for a scondary root file system and resizes both
+# partitions in order to make use of the full available disk space
 #
 # ATTENTION: Resizing file systems can lead to data loss!
 # ----------------------------------------------------------------------------
@@ -54,16 +55,16 @@ abnormal_termination()
 
 trap "abnormal_termination" EXIT
 
-echo "going to expand root partition"
+echo "going to resize existing rootfs partition and adding a secondary rootfs partition"
 
 CONTROL_FILE="/etc/pi-resize-rootfs.done"
 
 if [ -f "${CONTROL_FILE}" ] ; then
-    print_and_exit "INFO" "rootfs is already resized - not going to resize rootfs again"
+    print_and_exit "INFO" "rootfs already got modified - not going to modify rootfs again"
 fi
 
 if systemd-detect-virt --container > /dev/null ; then
-    print_and_exit "INFO" "detected container virtualization - not going to resize rootfs"
+    print_and_exit "INFO" "detected container virtualization - not going to modify rootfs"
 fi
 
 if [[ $EUID -ne 0 ]]; then
@@ -75,27 +76,66 @@ if [ -z "${ROOT_PART}" ] ; then
     print_and_exit "ERROR" "unable to detect root partition device"
 fi
 
+ROOT_DEV=""
 case "${ROOT_PART}" in
     mmcblk0*) ROOT_DEV=mmcblk0 ;;
     sda*)     ROOT_DEV=sda ;;
 esac
 
+if [ -z "${ROOT_DEV}" ] ; then
+    print_and_exit "ERROR" "${ROOT_PART} does not look like a SD card"
+fi
+
+if [ "${ROOT_DEV}" = "${ROOT_PART}" ] ; then
+    print_and_exit "ERROR" "${ROOT_PART} does not look like a partition"
+fi
+
 PART_NUM=$(echo ${ROOT_PART} | grep -o '[1-9][0-9]*$')
-if [ "${PART_NUM}" = "${ROOT_PART}" ] ; then
-    print_and_exit "ERROR" "${ROOT_PART} does not look like an SD card - not going to resize rootfs"
+if [ -z "${PART_NUM}" ] ; then
+    print_and_exit "ERROR" "unable to extract partition number of ${ROOT_PART}"
 fi
 
-LAST_PART_NUM=$(parted /dev/${ROOT_DEV} -ms unit s p | tail -n 1 | cut -f 1 -d:)
+PARTITION_INFO=$(parted /dev/${ROOT_DEV} -ms unit s print)
+LAST_PART_NUM=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -f 1 -d':')
 if [ ${LAST_PART_NUM} -ne ${PART_NUM} ]; then
-    print_and_exit "ERROR" "${ROOT_PART} is not the last partition - not going to resize rootfs"
+    print_and_exit "ERROR" "${ROOT_PART} is not the last partition"
 fi
 
-echo ", +" | sfdisk --no-reread -N ${PART_NUM} /dev/${ROOT_DEV}
+DISK_SIZE_S=$(echo "${PARTITION_INFO}" | grep -o "^/dev/${ROOT_DEV}.*" | cut -d':' -f2 | sed 's/s//g')
+ROOTFS_START_S=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -d':' -f2 | sed 's/s//g')
+ROOTFS_SIZE_S=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -d':' -f3 | sed 's/s//g')
+
+if [ "$(expr ${ROOTFS_START_S} + ${ROOTFS_SIZE_S} + 1)" -ge "${DISK_SIZE_S}" ] ; then
+    touch ${CONTROL_FILE}
+    print_and_exit "INFO" "root partition ${ROOT_PART} already got modified"
+fi
+
+SPLIT_SIZE_S=$(expr $(expr ${DISK_SIZE_S} - ${ROOTFS_START_S}) \/ 2)
+
+if [ "${SPLIT_SIZE_S}" -lt "${ROOTFS_SIZE_S}" ] ; then
+    print_and_exit "ERROR" "${ROOT_DEV} is too small to duplicate the root file system"
+fi
+
+TEMP_PARTITION_TABLE=$(mktemp /tmp/partition-table.XXXXXX)
+
+# dump the existing disk layout
+sfdisk -d /dev/${ROOT_DEV} > ${TEMP_PARTITION_TABLE}
+# remove line that describes last (root) partition
+sed -i '$ d' ${TEMP_PARTITION_TABLE}
+
+# add two new partitions with the same size
+NEW_ROOT_PART=${ROOT_DEV}p$(expr ${PART_NUM} + 1)
+echo "/dev/${ROOT_PART}: start=${ROOTFS_START_S} size=${SPLIT_SIZE_S}, type=83" >> ${TEMP_PARTITION_TABLE}
+echo "/dev/${NEW_ROOT_PART}: start=$(expr ${ROOTFS_START_S} + ${SPLIT_SIZE_S}) size=${SPLIT_SIZE_S}, type=83" >> ${TEMP_PARTITION_TABLE}
+
+sfdisk --no-reread /dev/${ROOT_DEV} < ${TEMP_PARTITION_TABLE}
 
 partprobe
 resize2fs /dev/${ROOT_PART}
 
+mkfs.ext4 -F /dev/${NEW_ROOT_PART}
+
 touch ${CONTROL_FILE}
 
-print_and_exit "INFO" "root partition ${ROOT_PART} successfully resized."
+print_and_exit "INFO" "disk layout of ${ROOT_DEV} successfully changed"
 
