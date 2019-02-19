@@ -74,8 +74,18 @@
     chdir: "{{ uboot_location }}"
     creates: "{{ uboot_location }}/boot.scr"
 
+- name: Create u-boot directory on data partition.
+  file:
+    path: /data/u-boot
+    state: directory
+
 - name: Configure u-boot-tools.
   template:
     src: fw_env.config
-    dest: /etc
+    dest: /data/u-boot
 
+- name: Create symbolic link for the u-boot-tools config.
+  file:
+    src: "/data/u-boot/fw_env.config"
+    dest: "/etc/fw_env.config"
+    state: link
