@@ -5,3 +5,8 @@ bare_metal_backports_packages: ["{{ kernel_image }}", firmware-brcm80211]
 
 wifi_firmware_config: [brcmfmac43430-sdio.txt, brcmfmac43455-sdio.txt]
 
+bare_metal_buster_packages: [mender-client]
+
+default_release_file: /etc/apt/apt.conf.d/08default-release
+
+buster_list: /etc/apt/sources.list.d/buster.list
