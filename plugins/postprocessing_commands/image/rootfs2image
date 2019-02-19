@@ -71,9 +71,11 @@ clean_up()
     local TEMPDIR="${1}"
 
     if [ "${FIRMWARE_MNT}" != "unused" ] ; then umount "${FIRMWARE_MNT}"; FIRMWARE_MNT="unused" ; fi
+    if [ "${DATA_MNT}" != "unused" ] ; then umount "${DATA_MNT}"; DATA_MNT="unused" ; fi
     if [ "${ROOT_MNT}" != "unused" ] ; then umount "${ROOT_MNT}"; ROOT_MNT="unused" ; fi
     if [ "${ROOT_LD}" != "unused" ] ; then losetup -d "${ROOT_LD}"; ROOT_LD="unused" ; fi
     if [ "${FIRMWARE_LD}" != "unused" ]; then losetup -d "${FIRMWARE_LD}"; FIRMWARE_LD="unused" ; fi
+    if [ "${DATA_LD}" != "unused" ]; then losetup -d "${DATA_LD}"; DATA_LD="unused" ; fi
     rm -rf "${TEMPDIR}"
 }
 
@@ -126,29 +128,38 @@ TEMPDIR="$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)"
 
 ROOT_LD="unused"
 FIRMWARE_LD="unused"
+DATA_LD="unused"
 ROOT_MNT="unused"
 FIRMWARE_MNT="unused"
+DATA_MNT="unused"
 
 trap "unexpected_exit ${TEMPDIR}" EXIT
 
-ROOTFS_SIZE=$(expr `du -s "${ROOTFS_DIR}" | awk '{ print $1 }'`)
-echo "Source rootfs is ${ROOTFS_SIZE}kb big."
+ROOTFS_SIZE_KB=$(expr `du -s "${ROOTFS_DIR}" | awk '{ print $1 }'`)
+echo "Source rootfs is ${ROOTFS_SIZE_KB}KB big."
 
 # Calculate the amount of needed 512 byte sectors:
-TABLE_SECTOR_SIZE=1
-FIRMWARE_SECTOR_SIZE=128
-LOSETUP_ROOT_OFFSET=$(expr ${TABLE_SECTOR_SIZE} + ${FIRMWARE_SECTOR_SIZE})
-TABLE_SECTORS=$(expr ${TABLE_SECTOR_SIZE} \* 1024 \* 1024 \/ 512)
-FIRMWARE_SECTORS=$(expr ${FIRMWARE_SECTOR_SIZE} \* 1024 \* 1024 \/ 512)
-ROOT_OFFSET=$(expr ${TABLE_SECTORS} + ${FIRMWARE_SECTORS})
+TABLE_SIZE_M=1
+FIRMWARE_PARTITION_SIZE_M=128
+DATA_PARTITION_SIZE_M=256
+
+LOSETUP_DATA_OFFSET_M=$(expr ${TABLE_SIZE_M} + ${FIRMWARE_PARTITION_SIZE_M})
+LOSETUP_ROOT_OFFSET_M=$(expr ${TABLE_SIZE_M} + ${FIRMWARE_PARTITION_SIZE_M} + ${DATA_PARTITION_SIZE_M})
+
+TABLE_SECTORS=$(expr ${TABLE_SIZE_M} \* 1024 \* 1024 \/ 512)
+FIRMWARE_SECTORS=$(expr ${FIRMWARE_PARTITION_SIZE_M} \* 1024 \* 1024 \/ 512)
+DATA_SECTORS=$(expr ${DATA_PARTITION_SIZE_M} \* 1024 \* 1024 \/ 512)
+
+DATA_OFFSET_SECTOR=$(expr ${TABLE_SECTORS} + ${FIRMWARE_SECTORS})
+ROOT_OFFSET_SECTOR=$(expr ${TABLE_SECTORS} + ${FIRMWARE_SECTORS} + ${DATA_SECTORS})
 
 # The root partition is ext4.
 # This means more space than the actual used space of the chroot is used.
 # As overhead for journaling and reserved blocks 25% are added.
-ROOT_SECTORS=$(expr $(expr ${ROOTFS_SIZE} + ${ROOTFS_SIZE} \/ 100 \* 25) \* 1024 \/ 512)
+ROOT_SECTORS=$(expr $(expr ${ROOTFS_SIZE_KB} + ${ROOTFS_SIZE_KB} \/ 100 \* 25) \* 1024 \/ 512)
 
 # Calculate required image size in 512 Byte sectors:
-IMAGE_SECTORS=$(expr ${TABLE_SECTORS} + ${FIRMWARE_SECTORS} + ${ROOT_SECTORS})
+IMAGE_SECTORS=$(expr ${TABLE_SECTORS} + ${FIRMWARE_SECTORS} + ${DATA_SECTORS} + ${ROOT_SECTORS})
 
 # Prepare the image file.
 dd if=/dev/zero of="${RPI_IMAGE}" bs=512 count=${IMAGE_SECTORS}
@@ -156,16 +167,19 @@ dd if=/dev/zero of="${RPI_IMAGE}" bs=512 count=${IMAGE_SECTORS}
 # Write partition table
 sfdisk -q "${RPI_IMAGE}" <<EOM
 ${TABLE_SECTORS},${FIRMWARE_SECTORS},c,*
-${ROOT_OFFSET},${ROOT_SECTORS},83
+${DATA_OFFSET_SECTOR},${DATA_SECTORS},83
+${ROOT_OFFSET_SECTOR},${ROOT_SECTORS},83
 EOM
 
 # Setup temporary loop devices:
 echo "Setting up loop devices."
-FIRMWARE_LD="$(losetup -o ${TABLE_SECTOR_SIZE}M --sizelimit ${FIRMWARE_SECTOR_SIZE}M -f --show ${RPI_IMAGE})"
-ROOT_LD="$(losetup -o ${LOSETUP_ROOT_OFFSET}M -f --show ${RPI_IMAGE})"
+FIRMWARE_LD="$(losetup -o ${TABLE_SIZE_M}M --sizelimit ${FIRMWARE_PARTITION_SIZE_M}M -f --show ${RPI_IMAGE})"
+DATA_LD="$(losetup -o ${LOSETUP_DATA_OFFSET_M}M --sizelimit ${DATA_PARTITION_SIZE_M}M -f --show ${RPI_IMAGE})"
+ROOT_LD="$(losetup -o ${LOSETUP_ROOT_OFFSET_M}M -f --show ${RPI_IMAGE})"
 
 # Build filesystems
 mkfs.vfat "${FIRMWARE_LD}"
+mkfs.ext4 "${DATA_LD}"
 mkfs.ext4 "${ROOT_LD}"
 
 # Mount the temporary loop devices
@@ -177,10 +191,13 @@ FIRMWARE_MNT="${ROOT_MNT}/boot/firmware"
 mkdir -p "${FIRMWARE_MNT}"
 mount "${FIRMWARE_LD}" "${FIRMWARE_MNT}"
 
+DATA_MNT="${ROOT_MNT}/data"
+mkdir -p "${DATA_MNT}"
+mount "${DATA_LD}" "${DATA_MNT}"
+
 # Copy all files from the LXD rootfs to the loop device mount point directory
 rsync -a "${ROOTFS_DIR}/" "${ROOT_MNT}/"
 
 clean_up "${TEMPDIR}"
 
 trap - EXIT
-
