@@ -134,6 +134,7 @@ partprobe
 resize2fs /dev/${ROOT_PART}
 
 mkfs.ext4 -F /dev/${NEW_ROOT_PART}
+e2label "/dev/${NEW_ROOT_PART}" secondary
 
 touch ${CONTROL_FILE}
 
