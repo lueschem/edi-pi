@@ -19,3 +19,45 @@
 
 - name: Update apt cache.
   apt: update_cache=yes
+
+- name: Load project specific (customized) mender configuration.
+  include_vars: "{{ item}}"
+  with_first_found:
+    - "{{ mender_config_directory }}/mender_custom.yml"
+    - "{{ mender_config_directory }}/mender.yml"
+
+- name: Write mender main configuration.
+  template:
+    src: mender.conf
+    dest: /etc/mender/
+
+- name: Create mender directory on data partition.
+  file:
+    path: /data/mender
+    state: directory
+
+- name: Configure the device type.
+  template:
+    src: device_type
+    dest: /data/mender/device_type
+
+- name: Copy the server certificate.
+  copy:
+    src: "{{ mender_config_directory }}/certificates/server.crt"
+    dest: /etc/mender/
+
+- name: Copy inventory scripts.
+  copy:
+    src: "{{ item }}"
+    dest: /usr/share/mender/inventory/
+    mode: 0755
+  with_fileglob:
+    - "{{ mender_config_directory }}/inventory/*"
+
+- name: Copy identity scripts.
+  copy:
+    src: "{{ item }}"
+    dest: /usr/share/mender/identity/
+    mode: 0755
+  with_fileglob:
+    - "{{ mender_config_directory }}/identity/*"
