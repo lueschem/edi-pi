@@ -1,0 +1,1 @@
+mender_config_directory: "{{ edi_project_directory }}/configuration/mender"
