@@ -71,7 +71,7 @@ clean_up()
     rm -rf "${TEMPDIR}"
 }
 
-if ! options=$(getopt -o hi:o:w: -l help,log:,input:,output:,workdir: -- "$@")
+if ! options=$(getopt -o hi:o:w:a: -l help,log:,input:,output:,workdir:,artifact: -- "$@")
 then
     print_usage
     print_error_and_exit "Invalid option."
@@ -83,6 +83,7 @@ SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LXD_ARCHIVE=""
 ROOTFSDIR=""
 LOG_LEVEL="INFO"
+ARTIFACT_NAME=""
 
 while true
 do
@@ -91,6 +92,7 @@ do
         -i|--input)         LXD_ARCHIVE="${2}"; shift 2;;
         -o|--output)        ROOTFSDIR="${2}"; shift 2;;
         -w|--workdir)       WORKDIR="${2}"; shift 2;;
+        -a|--artifact)      ARTIFACT_NAME="${2}"; shift 2;;
         --log)              LOG_LEVEL="${2}"; shift 2;;
         *)                  break ;;
     esac
@@ -116,6 +118,12 @@ then
     print_error_and_exit "Missing output directory."
 fi
 
+if [ -z "${ARTIFACT_NAME}" ]
+then
+    print_usage
+    print_error_and_exit "Missing artifact name."
+fi
+
 TEMPDIR="$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)"
 
 trap "unexpected_exit ${TEMPDIR}" EXIT
@@ -135,6 +143,10 @@ rm "${LXD_ROOTFS}/etc/machine-id"
 # Add fstab.
 cp "${SCRIPTDIR}/fstab" "${LXD_ROOTFS}/etc/"
 mv "${LXD_ROOTFS}" "${ROOTFSDIR}"
+
+# Add artifact information to rootfs.
+mkdir -p "${LXD_ROOTFS}/etc/mender/"
+echo "artifact_name=$(date +'%Y-%m-%d')-${ARTIFACT_NAME}" > "${LXD_ROOTFS}/etc/mender/artifact_info"
 
 clean_up "${TEMPDIR}"
 
