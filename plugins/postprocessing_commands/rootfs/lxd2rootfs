@@ -142,11 +142,12 @@ rm -f "${LXD_ROOTFS}/usr/bin/qemu-"*"-static"
 rm "${LXD_ROOTFS}/etc/machine-id"
 # Add fstab.
 cp "${SCRIPTDIR}/fstab" "${LXD_ROOTFS}/etc/"
-mv "${LXD_ROOTFS}" "${ROOTFSDIR}"
 
 # Add artifact information to rootfs.
 mkdir -p "${LXD_ROOTFS}/etc/mender/"
 echo "artifact_name=$(date +'%Y-%m-%d')-${ARTIFACT_NAME}" > "${LXD_ROOTFS}/etc/mender/artifact_info"
+
+mv "${LXD_ROOTFS}" "${ROOTFSDIR}"
 
 clean_up "${TEMPDIR}"
 
