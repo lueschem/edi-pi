@@ -1,0 +1,25 @@
+---
+- name: Load project specific (customized) wifi configuration.
+  include_vars: "{{ item}}"
+  with_first_found:
+    - "{{ wifi_config_directory }}/wifi_custom.yml"
+    - "{{ wifi_config_directory }}/wifi.yml"
+
+- name: Install wifi related apt packages.
+  apt:
+    name: "{{ packages }}"
+  vars:
+    packages:
+    - firmware-brcm80211
+    - wireless-tools
+    - wpasupplicant
+
+- name: Setup wpa supplicant.
+  template:
+    src: wpa_supplicant.conf
+    dest: /etc/wpa_supplicant/
+
+- name: Setup wlan0 interface.
+  copy:
+    src: wlan0
+    dest: /etc/network/interfaces.d/
