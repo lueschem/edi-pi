@@ -3,14 +3,15 @@ boot_scr_filesize=${filesize}
 if test -z "${edi_env_saved}"
 then
     echo "Going to write environment on first boot!"
+    setenv mender_boot_part 3
     setenv edi_env_saved true
     saveenv
 fi
 
 setexpr secondary_scriptaddr ${scriptaddr} + ${boot_scr_filesize}
 
-setenv edi_mmc_device 0:3
-setenv edi_root_device /dev/mmcblk0p3
+setenv edi_mmc_device 0:${mender_boot_part}
+setenv edi_root_device /dev/mmcblk0p${mender_boot_part}
 
 ext4load mmc ${edi_mmc_device} ${secondary_scriptaddr} /boot/boot.scr
 source ${secondary_scriptaddr}
