@@ -1,17 +1,57 @@
 boot_scr_filesize=${filesize}
 
-if test -z "${edi_env_saved}"
+# constant values
+setenv mender_boot_part_A 3
+setenv mender_boot_part_hex_A 3
+setenv mender_boot_part_B 4
+setenv mender_boot_part_hex_B 4
+setenv bootlimit 1
+
+# initialize and store variables on first boot
+if test -z "${edi_first_boot_done}"
 then
     echo "Going to write environment on first boot!"
-    setenv mender_boot_part 3
-    setenv edi_env_saved true
+    setenv bootcount 0
+    setenv upgrade_available 0
+    setenv mender_boot_part ${mender_boot_part_A}
+    setenv mender_boot_part_hex ${mender_boot_part_hex_A}
+    setenv edi_first_boot_done true
+    saveenv
+fi
+
+if test ${upgrade_available} = 1
+then
+    # mender will reset bootcount within EnableUpdatedPartition
+    setexpr bootcount ${bootcount} + 1
+    saveenv
+else
+    setenv bootcount 0
+fi
+
+if test ${bootcount} -gt ${bootlimit}
+then
+    echo "Switching back to previous setup due to hitting bootlimit!"
+    if test ${mender_boot_part} = ${mender_boot_part_A}
+    then
+        setenv mender_boot_part ${mender_boot_part_B}
+        setenv mender_boot_part_hex ${mender_boot_part_hex_B}
+    else
+        setenv mender_boot_part ${mender_boot_part_A}
+        setenv mender_boot_part_hex ${mender_boot_part_hex_A}
+    fi
+    setenv upgrade_available 0
     saveenv
 fi
 
 setexpr secondary_scriptaddr ${scriptaddr} + ${boot_scr_filesize}
 
-setenv edi_mmc_device 0:${mender_boot_part}
+setenv edi_mmc_device 0:${mender_boot_part_hex}
 setenv edi_root_device /dev/mmcblk0p${mender_boot_part}
 
 ext4load mmc ${edi_mmc_device} ${secondary_scriptaddr} /boot/boot.scr
 source ${secondary_scriptaddr}
+
+if test ${upgrade_available} = 1
+then
+    reset
+fi
