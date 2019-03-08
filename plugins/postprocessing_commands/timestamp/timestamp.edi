@@ -1,0 +1,7 @@
+#!/bin/bash
+
+set -o errexit
+set -o nounset
+
+echo "BUILD_TIMESTAMP=$(date +'%Y-%m-%d')" > {{ pi3_timestamp }}
+

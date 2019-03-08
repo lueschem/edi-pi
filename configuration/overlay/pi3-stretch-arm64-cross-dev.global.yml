@@ -18,6 +18,8 @@ playbooks:
             install_cross_development_tools: True
 
 postprocessing_commands:
+    050_timestamp:
+        skip: True
     100_lxd2rootfs:
         skip: True
     200_rootfs2image:

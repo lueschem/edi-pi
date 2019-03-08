@@ -44,6 +44,11 @@ playbooks:
             hostname: raspberry
 
 postprocessing_commands:
+    050_timestamp:
+        path: postprocessing_commands/timestamp/timestamp.edi
+        require_root: False
+        output:
+            pi3_timestamp: {{ edi_configuration_name }}_timestamp
     100_lxd2rootfs:
         path: postprocessing_commands/rootfs/lxd2rootfs.edi
         require_root: True
