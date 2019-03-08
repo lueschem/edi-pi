@@ -145,7 +145,7 @@ cp "${SCRIPTDIR}/fstab" "${LXD_ROOTFS}/etc/"
 
 # Add artifact information to rootfs.
 mkdir -p "${LXD_ROOTFS}/etc/mender/"
-echo "artifact_name=$(date +'%Y-%m-%d')-${ARTIFACT_NAME}" > "${LXD_ROOTFS}/etc/mender/artifact_info"
+echo "artifact_name=${ARTIFACT_NAME}" > "${LXD_ROOTFS}/etc/mender/artifact_info"
 
 mv "${LXD_ROOTFS}" "${ROOTFSDIR}"
 

@@ -1,3 +1,6 @@
 #!/bin/bash
 
+set -o nounset
+set -o errexit
+
 bmaptool create -o "{{ pi3_bmap }}" "{{ pi3_image }}"

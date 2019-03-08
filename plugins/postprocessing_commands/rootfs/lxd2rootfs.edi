@@ -1,4 +1,9 @@
 #!/bin/bash
 
-{{ edi_current_plugin_directory }}/lxd2rootfs --input {{ edi_input_artifact }} --output {{ pi3_rootfs }} --workdir {{ edi_work_directory }} --artifact {{ edi_configuration_name }} --log {{ edi_log_level }}
+set -o errexit
+set -o nounset
+
+source {{ pi3_timestamp }}
+
+{{ edi_current_plugin_directory }}/lxd2rootfs --input {{ edi_input_artifact }} --output {{ pi3_rootfs }} --workdir {{ edi_work_directory }} --artifact ${BUILD_TIMESTAMP}-{{ edi_configuration_name }} --log {{ edi_log_level }}
 
