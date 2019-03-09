@@ -26,3 +26,5 @@ postprocessing_commands:
         skip: True
     300_blockmap:
         skip: True
+    400_mender:
+        skip: True

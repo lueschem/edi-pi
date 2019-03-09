@@ -63,3 +63,9 @@ postprocessing_commands:
         path: postprocessing_commands/blockmap/blockmap.edi
         output:
             pi3_bmap: {{ edi_configuration_name }}.bmap
+    400_mender:
+        path: postprocessing_commands/mender/image2mender.edi
+        require_root: True
+        output:
+            pi3_mender_artifact: {{ edi_configuration_name }}.mender
+

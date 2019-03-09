@@ -1,0 +1,151 @@
+#!/bin/bash
+
+# Copyright (C) 2019 Matthias Luescher
+#
+# Authors:
+#  Matthias Luescher
+#
+# This file is part of edi-pi.
+#
+# edi-pi is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# edi-pi is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with edi.  If not, see <http://www.gnu.org/licenses/>.
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+print_usage()
+{
+    cat <<EOF
+Convert a full disk image into a mender update artifact.
+
+Required arguments:
+ -i IMAGE, --input=IMAGE                   : Image file that shall get converted into a mender update artifact.
+ -o ARTIFACT, --output=ARTIFACT            : Name of the resulting mender update artifact.
+ -a ARTIFACT_NAME, --artifact=ARTIFACT_NAME: Mender artifact name.
+ -t DEVICE_TYPE, --type=DEVICE_TYPE        : The type of device supported by the update.
+Optional arguments:
+ -h, --help                                : Print help text.
+ --log=LEVEL                               : Use --log=DEBUG to trace all commands.
+ -w DIRECTORY, --workdir=DIRECTORY         : Working directory.
+EOF
+}
+
+print_error()
+{
+    local MESSAGE="${1}"
+    >&2 echo -e "\033[91mError: ${MESSAGE}\033[0m"
+}
+
+print_error_and_exit()
+{
+    local MESSAGE="${1}"
+    print_error "${MESSAGE}"
+    exit 1
+}
+
+unexpected_exit()
+{
+    local TEMPDIR="${1}"
+    print_error "Going to clean up after abnormal script termination."
+    clean_up "${TEMPDIR}"
+    rm -f "${MENDER_ARTIFACT}"
+    trap - EXIT
+    print_error_and_exit "Abnormal script termination."
+}
+
+clean_up()
+{
+    local TEMPDIR="${1}"
+    rm -rf "${TEMPDIR}"
+}
+
+if ! options=$(getopt -o hi:o:w:a:t: -l help,log:,input:,output:,workdir:,artifact:,type: -- "$@")
+then
+    print_usage
+    print_error_and_exit "Invalid option."
+fi
+eval set -- "$options"
+
+WORKDIR="$(pwd)"
+SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+INPUT_IMAGE=""
+MENDER_ARTIFACT=""
+ARTIFACT_NAME=""
+DEVICE_TYPE=""
+LOG_LEVEL="INFO"
+
+while true
+do
+    case "${1}" in
+        -h|--help)          print_usage && exit 0;;
+        -i|--input)         INPUT_IMAGE="${2}"; shift 2;;
+        -o|--output)        MENDER_ARTIFACT="${2}"; shift 2;;
+        -w|--workdir)       WORKDIR="${2}"; shift 2;;
+	-a|--artifact)      ARTIFACT_NAME="${2}"; shift 2;;
+	-t|--type)          DEVICE_TYPE="${2}"; shift 2;;
+        --log)              LOG_LEVEL="${2}"; shift 2;;
+        *)                  break ;;
+    esac
+done
+
+if [ "${LOG_LEVEL}" == "DEBUG" ]; then
+    set -x
+fi
+
+if [[ ${EUID} -ne 0 ]]; then
+   print_error_and_exit "This script must be run as root."
+fi
+
+if [ -z "${INPUT_IMAGE}" ]
+then
+    print_usage
+    print_error_and_exit "Missing input image parameter."
+fi
+
+if [ -z "${MENDER_ARTIFACT}" ]
+then
+    print_usage
+    print_error_and_exit "Missing output artifact parameter."
+fi
+
+if [ -z "${DEVICE_TYPE}" ]
+then
+    print_usage
+    print_error_and_exit "Missing device type parameter."
+fi
+
+if ! which mender-artifact > /dev/null
+then
+    print_error "Missing mender-artifact executable. Mender update artifact will not be built."
+    # Ignore this error for now since the update image might not be needed for every use case.
+    echo "Mender update artifact not built due to missing mender-artifact executable." >> ${MENDER_ARTIFACT}
+    exit 0
+fi
+
+TEMPDIR="$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)"
+
+trap "unexpected_exit ${TEMPDIR}" EXIT
+
+PARTITION_INFO=$(parted ${INPUT_IMAGE} -ms unit s print)
+ROOTFS_START_S=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -d':' -f2 | sed 's/s//g')
+ROOTFS_SIZE_S=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -d':' -f4 | sed 's/s//g')
+
+ROOTFS_IMAGE=${TEMPDIR}/rootfs.ext4
+
+dd if=${INPUT_IMAGE} of=${ROOTFS_IMAGE} skip=${ROOTFS_START_S} count=${ROOTFS_SIZE_S}
+mender-artifact write rootfs-image --device-type ${DEVICE_TYPE} --artifact-name ${ARTIFACT_NAME} --update ${ROOTFS_IMAGE} --version 2 --output-path ${MENDER_ARTIFACT}
+
+clean_up "${TEMPDIR}"
+
+trap - EXIT

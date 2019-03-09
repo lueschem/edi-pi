@@ -36,6 +36,7 @@ Extract and postprocess the root file system of a lxd image.
 Required arguments:
  -i FILE, --input=FILE              : LXD container archive that contains the root file system.
  -o DIRECTORY, --output=DIRECTORY   : Name of the directory that will receive the root file system.
+ -a ARTIFACT, --artifact=ARTIFACT   : Mender artifact name.
 Optional arguments:
  -h, --help                         : Print help text.
  --log=LEVEL                        : Use --log=DEBUG to trace all commands.
