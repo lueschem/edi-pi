@@ -103,7 +103,7 @@ fi
 
 DISK_SIZE_S=$(echo "${PARTITION_INFO}" | grep -o "^/dev/${ROOT_DEV}.*" | cut -d':' -f2 | sed 's/s//g')
 ROOTFS_START_S=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -d':' -f2 | sed 's/s//g')
-ROOTFS_SIZE_S=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -d':' -f3 | sed 's/s//g')
+ROOTFS_SIZE_S=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -d':' -f4 | sed 's/s//g')
 
 if [ "$(expr ${ROOTFS_START_S} + ${ROOTFS_SIZE_S} + 1)" -lt "${DISK_SIZE_S}" ] ; then
     SPLIT_SIZE_S=$(expr $(expr ${DISK_SIZE_S} - ${ROOTFS_START_S}) \/ 2)
