@@ -18,8 +18,10 @@
   template:
     src: wpa_supplicant.conf
     dest: /etc/wpa_supplicant/
+  when: wifi_ssid != ""
 
 - name: Setup wlan0 interface.
   copy:
     src: wlan0
     dest: /etc/network/interfaces.d/
+  when: wifi_ssid != ""
