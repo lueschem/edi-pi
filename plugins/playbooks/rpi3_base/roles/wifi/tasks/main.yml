@@ -13,6 +13,7 @@
     - firmware-brcm80211
     - wireless-tools
     - wpasupplicant
+  when: wifi_ssid != ""
 
 - name: Setup wpa supplicant.
   template:
