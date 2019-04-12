@@ -8,7 +8,7 @@ setenv mender_boot_part_hex_B 4
 setenv bootlimit 1
 
 # initialize and store variables on first boot
-if test -z "${edi_first_boot_done}"
+if test "${edi_first_boot_done}" != "true"
 then
     echo "Going to write environment on first boot!"
     setenv bootcount 0
@@ -48,7 +48,16 @@ setexpr secondary_scriptaddr ${scriptaddr} + ${boot_scr_filesize}
 setenv edi_mmc_device 0:${mender_boot_part_hex}
 setenv edi_root_device /dev/mmcblk0p${mender_boot_part}
 
-ext4load mmc ${edi_mmc_device} ${secondary_scriptaddr} /boot/boot.scr
+if ext4load mmc ${edi_mmc_device} ${secondary_scriptaddr} /boot/boot.scr
+then
+    echo "Successfully loaded secondary boot script."
+else
+    echo "Trying to reset an environment setup that does not match the current installation!"
+    setenv edi_first_boot_done false
+    saveenv
+    reset
+fi
+
 source ${secondary_scriptaddr}
 
 if test ${upgrade_available} = 1
