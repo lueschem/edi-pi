@@ -9,6 +9,7 @@ generate the following artifacts:
 
 * A pure Debian stretch arm64 (64bit) image suitable for the Raspberry Pi 3.
 * A pure Debian stretch armhf (32bit) image suitable for the Raspberry Pi 2 or 3.
+* Matching Mender update artifacts for the above configurations.
 * An amd64/arm64 or amd64/armhf based LXD container with a pre-installed
 cross development toolchain for C and C++.
 * An emulated arm64 or armhf LXD container.
@@ -29,7 +30,7 @@ Please note that image generation operations require superuser privileges
 and therefore you can easily break your host operating system. Therefore
 make sure that you have a backup copy of your data.
 
-## Acknowledgement
+## Acknowledgment
 
 edi-pi would not be possible without the fantastic Raspberry Pi community.
 Special thanks go to the people behind those two projects:
@@ -50,10 +51,20 @@ will need a proper ssh key setup in order to access the container or
 the Rasperry Pi using ssh.
 
 The image post processing commands require some additional tools. On
-Ubuntu 16.04 those tools can be installed as follows:
+Ubuntu 18.04 those tools can be installed as follows:
 
 ``` bash
-sudo apt install e2fsprogs dosfstools bmap-tools
+sudo apt install e2fsprogs dosfstools bmap-tools mtools parted
+```
+
+To generate the Mender update artifact, the mender-artifact tool is required.
+Unfortunately it did not make it into the Ubuntu Bionic apt repositories.
+Luckily this package comes with a small number of dependencies and therefore
+it is without risk to [download it from Debian](https://packages.debian.org/buster/mender-artifact)
+and install it on Ubuntu Bionic:
+
+``` bash
+sudo dpkg -i mender-artifact*.deb
 ```
 
 ### Creating a Raspberry Pi Image
@@ -124,6 +135,12 @@ The container can be accessed as follows (the password is _ChangeMe!_):
 lxc exec edi-pi-cross-dev -- login ${USER}
 ```
 
+Or with ssh (Hint: retrieve IP_OF_CONTAINER with `lxc list`):
+
+``` bash
+ssh IP_OF_CONTAINER
+```
+
 You can directly start to cross compile applications:
 
 
@@ -149,13 +166,13 @@ The following command generates an emulated container:
 For the Raspberry Pi 3, arm64:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-dev pi3-stretch-arm64-dev.yml
+sudo edi -v lxc configure edi-pi-arm64-dev pi3-stretch-arm64-dev.yml
 ```
 
 For the Raspberry Pi 2 or 3, armhf:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-dev pi23-stretch-armhf-dev.yml
+sudo edi -v lxc configure edi-pi-armhf-dev pi23-stretch-armhf-dev.yml
 ```
 
 As above, you can access the container as follows (the password is _ChangeMe!_):
@@ -168,3 +185,9 @@ lxc exec edi-pi-dev -- login ${USER}
 
 For more information please read the [edi documentation](https://docs.get-edi.io) and 
 [this blog post](https://www.get-edi.io/A-new-Approach-to-Operating-System-Image-Generation/).
+
+For details about the Mender based robust update integration please refer to this
+[blog post](https://www.get-edi.io/Updating-a-Debian-Based-IoT-Fleet/).
+
+If you are curious about the U-Boot bootloader setup please take a look at this
+[blog post](https://www.get-edi.io/Booting-Debian-with-U-Boot/).
