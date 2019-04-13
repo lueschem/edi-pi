@@ -1,0 +1,2 @@
+disable wpa_supplicant.service
+disable wpa_supplicant@.service

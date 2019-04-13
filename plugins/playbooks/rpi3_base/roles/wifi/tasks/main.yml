@@ -15,6 +15,12 @@
     - wpasupplicant
   when: wifi_ssid != ""
 
+- name: Preset redundant wpa_supplicant services to disabled.
+  copy:
+    src: 95-wpa_supplicant.preset
+    dest: /lib/systemd/system-preset/
+  when: wifi_ssid != ""
+
 - name: Setup wpa supplicant.
   template:
     src: wpa_supplicant.conf
