@@ -11,6 +11,3 @@
 - name: Add a systemd service that resizes the root file system.
   copy: src=pi-resize-rootfs.service dest=/lib/systemd/system/
 
-- name: Enable the systemd service that resizes the root file system.
-  service: name=pi-resize-rootfs enabled=true
-

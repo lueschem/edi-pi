@@ -4,6 +4,7 @@ general:
 
 bootstrap:
     tool: debootstrap
+    additional_packages: ["python", "sudo", "netbase", "net-tools", "iputils-ping", "ifupdown", "isc-dhcp-client", "resolvconf", "systemd", "systemd-sysv", "gnupg", "dumb-init"]
 
 lxc_profiles:
     100_lxc_networking:
@@ -13,6 +14,10 @@ lxc_profiles:
     200_default_root_device:
         path: lxc_profiles/general/default_root_device/default_root_device.yml
 {% endif %}
+
+    300_suppress_init:
+        path: lxc_profiles/general/suppress_init/suppress_init.yml
+        skip: {{ not edi_create_distributable_image }}
 
 lxc_templates:
     100_etc_hostname:
@@ -32,6 +37,7 @@ playbooks:
             disable_ssh_password_authentication: True
             install_documentation: {{ not edi_create_distributable_image }}
             translations_filter: {% if edi_create_distributable_image %}en_translations_only{% else %}""{% endif %}
+            force_lxc_network_interface_startup: {{ edi_create_distributable_image }}
     200_development_user_facilities:
         path: playbooks/debian/development_user_facilities/main.yml
     300_rpi3_base:
