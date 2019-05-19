@@ -37,7 +37,6 @@ playbooks:
             disable_ssh_password_authentication: True
             install_documentation: {{ not edi_create_distributable_image }}
             translations_filter: {% if edi_create_distributable_image %}en_translations_only{% else %}""{% endif %}
-            force_lxc_network_interface_startup: {{ edi_create_distributable_image }}
     200_development_user_facilities:
         path: playbooks/debian/development_user_facilities/main.yml
     300_rpi3_base:
