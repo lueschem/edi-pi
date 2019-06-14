@@ -1,2 +1,0 @@
-default_release_file: /etc/apt/apt.conf.d/08default-release
-buster_list: /etc/apt/sources.list.d/buster.list

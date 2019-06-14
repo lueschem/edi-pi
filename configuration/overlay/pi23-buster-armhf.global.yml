@@ -3,17 +3,13 @@ general:
 
 bootstrap:
     architecture: armhf
-    repository: deb http://deb.debian.org/debian/ stretch main
+    repository: deb http://deb.debian.org/debian/ buster main
     repository_key: https://ftp-master.debian.org/keys/archive-key-8.asc
 
 playbooks:
     300_rpi3_base:
         parameters:
             kernel_image: linux-image-armmp-lpae
-
-    400_development_tools:
-        parameters:
-            install_development_tools: True
 
 shared_folders:
     edi_workspace:

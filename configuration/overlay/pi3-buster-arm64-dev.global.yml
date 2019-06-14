@@ -3,7 +3,7 @@ general:
 
 bootstrap:
     architecture: arm64
-    repository: deb http://deb.debian.org/debian/ stretch main
+    repository: deb http://deb.debian.org/debian/ buster main
     repository_key: https://ftp-master.debian.org/keys/archive-key-8.asc
 
 playbooks:

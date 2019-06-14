@@ -17,7 +17,7 @@ lxc_profiles:
 
     300_suppress_init:
         path: lxc_profiles/general/suppress_init/suppress_init.yml
-        skip: {{ not edi_create_distributable_image }}
+        skip: False
 
 lxc_templates:
     100_etc_hostname:

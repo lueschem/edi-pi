@@ -7,8 +7,8 @@ Debian tool chain and image generation for the Raspberry Pi 2 and 3.
 The edi configuration contained in this repository can be used to
 generate the following artifacts:
 
-* A pure Debian stretch arm64 (64bit) image suitable for the Raspberry Pi 3.
-* A pure Debian stretch armhf (32bit) image suitable for the Raspberry Pi 2 or 3.
+* A pure Debian buster arm64 (64bit) image suitable for the Raspberry Pi 3.
+* A pure Debian buster armhf (32bit) image suitable for the Raspberry Pi 2 or 3.
 * Matching Mender update artifacts for the above configurations.
 * An amd64/arm64 or amd64/armhf based LXD container with a pre-installed
 cross development toolchain for C and C++.
@@ -74,13 +74,13 @@ A Raspberry Pi image can be created using the following command:
 For Raspberry Pi 3, arm64:
 
 ``` bash
-sudo edi -v image create pi3-stretch-arm64.yml
+sudo edi -v image create pi3-buster-arm64.yml
 ```
 
 For Raspberry Pi 2 or 3, armhf:
 
 ``` bash
-sudo edi -v image create pi23-stretch-armhf.yml
+sudo edi -v image create pi23-buster-armhf.yml
 ```
 
 The resulting image can be copied to a SD card (here /dev/mmcblk0)
@@ -90,13 +90,13 @@ using the following command
 For Raspberry Pi 3, arm64:
 
 ``` bash
-sudo bmaptool copy artifacts/pi3-stretch-arm64.img /dev/mmcblk0
+sudo bmaptool copy artifacts/pi3-buster-arm64.img /dev/mmcblk0
 ```
 
 For Raspberry Pi 2 or 3, armhf:
 
 ``` bash
-sudo bmaptool copy artifacts/pi23-stretch-armhf.img /dev/mmcblk0
+sudo bmaptool copy artifacts/pi23-buster-armhf.img /dev/mmcblk0
 ```
 
 If the command fails, unmount the flash card and repeat the above command.
@@ -120,13 +120,13 @@ following command:
 For the Raspberry Pi 3, amd64/arm64:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-cross-dev pi3-stretch-arm64-cross-dev.yml
+sudo edi -v lxc configure edi-pi-cross-dev pi3-buster-arm64-cross-dev.yml
 ```
 
 For the Raspberry Pi 2 or 3, amd64/armhf:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-cross-dev pi23-stretch-armhf-cross-dev.yml
+sudo edi -v lxc configure edi-pi-cross-dev pi23-buster-armhf-cross-dev.yml
 ```
 
 The container can be accessed as follows (the password is _ChangeMe!_):
@@ -166,13 +166,13 @@ The following command generates an emulated container:
 For the Raspberry Pi 3, arm64:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-arm64-dev pi3-stretch-arm64-dev.yml
+sudo edi -v lxc configure edi-pi-arm64-dev pi3-buster-arm64-dev.yml
 ```
 
 For the Raspberry Pi 2 or 3, armhf:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-armhf-dev pi23-stretch-armhf-dev.yml
+sudo edi -v lxc configure edi-pi-armhf-dev pi23-buster-armhf-dev.yml
 ```
 
 As above, you can access the container as follows (the password is _ChangeMe!_):

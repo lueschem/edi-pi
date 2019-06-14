@@ -4,17 +4,17 @@
     name: raspi3-firmware
     state: absent
 
-- name: Install apt-transport-https.
+- name: Install ca-certificates.
   apt:
-    name: apt-transport-https
-    install_recommends: yes
+    name: ca-certificates
+    install_recommends: no
 
 - name: Add edi-repository apt-key.
   apt_key: data="{{ lookup('file', 'edi-repository.key') }}" state=present
 
 - name: Add edi-repository to sources.list.d.
   apt_repository:
-    repo: deb https://get-edi.github.io/edi-repository/debian stretch main
+    repo: deb https://get-edi.github.io/edi-repository/debian buster main
     state: present
     filename: edi-repository
 

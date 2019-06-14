@@ -2,8 +2,8 @@
 - name: Remove /etc/apt/sources.list.
   file: dest=/etc/apt/sources.list state=absent
 
-- name: Readd stretch repository.
-  copy: src=stretch.list dest=/etc/apt/sources.list.d/
+- name: Readd buster repository.
+  copy: src=buster.list dest=/etc/apt/sources.list.d/
 
 - name: Update apt cache.
   apt: update_cache=yes

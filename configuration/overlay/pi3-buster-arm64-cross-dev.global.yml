@@ -3,8 +3,12 @@ general:
 
 bootstrap:
     architecture: amd64
-    repository: deb http://deb.debian.org/debian/ stretch main
+    repository: deb http://deb.debian.org/debian/ buster main
     repository_key: https://ftp-master.debian.org/keys/archive-key-8.asc
+
+lxc_profiles:
+    300_suppress_init:
+        skip: True
 
 shared_folders:
     edi_workspace:
