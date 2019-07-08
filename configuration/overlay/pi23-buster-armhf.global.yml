@@ -3,8 +3,6 @@ general:
 
 bootstrap:
     architecture: armhf
-    repository: deb http://deb.debian.org/debian/ buster main
-    repository_key: https://ftp-master.debian.org/keys/archive-key-8.asc
 
 playbooks:
     300_rpi3_base:
