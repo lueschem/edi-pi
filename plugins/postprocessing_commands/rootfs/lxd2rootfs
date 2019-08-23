@@ -148,6 +148,9 @@ cp "${SCRIPTDIR}/fstab" "${LXD_ROOTFS}/etc/"
 mkdir -p "${LXD_ROOTFS}/etc/mender/"
 echo "artifact_name=${ARTIFACT_NAME}" > "${LXD_ROOTFS}/etc/mender/artifact_info"
 
+# Do not wait for eth0 during boot.
+sed -i '/auto eth0/d' "${LXD_ROOTFS}/etc/network/interfaces.d/eth0"
+
 mv "${LXD_ROOTFS}" "${ROOTFSDIR}"
 
 clean_up "${TEMPDIR}"
