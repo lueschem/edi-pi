@@ -1,4 +1,4 @@
-- hosts: edi
+- hosts: all
   
   vars:
     install_development_tools: False

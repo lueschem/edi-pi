@@ -1,11 +1,16 @@
 ---
 - name: Remove /etc/apt/sources.list.
-  file: dest=/etc/apt/sources.list state=absent
+  file:
+    dest: /etc/apt/sources.list
+    state: absent
 
 - name: Readd buster repository.
-  copy: src=buster.list dest=/etc/apt/sources.list.d/
+  copy:
+    src: buster.list
+    dest: /etc/apt/sources.list.d/
 
 - name: Update apt cache.
-  apt: update_cache=yes
+  apt:
+    update_cache: yes
 
 

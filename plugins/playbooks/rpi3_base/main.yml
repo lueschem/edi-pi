@@ -1,4 +1,4 @@
-- hosts: edi
+- hosts: all
 
   vars:
     kernel_image: linux-image-arm64

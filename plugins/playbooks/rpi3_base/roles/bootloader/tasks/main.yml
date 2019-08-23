@@ -10,7 +10,9 @@
     install_recommends: no
 
 - name: Add edi-repository apt-key.
-  apt_key: data="{{ lookup('file', 'edi-repository.key') }}" state=present
+  apt_key:
+    data: "{{ lookup('file', 'edi-repository.key') }}"
+    state: present
 
 - name: Add edi-repository to sources.list.d.
   apt_repository:

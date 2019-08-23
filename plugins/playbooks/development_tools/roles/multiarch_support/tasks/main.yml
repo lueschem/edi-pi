@@ -5,4 +5,5 @@
     creates: /etc/{{ cross_architecture }}.enabled.edi
 
 - name: Update apt cache.
-  apt: update_cache=yes
+  apt:
+    update_cache: yes

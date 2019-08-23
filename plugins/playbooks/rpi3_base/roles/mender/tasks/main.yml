@@ -1,6 +1,9 @@
 ---
 - name: Install mender-client.
-  apt: name=mender-client state=present install_recommends=no
+  apt:
+    name: mender-client
+    state: present
+    install_recommends: no
 
 - name: Load project specific (customized) mender configuration.
   include_vars: "{{ item}}"
