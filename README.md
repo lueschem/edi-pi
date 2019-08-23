@@ -120,19 +120,19 @@ following command:
 For the Raspberry Pi 3, amd64/arm64:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-cross-dev pi3-buster-arm64-cross-dev.yml
+sudo edi -v lxc configure edi-pi-cross-dev-buster pi3-buster-arm64-cross-dev.yml
 ```
 
 For the Raspberry Pi 2 or 3, amd64/armhf:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-cross-dev pi23-buster-armhf-cross-dev.yml
+sudo edi -v lxc configure edi-pi-cross-dev-buster pi23-buster-armhf-cross-dev.yml
 ```
 
 The container can be accessed as follows (the password is _ChangeMe!_):
 
 ``` bash
-lxc exec edi-pi-cross-dev -- login ${USER}
+lxc exec edi-pi-cross-dev-buster -- login ${USER}
 ```
 
 Or with ssh (Hint: retrieve IP_OF_CONTAINER with `lxc list`):
@@ -166,19 +166,37 @@ The following command generates an emulated container:
 For the Raspberry Pi 3, arm64:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-arm64-dev pi3-buster-arm64-dev.yml
+sudo edi -v lxc configure edi-pi-arm64-dev-buster pi3-buster-arm64-dev.yml
 ```
 
 For the Raspberry Pi 2 or 3, armhf:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-armhf-dev pi23-buster-armhf-dev.yml
+sudo edi -v lxc configure edi-pi-armhf-dev-buster pi23-buster-armhf-dev.yml
 ```
 
 As above, you can access the container as follows (the password is _ChangeMe!_):
 
+For the Raspberry Pi 3, arm64:
+
 ``` bash
-lxc exec edi-pi-dev -- login ${USER}
+lxc exec edi-pi-arm64-dev-buster -- login ${USER}
+```
+
+For the Raspberry Pi 2 or 3, armhf:
+
+``` bash
+lxc exec edi-pi-armhf-dev-buster -- login ${USER}
+```
+
+Please note that no services get started in the emulated container and thus
+no ssh access will be possible.
+
+To enable networking within the emulated container use the following command
+to bring up the default network interface:
+
+``` bash
+sudo ip link set eth0 up && sudo dhclient eth0
 ```
 
 ### More Information
