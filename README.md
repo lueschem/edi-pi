@@ -77,10 +77,16 @@ For Raspberry Pi 3, arm64:
 sudo edi -v image create pi3-buster-arm64.yml
 ```
 
-For Raspberry Pi 2 or 3, armhf:
+For Raspberry Pi 2, armhf:
 
 ``` bash
-sudo edi -v image create pi23-buster-armhf.yml
+sudo edi -v image create pi2-buster-armhf.yml
+```
+
+For Raspberry Pi 3, armhf:
+
+``` bash
+sudo edi -v image create pi3-buster-armhf.yml
 ```
 
 The resulting image can be copied to a SD card (here /dev/mmcblk0)
@@ -93,10 +99,16 @@ For Raspberry Pi 3, arm64:
 sudo bmaptool copy artifacts/pi3-buster-arm64.img /dev/mmcblk0
 ```
 
-For Raspberry Pi 2 or 3, armhf:
+For Raspberry Pi 2, armhf:
 
 ``` bash
-sudo bmaptool copy artifacts/pi23-buster-armhf.img /dev/mmcblk0
+sudo bmaptool copy artifacts/pi2-buster-armhf.img /dev/mmcblk0
+```
+
+For Raspberry Pi 3, armhf:
+
+``` bash
+sudo bmaptool copy artifacts/pi3-buster-armhf.img /dev/mmcblk0
 ```
 
 If the command fails, unmount the flash card and repeat the above command.

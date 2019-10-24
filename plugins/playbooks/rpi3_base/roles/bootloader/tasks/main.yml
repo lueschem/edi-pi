@@ -59,7 +59,7 @@
 
 - name: Install the u-boot bootloader.
   unarchive: 
-    src: u-boot-bootloader.{{ edi_bootstrap_architecture }}.tar.gz
+    src: u-boot-bootloader.{{ edi_bootstrap_architecture }}.{{ raspberry_pi_type }}.tar.gz
     dest: "{{ uboot_location }}"
     owner: root
     group: root 

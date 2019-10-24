@@ -125,7 +125,10 @@ then
     exit 0
 fi
 
-if [ ${DEVICE_TYPE} == "pi23-armhf" ]
+if [ ${DEVICE_TYPE} == "pi2-armhf" ]
+then
+    COMPATIBLE_DEVICE="--device-type rpi-armhf"
+elif [ ${DEVICE_TYPE} == "pi3-armhf" ]
 then
     COMPATIBLE_DEVICE="--device-type rpi-armhf"
 elif [ ${DEVICE_TYPE} == "pi3-arm64" ]

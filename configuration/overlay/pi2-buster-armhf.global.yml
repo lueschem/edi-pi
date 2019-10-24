@@ -1,0 +1,16 @@
+general:
+    parameters:
+        raspberry_pi_type: pi2
+
+bootstrap:
+    architecture: armhf
+
+playbooks:
+    300_rpi3_base:
+        parameters:
+            kernel_image: linux-image-armmp-lpae
+
+shared_folders:
+    edi_workspace:
+        folder: edi-workspace
+        mountpoint: edi-workspace

@@ -51,6 +51,7 @@ create_u_boot_archive()
     local ARCHITECTURE=$1
     local CONFIGURATION=$2
     local COMPILER_PREFIX=$3
+    local RASPBERRY_PI_TYPE=$4
 
     echo "Going to create u-boot (${ARCHITECTURE}) archive!"
     WORKDIR="${TEMPDIR}/u-boot-${VERSION_LABEL#"v"}"
@@ -70,7 +71,7 @@ create_u_boot_archive()
     cp Licenses/* ${TEMPDIR}/output/licenses.u-boot/
     echo "${VERSION_LABEL}" > "${TEMPDIR}/output/u-boot-bootloader.version"
     
-    FINAL_ARCHIVE="${SCRIPTDIR}/u-boot-bootloader.${ARCHITECTURE}.tar.gz"
+    FINAL_ARCHIVE="${SCRIPTDIR}/u-boot-bootloader.${ARCHITECTURE}.${RASPBERRY_PI_TYPE}.tar.gz"
     tar -cf "${FINAL_ARCHIVE}" -C "${TEMPDIR}/output" "."
     echo "Successfully created ${FINAL_ARCHIVE}!"
 }
@@ -110,8 +111,9 @@ elif [[ "${BOOTLOADER_TYPE}" == "u-boot" ]]
 then
     ARCHIVE_URL="https://github.com/u-boot/u-boot/archive/${VERSION_LABEL}.tar.gz"
     PROCESSING_INSTRUCTIONS=(
-        "create_u_boot_archive armhf rpi_3_32b_defconfig arm-linux-gnueabihf-"
-	"create_u_boot_archive arm64 rpi_3_defconfig aarch64-linux-gnu-"
+        "create_u_boot_archive armhf rpi_2_defconfig arm-linux-gnueabihf- pi2"
+        "create_u_boot_archive armhf rpi_3_32b_defconfig arm-linux-gnueabihf- pi3"
+	"create_u_boot_archive arm64 rpi_3_defconfig aarch64-linux-gnu- pi3"
 	)
 else
     >&2 echo "Error: Unknown bootloader type ${BOOTLOADER_TYPE}."
