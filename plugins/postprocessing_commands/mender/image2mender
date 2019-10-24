@@ -30,7 +30,7 @@ print_usage()
 Convert a full disk image into a mender update artifact.
 
 Required arguments:
- -i IMAGE, --input=IMAGE                   : Image file that shall get converted into a mender update artifact.
+ -i IMAGE, --input=IMAGE                   : Partition image file that shall get converted into a mender update artifact.
  -o ARTIFACT, --output=ARTIFACT            : Name of the resulting mender update artifact.
  -a ARTIFACT_NAME, --artifact=ARTIFACT_NAME: Mender artifact name.
  -t DEVICE_TYPE, --type=DEVICE_TYPE        : The type of device supported by the update.
@@ -56,18 +56,10 @@ print_error_and_exit()
 
 unexpected_exit()
 {
-    local TEMPDIR="${1}"
     print_error "Going to clean up after abnormal script termination."
-    clean_up "${TEMPDIR}"
     rm -f "${MENDER_ARTIFACT}"
     trap - EXIT
     print_error_and_exit "Abnormal script termination."
-}
-
-clean_up()
-{
-    local TEMPDIR="${1}"
-    rm -rf "${TEMPDIR}"
 }
 
 if ! options=$(getopt -o hi:o:w:a:t: -l help,log:,input:,output:,workdir:,artifact:,type: -- "$@")
@@ -133,19 +125,16 @@ then
     exit 0
 fi
 
-TEMPDIR="$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)"
+if [ ${DEVICE_TYPE} == "pi23-armhf" ]
+then
+    COMPATIBLE_DEVICE="--device-type rpi-armhf"
+elif [ ${DEVICE_TYPE} == "pi3-arm64" ]
+then
+    COMPATIBLE_DEVICE="--device-type rpi-arm64"
+else
+    COMPATIBLE_DEVICE=""
+fi
 
-trap "unexpected_exit ${TEMPDIR}" EXIT
-
-PARTITION_INFO=$(parted ${INPUT_IMAGE} -ms unit s print)
-ROOTFS_START_S=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -d':' -f2 | sed 's/s//g')
-ROOTFS_SIZE_S=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -d':' -f4 | sed 's/s//g')
-
-ROOTFS_IMAGE=${TEMPDIR}/rootfs.ext4
-
-dd if=${INPUT_IMAGE} of=${ROOTFS_IMAGE} skip=${ROOTFS_START_S} count=${ROOTFS_SIZE_S}
-mender-artifact write rootfs-image --device-type ${DEVICE_TYPE} --artifact-name ${ARTIFACT_NAME} --update ${ROOTFS_IMAGE} --version 2 --output-path ${MENDER_ARTIFACT}
-
-clean_up "${TEMPDIR}"
+mender-artifact write rootfs-image --device-type ${DEVICE_TYPE} ${COMPATIBLE_DEVICE} --artifact-name ${ARTIFACT_NAME} --update ${INPUT_IMAGE} --version 2 --output-path ${MENDER_ARTIFACT}
 
 trap - EXIT

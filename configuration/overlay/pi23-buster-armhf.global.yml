@@ -1,5 +1,6 @@
 general:
-    edi_compression: gz
+    parameters:
+        raspberry_pi_type: pi23
 
 bootstrap:
     architecture: armhf

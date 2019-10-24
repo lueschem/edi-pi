@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (C) 2017 Matthias Luescher
+# Copyright (C) 2019 Matthias Luescher
 #
 # Authors:
 #  Matthias Luescher
@@ -36,6 +36,7 @@ Convert a root file system into a Raspberry Pi image.
 Required arguments:
  -i DIRECTORY, --input=DIRECTORY    : Directory that contains the root file system.
  -o FILE, --output=FILE             : Name of the file that will contain the resulting Raspberry Pi image.
+ -p FILE, --partition-output=FILE   : Name of the file that will contain the resulting Raspberry Pi partition image.
 Optional arguments:
  -h, --help                         : Print help text.
  --log=LEVEL                        : Use --log=DEBUG to trace all commands.
@@ -62,24 +63,31 @@ unexpected_exit()
     print_error "Going to clean up after abnormal script termination."
     clean_up "${TEMPDIR}"
     rm -f "${RPI_IMAGE}"
+    rm -f "${RPI_PARTITION_IMAGE}"
     trap - EXIT
     print_error_and_exit "Abnormal script termination."
+}
+
+do_unmount()
+{
+    if [ "${FIRMWARE_MNT}" != "unused" ] ; then umount "${FIRMWARE_MNT}"; FIRMWARE_MNT="unused" ; fi
+    if [ "${DATA_MNT}" != "unused" ] ; then umount "${DATA_MNT}"; DATA_MNT="unused" ; fi
+    if [ "${ROOT_MNT}" != "unused" ] ; then umount "${ROOT_MNT}"; ROOT_MNT="unused" ; fi
 }
 
 clean_up()
 {
     local TEMPDIR="${1}"
 
-    if [ "${FIRMWARE_MNT}" != "unused" ] ; then umount "${FIRMWARE_MNT}"; FIRMWARE_MNT="unused" ; fi
-    if [ "${DATA_MNT}" != "unused" ] ; then umount "${DATA_MNT}"; DATA_MNT="unused" ; fi
-    if [ "${ROOT_MNT}" != "unused" ] ; then umount "${ROOT_MNT}"; ROOT_MNT="unused" ; fi
+    do_unmount
+
     if [ "${ROOT_LD}" != "unused" ] ; then losetup -d "${ROOT_LD}"; ROOT_LD="unused" ; fi
     if [ "${FIRMWARE_LD}" != "unused" ]; then losetup -d "${FIRMWARE_LD}"; FIRMWARE_LD="unused" ; fi
     if [ "${DATA_LD}" != "unused" ]; then losetup -d "${DATA_LD}"; DATA_LD="unused" ; fi
     rm -rf "${TEMPDIR}"
 }
 
-if ! options=$(getopt -o hi:o:w: -l help,log:,input:,output:,workdir: -- "$@")
+if ! options=$(getopt -o hi:o:p:w: -l help,log:,input:,output:,partition-output:,workdir: -- "$@")
 then
     print_usage
     print_error_and_exit "Invalid option."
@@ -90,17 +98,19 @@ WORKDIR="$(pwd)"
 SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOTFS_DIR=""
 RPI_IMAGE=""
+RPI_PARTITION_IMAGE=""
 LOG_LEVEL="INFO"
 
 while true
 do
     case "${1}" in
-        -h|--help)          print_usage && exit 0;;
-        -i|--input)         ROOTFS_DIR="${2}"; shift 2;;
-        -o|--output)        RPI_IMAGE="${2}"; shift 2;;
-        -w|--workdir)       WORKDIR="${2}"; shift 2;;
-        --log)              LOG_LEVEL="${2}"; shift 2;;
-        *)                  break ;;
+        -h|--help)             print_usage && exit 0;;
+        -i|--input)            ROOTFS_DIR="${2}"; shift 2;;
+        -o|--output)           RPI_IMAGE="${2}"; shift 2;;
+        -p|--partition-output) RPI_PARTITION_IMAGE="${2}"; shift 2;;
+        -w|--workdir)          WORKDIR="${2}"; shift 2;;
+        --log)                 LOG_LEVEL="${2}"; shift 2;;
+        *)                     break ;;
     esac
 done
 
@@ -122,6 +132,12 @@ if [ -z "${RPI_IMAGE}" ]
 then
     print_usage
     print_error_and_exit "Missing output archive."
+fi
+
+if [ -z "${RPI_PARTITION_IMAGE}" ]
+then
+    print_usage
+    print_error_and_exit "Missing partition output image."
 fi
 
 TEMPDIR="$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)"
@@ -201,6 +217,10 @@ mount "${DATA_LD}" "${DATA_MNT}"
 
 # Copy all files from the LXD rootfs to the loop device mount point directory
 rsync -a "${ROOTFS_DIR}/" "${ROOT_MNT}/"
+
+do_unmount
+
+dd if="${ROOT_LD}" of="${RPI_PARTITION_IMAGE}"
 
 clean_up "${TEMPDIR}"
 

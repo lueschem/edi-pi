@@ -1,6 +1,9 @@
 general:
     edi_required_minimal_edi_version: 1.1.0
+    edi_compression: gz
     edi_lxc_network_interface_name: eth0
+    parameters:
+        raspberry_pi_type: generic
 
 bootstrap:
     tool: debootstrap
@@ -66,6 +69,7 @@ postprocessing_commands:
         require_root: True
         output:
             pi3_image: {{ edi_configuration_name }}.img
+            pi3_partition_image: {{ edi_configuration_name }}_rootfs.ext4
     300_blockmap:
         path: postprocessing_commands/blockmap/blockmap.edi
         output:

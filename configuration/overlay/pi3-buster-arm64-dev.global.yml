@@ -1,6 +1,3 @@
-general:
-    edi_compression: gz
-
 bootstrap:
     architecture: arm64
 

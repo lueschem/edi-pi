@@ -3,5 +3,5 @@
 set -o nounset
 set -o errexit
 
-{{ edi_current_plugin_directory }}/rootfs2image --input {{ pi3_rootfs }} --output {{ pi3_image }} --workdir {{ edi_work_directory }} --log {{ edi_log_level }}
+{{ edi_current_plugin_directory }}/rootfs2image --input {{ pi3_rootfs }} --output {{ pi3_image }} --partition-output {{ pi3_partition_image }} --workdir {{ edi_work_directory }} --log {{ edi_log_level }}
 
