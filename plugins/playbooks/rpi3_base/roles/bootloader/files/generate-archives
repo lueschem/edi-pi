@@ -11,7 +11,7 @@ echo_usage()
 {
     echo "Usage: generate-archives BOOTLOADER_TYPE VERSION_LABEL"
     echo "Example: generate-archives raspberrypi 1.20180924"
-    echo "Example: generate-archives u-boot v2018.09"
+    echo "Example: generate-archives u-boot v2019.10"
 }
 
 cleanup()
@@ -113,8 +113,9 @@ then
     PROCESSING_INSTRUCTIONS=(
         "create_u_boot_archive armhf rpi_2_defconfig arm-linux-gnueabihf- pi2"
         "create_u_boot_archive armhf rpi_3_32b_defconfig arm-linux-gnueabihf- pi3"
-	"create_u_boot_archive arm64 rpi_3_defconfig aarch64-linux-gnu- pi3"
-	)
+        "create_u_boot_archive arm64 rpi_3_defconfig aarch64-linux-gnu- pi3"
+        "create_u_boot_archive arm64 rpi_4_defconfig aarch64-linux-gnu- pi4"
+        )
 else
     >&2 echo "Error: Unknown bootloader type ${BOOTLOADER_TYPE}."
     exit 1
