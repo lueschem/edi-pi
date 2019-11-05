@@ -57,15 +57,7 @@ Ubuntu 18.04 those tools can be installed as follows:
 sudo apt install e2fsprogs dosfstools bmap-tools mtools parted
 ```
 
-To generate the Mender update artifact, the mender-artifact tool is required.
-Unfortunately it did not make it into the Ubuntu Bionic apt repositories.
-Luckily this package comes with a small number of dependencies and therefore
-it is without risk to [download it from Debian](https://packages.debian.org/buster/mender-artifact)
-and install it on Ubuntu Bionic:
-
-``` bash
-sudo dpkg -i mender-artifact*.deb
-```
+To generate the Mender update artifact, the [mender-artifact](https://docs.mender.io/2.2/downloads) tool is required.
 
 ### Creating a Raspberry Pi Image
 
