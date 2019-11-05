@@ -138,6 +138,6 @@ else
     COMPATIBLE_DEVICE=""
 fi
 
-mender-artifact write rootfs-image --device-type ${DEVICE_TYPE} ${COMPATIBLE_DEVICE} --artifact-name ${ARTIFACT_NAME} --update ${INPUT_IMAGE} --version 2 --output-path ${MENDER_ARTIFACT}
+mender-artifact write rootfs-image --device-type ${DEVICE_TYPE} ${COMPATIBLE_DEVICE} --artifact-name ${ARTIFACT_NAME} --file ${INPUT_IMAGE} --version 2 --output-path ${MENDER_ARTIFACT}
 
 trap - EXIT
