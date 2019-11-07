@@ -1,3 +1,7 @@
+general:
+    parameters:
+        raspberry_pi_type: pi3
+
 bootstrap:
     architecture: arm64
 
