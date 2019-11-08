@@ -1,0 +1,6 @@
+---
+- name: Configure /boot/config.txt
+  copy:
+    src: config.txt
+    dest: /boot/config.txt
+

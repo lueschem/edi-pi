@@ -7,6 +7,9 @@
     - role: repositories
       become: True
       become_user: root
+    - role: boot
+      become: True
+      become_user: root
     - role: bootloader 
       become: True
       become_user: root
