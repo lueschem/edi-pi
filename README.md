@@ -57,7 +57,13 @@ Ubuntu 18.04 those tools can be installed as follows:
 sudo apt install e2fsprogs dosfstools bmap-tools mtools parted
 ```
 
-To generate the Mender update artifact, the [mender-artifact](https://docs.mender.io/2.2/downloads) tool is required.
+To generate the Mender update artifact, the [mender-artifact](https://docs.mender.io/2.2/downloads)
+tool is required. Please download the standalone binary and make it visible and executable:
+
+``` bash
+sudo cp ~/Downloads/mender-artifact /usr/local/bin/
+sudo chmod +x /usr/local/bin/mender-artifact
+```
 
 ### Creating a Raspberry Pi Image
 

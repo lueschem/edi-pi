@@ -138,6 +138,14 @@ else
     COMPATIBLE_DEVICE=""
 fi
 
-mender-artifact write rootfs-image --device-type ${DEVICE_TYPE} ${COMPATIBLE_DEVICE} --artifact-name ${ARTIFACT_NAME} --file ${INPUT_IMAGE} --version 2 --output-path ${MENDER_ARTIFACT}
+INPUT_OPTION="--file"
+MENDER_ARTIFACT_VERSION=$(mender-artifact --version | cut -d' ' -f 3 | cut -d'.' -f 1)
+
+if [ ${MENDER_ARTIFACT_VERSION} -eq 2 ]
+then
+    INPUT_OPTION="--update"
+fi
+
+mender-artifact write rootfs-image --device-type ${DEVICE_TYPE} ${COMPATIBLE_DEVICE} --artifact-name ${ARTIFACT_NAME} ${INPUT_OPTION} ${INPUT_IMAGE} --version 2 --output-path ${MENDER_ARTIFACT}
 
 trap - EXIT
