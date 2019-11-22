@@ -4,6 +4,7 @@ general:
     edi_lxc_network_interface_name: eth0
     parameters:
         raspberry_pi_type: generic
+        ansible_pipelining: true
 
 bootstrap:
     tool: debootstrap
