@@ -49,6 +49,12 @@
     src: config.txt.{{ edi_bootstrap_architecture }}
     dest: "{{ uboot_location }}/config.txt"
 
+- name: Setup the kernel command line.
+  copy:
+    src: cmdline.txt.rpi4
+    dest: "{{ uboot_location }}/cmdline.txt"
+  when: raspberry_pi_type == "pi4"
+
 - name: Install the raspberrypi bootloader.
   unarchive: 
     src: raspberrypi-bootloader.tar.gz

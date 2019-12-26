@@ -1,0 +1,1 @@
+dwc_otg.lpm_enable=0 console=serial0,115200 console=tty1 root=/dev/edi_root_device rw rootfstype=ext4 elevator=deadline fsck.repair=yes rootwait
