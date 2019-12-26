@@ -9,6 +9,7 @@ playbooks:
     300_rpi3_base:
         parameters:
             edi_boot_shim_template: rpi4
+            kernel_image: linux-image-4.19.89-v8+
 
 shared_folders:
     edi_workspace:
