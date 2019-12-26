@@ -1,0 +1,16 @@
+general:
+    parameters:
+        raspberry_pi_type: pi4
+
+bootstrap:
+    architecture: arm64
+
+playbooks:
+    300_rpi3_base:
+        parameters:
+            edi_boot_shim_template: rpi4
+
+shared_folders:
+    edi_workspace:
+        folder: edi-workspace
+        mountpoint: edi-workspace
