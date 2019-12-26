@@ -5,6 +5,7 @@ bare_metal_packages:
   - udev
   - "{{ kernel_image }}"
   - firmware-brcm80211
+  - haveged
 
 wifi_firmware_config:
   - brcmfmac43430-sdio.txt
