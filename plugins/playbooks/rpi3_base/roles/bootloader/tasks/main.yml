@@ -9,14 +9,14 @@
     name: ca-certificates
     install_recommends: no
 
-- name: Add edi-repository apt-key.
+- name: Add get-edi packagecloud repository apt key.
   apt_key:
-    data: "{{ lookup('file', 'edi-repository.key') }}"
+    data: "{{ lookup('file', 'packagecloud.gpgkey') }}"
     state: present
 
-- name: Add edi-repository to sources.list.d.
+- name: Add get-edi packagecloud repository to sources.list.d.
   apt_repository:
-    repo: deb https://get-edi.github.io/edi-repository/debian buster main
+    repo: deb https://packagecloud.io/get-edi/debian/debian/ buster main
     state: present
     filename: edi-repository
 
@@ -30,7 +30,7 @@
     state: directory
 
 - name: Configure edi-boot-shim for multiboot.
-  copy:
+  template:
     src: multiboot.cfg
     dest: /etc/edi-boot-shim/edi-boot-shim.cfg.d
 
