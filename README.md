@@ -69,6 +69,12 @@ sudo chmod +x /usr/local/bin/mender-artifact
 
 A Raspberry Pi image can be created using the following command:
 
+For Raspberry Pi 4, arm64:
+
+``` bash
+sudo edi -v image create pi4-buster-arm64.yml
+```
+
 For Raspberry Pi 3, arm64:
 
 ``` bash
@@ -90,6 +96,12 @@ sudo edi -v image create pi3-buster-armhf.yml
 The resulting image can be copied to a SD card (here /dev/mmcblk0)
 using the following command
 (**Please note that everything on the SD card will be erased!**):
+
+For Raspberry Pi 4, arm64:
+
+``` bash
+sudo bmaptool copy artifacts/pi4-buster-arm64.img /dev/mmcblk0
+```
 
 For Raspberry Pi 3, arm64:
 
@@ -127,16 +139,16 @@ execute a command using `sudo` or login via a local terminal).
 A cross development container can be created using the
 following command:
 
-For the Raspberry Pi 3, amd64/arm64:
+For the Raspberry Pi 3 or 4, amd64/arm64:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-cross-dev-buster pi3-buster-arm64-cross-dev.yml
+sudo edi -v lxc configure edi-pi-cross-dev-buster pi-buster-arm64-cross-dev.yml
 ```
 
-For the Raspberry Pi 2 or 3, amd64/armhf:
+For the Raspberry Pi 2, 3 or 4, amd64/armhf:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-cross-dev-buster pi23-buster-armhf-cross-dev.yml
+sudo edi -v lxc configure edi-pi-cross-dev-buster pi-buster-armhf-cross-dev.yml
 ```
 
 The container can be accessed as follows (the password is _ChangeMe!_):
@@ -154,13 +166,13 @@ ssh IP_OF_CONTAINER
 You can directly start to cross compile applications:
 
 
-For the Raspberry Pi 3, arm64:
+For the Raspberry Pi 3 or 4, arm64:
 
 ``` bash
 aarch64-linux-gnu-g++ ...
 ```
 
-For the Raspberry Pi 2 or 3, armhf:
+For the Raspberry Pi 2, 3 or 4, armhf:
 
 ``` bash
 arm-linux-gnueabihf-g++
@@ -179,10 +191,10 @@ For the Raspberry Pi 3, arm64:
 sudo edi -v lxc configure edi-pi-arm64-dev-buster pi3-buster-arm64-dev.yml
 ```
 
-For the Raspberry Pi 2 or 3, armhf:
+For the Raspberry Pi 3, armhf:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-armhf-dev-buster pi23-buster-armhf-dev.yml
+sudo edi -v lxc configure edi-pi-armhf-dev-buster pi3-buster-armhf-dev.yml
 ```
 
 As above, you can access the container as follows (the password is _ChangeMe!_):
@@ -193,7 +205,7 @@ For the Raspberry Pi 3, arm64:
 lxc exec edi-pi-arm64-dev-buster -- login ${USER}
 ```
 
-For the Raspberry Pi 2 or 3, armhf:
+For the Raspberry Pi 3, armhf:
 
 ``` bash
 lxc exec edi-pi-armhf-dev-buster -- login ${USER}
