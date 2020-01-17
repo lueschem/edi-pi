@@ -1,14 +1,14 @@
 # edi-pi
 
-Debian tool chain and image generation for the Raspberry Pi 2 and 3.
+Debian tool chain and image generation for the Raspberry Pi 2, 3 and 4.
 
 ## Introduction
 
 The edi configuration contained in this repository can be used to
 generate the following artifacts:
 
-* A pure Debian buster arm64 (64bit) image suitable for the Raspberry Pi 3.
-* A pure Debian buster armhf (32bit) image suitable for the Raspberry Pi 2 or 3.
+* A Debian buster arm64 (64bit) image suitable for the Raspberry Pi 3 or 4.
+* A Debian buster armhf (32bit) image suitable for the Raspberry Pi 2 or 3.
 * Matching Mender update artifacts for the above configurations.
 * An amd64/arm64 or amd64/armhf based LXD container with a pre-installed
 cross development toolchain for C and C++.
