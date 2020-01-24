@@ -7,7 +7,3 @@ bare_metal_packages:
   - firmware-brcm80211
   - haveged
 
-wifi_firmware_config:
-  - brcmfmac43430-sdio.txt
-  - brcmfmac43455-sdio.txt
-

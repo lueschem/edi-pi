@@ -5,10 +5,4 @@
     state: present
     install_recommends: no
 
-- name: Copy wifi firmware configuration files.
-  copy:
-    src: "{{ item }}"
-    dest: /lib/firmware/brcm/
-  with_items: "{{ wifi_firmware_config }}"
-
 
