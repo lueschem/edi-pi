@@ -1,4 +1,9 @@
 ---
+- name: Install ca-certificates.
+  apt:
+    name: ca-certificates
+    install_recommends: no
+
 - name: Remove /etc/apt/sources.list.
   file:
     dest: /etc/apt/sources.list
@@ -9,8 +14,18 @@
     src: buster.list
     dest: /etc/apt/sources.list.d/
 
+- name: Add get-edi packagecloud repository apt key.
+  apt_key:
+    data: "{{ lookup('file', 'packagecloud.gpgkey') }}"
+    state: present
+
+- name: Add get-edi packagecloud repository to sources.list.d.
+  apt_repository:
+    repo: deb https://packagecloud.io/get-edi/debian/debian/ buster main
+    state: present
+    filename: edi-repository
+
 - name: Update apt cache.
   apt:
     update_cache: yes
-
 
