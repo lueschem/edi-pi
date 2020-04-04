@@ -216,9 +216,11 @@ mkdir -p "${DATA_MNT}"
 mount "${DATA_LD}" "${DATA_MNT}"
 
 # Copy all files from the LXD rootfs to the loop device mount point directory
-rsync -a "${ROOTFS_DIR}/" "${ROOT_MNT}/"
+rsync -a --exclude 'usr/share/doc/*/changelog.Debian.gz' --exclude 'usr/share/doc/*/changelog.gz' "${ROOTFS_DIR}/" "${ROOT_MNT}/"
 
 do_unmount
+
+zerofree "${ROOT_LD}"
 
 dd if="${ROOT_LD}" of="${RPI_PARTITION_IMAGE}"
 
