@@ -20,10 +20,10 @@
     state: present
 
 - name: Add get-edi packagecloud repository to sources.list.d.
-  apt_repository:
-    repo: deb https://packagecloud.io/get-edi/debian/debian/ buster main
-    state: present
-    filename: edi-repository
+  copy:
+    src: edi-repository.list
+    dest: /etc/apt/sources.list.d/
+
 
 - name: Update apt cache.
   apt:

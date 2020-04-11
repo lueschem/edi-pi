@@ -5,12 +5,13 @@ general:
     parameters:
         raspberry_pi_type: generic
         ansible_pipelining: true
+        ansible_python_interpreter: /usr/bin/python3
 
 bootstrap:
     tool: debootstrap
     repository: deb http://deb.debian.org/debian/ buster main
     repository_key: https://ftp-master.debian.org/keys/archive-key-9.asc
-    additional_packages: ["python", "sudo", "netbase", "net-tools", "iputils-ping", "ifupdown", "isc-dhcp-client", "resolvconf", "systemd", "systemd-sysv", "gnupg", "dumb-init"]
+    additional_packages: ["python3", "sudo", "netbase", "net-tools", "iputils-ping", "ifupdown", "isc-dhcp-client", "resolvconf", "systemd", "systemd-sysv", "gnupg", "dumb-init"]
 
 lxc_profiles:
     100_lxc_networking:
