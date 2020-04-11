@@ -112,5 +112,9 @@ documentation_steps:
             edi_doc_replacements:
             - pattern: '(CVE-[0-9]{4}-[0-9]{4,6})'
               replacement: '`\1 <https://cve.mitre.org/cgi-bin/cvename.cgi?name=\1>`_'
+            - pattern: '[#]*((?i)Closes:\s[#])([0-9]{6,10})'
+              replacement: '`\1\2 <https://bugs.debian.org/cgi-bin/bugreport.cgi?bug=\2>`_'
+            - pattern: '[#]*((?i)LP:\s[#])([0-9]{6,10})'
+              replacement: '`\1\2 <https://bugs.launchpad.net/ubuntu/+source/nano/+bug/\2>`_'
 
 
