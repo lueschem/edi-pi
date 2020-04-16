@@ -1,0 +1,124 @@
+#!/bin/bash
+
+# Copyright (C) 2020 Matthias Luescher
+#
+# Authors:
+#  Matthias Luescher
+#
+# This file is part of edi-pi.
+#
+# edi-pi is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# edi-pi is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with edi.  If not, see <http://www.gnu.org/licenses/>.
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+print_usage()
+{
+    cat <<EOF
+Write the sphinx based project documentation.
+
+Required arguments:
+ -p PROJECT, --project=PROJECT      : The name of the project.
+ -r RELEASE, --release=RELEASE      : The name of the release.
+ -a AUTHOR, --author=AUTHOR         : The name of the author.
+ -i DIRECTORY, --input=DIRECTORY    : The directory that contains the raw input.
+ -o DIRECTORY, --output=DIRECTORY   : The directory that will receive the rendered output.
+ -c CONFIG, --config=CONFIG         : The config file that contains the documentation steps.
+Optional arguments:
+ -h, --help                         : Print help text.
+ --log=LEVEL                        : Use --log=DEBUG to trace all commands.
+EOF
+}
+
+print_error()
+{
+    local MESSAGE="${1}"
+    >&2 echo -e "\033[91mError: ${MESSAGE}\033[0m"
+}
+
+print_error_and_exit()
+{
+    local MESSAGE="${1}"
+    print_error "${MESSAGE}"
+    exit 1
+}
+
+unexpected_exit()
+{
+    local TEMPDIR="${1}"
+    print_error "Going to clean up after abnormal script termination."
+    clean_up "${TEMPDIR}"
+    trap - EXIT
+    print_error_and_exit "Abnormal script termination."
+}
+
+clean_up()
+{
+    local TEMPDIR="${1}"
+    rm -rf "${TEMPDIR}"
+}
+
+if ! options=$(getopt -o p:r:a:i:o:c:hw: -l project:,release:,author:,input:,output:,config:,help,log: -- "$@")
+then
+    print_usage
+    print_error_and_exit "Invalid option."
+fi
+eval set -- "$options"
+
+PROJECT="missing-project"
+RELEASE="missing-release"
+AUTHOR="missing-author"
+RAW_INPUT="missing-input"
+RENDERED_OUTPUT="missing-output"
+CONFIG="missing-config"
+LOG_LEVEL="INFO"
+
+while true
+do
+    case "${1}" in
+        -h|--help)          print_usage && exit 0;;
+        -p|--project)       PROJECT="${2}"; shift 2;;
+        -r|--release)       RELEASE="${2}"; shift 2;;
+        -a|--author)        AUTHOR="${2}"; shift 2;;
+        -i|--input)         RAW_INPUT="${2}"; shift 2;;
+        -o|--output)        RENDERED_OUTPUT="${2}"; shift 2;;
+        -c|--config)        CONFIG="${2}"; shift 2;;
+        --log)              LOG_LEVEL="${2}"; shift 2;;
+        *)                  break ;;
+    esac
+done
+
+if [ "${LOG_LEVEL}" == "DEBUG" ]; then
+    set -x
+fi
+
+if [[ ${EUID} -eq 0 ]]; then
+   print_error_and_exit "This script should not be run as root."
+fi
+
+if [ -d "${RENDERED_OUTPUT}" ]; then
+    print_error_and_exit "The directory ${RENDERED_OUTPUT} already exists."
+fi
+
+mkdir -p "${RENDERED_OUTPUT}"
+trap 'unexpected_exit "${RENDERED_OUTPUT}"' EXIT
+
+cd "${RENDERED_OUTPUT}"
+sphinx-quickstart --quiet -p "${PROJECT}" -a "${AUTHOR}" -r "${RELEASE}"
+rm index.rst
+edi --log="${LOG_LEVEL}" documentation render "${RAW_INPUT}" "${RENDERED_OUTPUT}" "${CONFIG}"
+
+trap - EXIT
+
