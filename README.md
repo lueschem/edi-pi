@@ -54,7 +54,7 @@ The image post processing commands require some additional tools. On
 Ubuntu 18.04 those tools can be installed as follows:
 
 ``` bash
-sudo apt install e2fsprogs dosfstools bmap-tools mtools parted zerofree
+sudo apt install e2fsprogs dosfstools bmap-tools mtools parted zerofree python3-sphinx
 ```
 
 To generate the Mender update artifact, the [mender-artifact](https://docs.mender.io/2.2/downloads)
