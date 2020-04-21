@@ -221,9 +221,26 @@ to bring up the default network interface:
 sudo ip link set eth0 up && sudo dhclient eth0
 ```
 
+## Documenting an Artifact
+
+During the image build the documentation gets rendered to artifacts/CONFIGNAME_documentation
+as reStructuredText. The text files can be transformed into a nice pdf file with some
+additional tools that need to be installed first:
+
+``` bash
+sudo apt install texlive-latex-recommended texlive-pictures texlive-latex-extra latexmk
+```
+
+Then the pdf can be generated using the following commands:
+
+``` bash
+cd artifacts/CONFIGNAME_documentation
+make latexpdf
+```
+
 ### More Information
 
-For more information please read the [edi documentation](https://docs.get-edi.io) and 
+For more information please read the [edi documentation](https://docs.get-edi.io) and
 [this blog post](https://www.get-edi.io/A-new-Approach-to-Operating-System-Image-Generation/).
 
 For details about the Mender based robust update integration please refer to this
