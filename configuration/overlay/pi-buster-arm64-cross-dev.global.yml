@@ -1,3 +1,6 @@
+general:
+    edi_lxc_bridge_interface_name: lxdbr0
+
 bootstrap:
     architecture: amd64
 

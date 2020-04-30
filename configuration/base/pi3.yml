@@ -1,7 +1,8 @@
 general:
-    edi_required_minimal_edi_version: 1.5.0
+    edi_required_minimal_edi_version: 1.6.0
     edi_compression: gz
     edi_lxc_network_interface_name: eth0
+    edi_lxc_bridge_interface_name: edibr0
     parameters:
         raspberry_pi_type: generic
         ansible_pipelining: true
