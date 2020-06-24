@@ -30,3 +30,5 @@ postprocessing_commands:
         skip: True
     400_mender:
         skip: True
+    500_documentation:
+        skip: True
