@@ -3,4 +3,4 @@
 set -o nounset
 set -o errexit
 
-bmaptool create -o "{{ pi3_bmap }}" "{{ pi3_image }}"
+bmaptool create -o "{{ pp_bmap }}" "{{ pp_image }}"
