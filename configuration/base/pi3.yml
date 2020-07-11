@@ -63,31 +63,31 @@ postprocessing_commands:
         path: postprocessing_commands/timestamp/timestamp.edi
         require_root: False
         output:
-            pi3_timestamp: {{ edi_configuration_name }}_timestamp
+            pp_timestamp: {{ edi_configuration_name }}_timestamp
     100_lxd2rootfs:
         path: postprocessing_commands/rootfs/lxd2rootfs.edi
         require_root: True
         output: 
-            pi3_rootfs: {{ edi_configuration_name }}_rootfs
+            pp_rootfs: {{ edi_configuration_name }}_rootfs
     200_rootfs2image:
         path: postprocessing_commands/image/rootfs2image.edi
         require_root: True
         output:
-            pi3_image: {{ edi_configuration_name }}.img
-            pi3_partition_image: {{ edi_configuration_name }}_rootfs.ext4
+            pp_image: {{ edi_configuration_name }}.img
+            pp_partition_image: {{ edi_configuration_name }}_rootfs.ext4
     300_blockmap:
         path: postprocessing_commands/blockmap/blockmap.edi
         output:
-            pi3_bmap: {{ edi_configuration_name }}.bmap
+            pp_bmap: {{ edi_configuration_name }}.bmap
     400_mender:
         path: postprocessing_commands/mender/image2mender.edi
         require_root: True
         output:
-            pi3_mender_artifact: {{ edi_configuration_name }}.mender
+            pp_mender_artifact: {{ edi_configuration_name }}.mender
     500_documentation:
         path: postprocessing_commands/documentation/write_doc.edi
         output:
-            pi3_documentation: {{ edi_configuration_name }}_documentation
+            pp_documentation: {{ edi_configuration_name }}_documentation
         parameters:
             author: The edi-pi Project Team
 

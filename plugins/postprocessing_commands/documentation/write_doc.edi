@@ -3,6 +3,6 @@
 set -o errexit
 set -o nounset
 
-source {{ pi3_timestamp }}
+source {{ pp_timestamp }}
 
-{{ edi_current_plugin_directory }}/write_doc --project "{{ edi_configuration_name }}" --release "${BUILD_TIMESTAMP}" --author "{{ author }}" --input "{{ pi3_rootfs }}/usr/share/doc" --output "{{ pi3_documentation }}" --config "{{ edi_project_directory }}/{{ edi_configuration_name }}.yml" --log "{{ edi_log_level }}"
+{{ edi_current_plugin_directory }}/write_doc --project "{{ edi_configuration_name }}" --release "${BUILD_TIMESTAMP}" --author "{{ author }}" --input "{{ pp_rootfs }}/usr/share/doc" --output "{{ pp_documentation }}" --config "{{ edi_project_directory }}/{{ edi_configuration_name }}.yml" --log "{{ edi_log_level }}"

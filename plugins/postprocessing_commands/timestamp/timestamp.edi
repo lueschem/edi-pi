@@ -3,5 +3,5 @@
 set -o errexit
 set -o nounset
 
-echo "BUILD_TIMESTAMP=$(date +'%Y-%m-%d-%H%M')" > {{ pi3_timestamp }}
+echo "BUILD_TIMESTAMP=$(date +'%Y-%m-%d-%H%M')" > {{ pp_timestamp }}
 
