@@ -63,7 +63,7 @@ unexpected_exit()
     print_error "Going to clean up after abnormal script termination."
     clean_up "${TEMPDIR}"
     rm -f "${RPI_IMAGE}"
-    rm -f "${RPI_PARTITION_IMAGE}"
+    rm -f "${DEVICE_PARTITION_IMAGE}"
     trap - EXIT
     print_error_and_exit "Abnormal script termination."
 }
@@ -98,7 +98,7 @@ WORKDIR="$(pwd)"
 SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOTFS_DIR=""
 RPI_IMAGE=""
-RPI_PARTITION_IMAGE=""
+DEVICE_PARTITION_IMAGE=""
 LOG_LEVEL="INFO"
 
 while true
@@ -107,7 +107,7 @@ do
         -h|--help)             print_usage && exit 0;;
         -i|--input)            ROOTFS_DIR="${2}"; shift 2;;
         -o|--output)           RPI_IMAGE="${2}"; shift 2;;
-        -p|--partition-output) RPI_PARTITION_IMAGE="${2}"; shift 2;;
+        -p|--partition-output) DEVICE_PARTITION_IMAGE="${2}"; shift 2;;
         -w|--workdir)          WORKDIR="${2}"; shift 2;;
         --log)                 LOG_LEVEL="${2}"; shift 2;;
         *)                     break ;;
@@ -134,7 +134,7 @@ then
     print_error_and_exit "Missing output archive."
 fi
 
-if [ -z "${RPI_PARTITION_IMAGE}" ]
+if [ -z "${DEVICE_PARTITION_IMAGE}" ]
 then
     print_usage
     print_error_and_exit "Missing partition output image."
@@ -222,7 +222,7 @@ do_unmount
 
 zerofree "${ROOT_LD}"
 
-dd if="${ROOT_LD}" of="${RPI_PARTITION_IMAGE}"
+dd if="${ROOT_LD}" of="${DEVICE_PARTITION_IMAGE}"
 
 clean_up "${TEMPDIR}"
 
