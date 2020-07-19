@@ -1,6 +1,6 @@
 general:
     parameters:
-        raspberry_pi_type: pi2
+        mender_device_type: pi2
 
 bootstrap:
     architecture: armhf

@@ -5,6 +5,6 @@ set -o errexit
 
 source {{ pp_timestamp }}
 
-{{ edi_current_plugin_directory }}/image2mender --input {{ pp_partition_image }} --output {{ pp_mender_artifact }} --workdir {{ edi_work_directory }} --log {{ edi_log_level }} --artifact ${BUILD_TIMESTAMP}-{{ edi_configuration_name }} --type {{ raspberry_pi_type }}-{{ edi_bootstrap_architecture }}
+{{ edi_current_plugin_directory }}/image2mender --input {{ pp_partition_image }} --output {{ pp_mender_artifact }} --workdir {{ edi_work_directory }} --log {{ edi_log_level }} --artifact ${BUILD_TIMESTAMP}-{{ edi_configuration_name }} --type {{ mender_device_type }}-{{ edi_bootstrap_architecture }}
 
 

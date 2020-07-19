@@ -3,6 +3,7 @@
   vars:
     kernel_image: linux-image-arm64
     edi_boot_shim_template: rpi
+    mender_device_type: ToBeOverwrittenInConfigurationOverlay
 
   roles:
     - role: repositories

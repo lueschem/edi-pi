@@ -1,6 +1,6 @@
 general:
     parameters:
-        raspberry_pi_type: pi4
+        mender_device_type: pi4
 
 bootstrap:
     architecture: arm64

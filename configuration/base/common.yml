@@ -4,7 +4,7 @@ general:
     edi_lxc_network_interface_name: eth0
     edi_lxc_bridge_interface_name: edibr0
     parameters:
-        raspberry_pi_type: generic
+        mender_device_type: generic
         ansible_pipelining: true
         ansible_python_interpreter: /usr/bin/python3
 
