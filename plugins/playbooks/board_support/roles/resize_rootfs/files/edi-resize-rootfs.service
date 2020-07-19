@@ -4,7 +4,7 @@ After=systemd-remount-fs.service
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/pi-resize-rootfs
+ExecStart=/usr/bin/edi-resize-rootfs
 
 [Install]
 WantedBy=multi-user.target

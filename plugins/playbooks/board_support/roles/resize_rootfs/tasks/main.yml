@@ -11,7 +11,7 @@
 
 - name: Copy the script that resizes the root file system.
   copy:
-    src: pi-resize-rootfs
+    src: edi-resize-rootfs
     dest: /usr/bin/
     mode: 0755
     owner: root
@@ -19,6 +19,6 @@
 
 - name: Add a systemd service that resizes the root file system.
   copy:
-    src: pi-resize-rootfs.service
+    src: edi-resize-rootfs.service
     dest: /lib/systemd/system/
 
