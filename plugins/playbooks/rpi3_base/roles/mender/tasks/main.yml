@@ -6,7 +6,7 @@
     install_recommends: no
 
 - name: Load project specific (customized) mender configuration.
-  include_vars: "{{ item}}"
+  include_vars: "{{ item }}"
   with_first_found:
     - "{{ mender_config_directory }}/mender_custom.yml"
     - "{{ mender_config_directory }}/mender.yml"

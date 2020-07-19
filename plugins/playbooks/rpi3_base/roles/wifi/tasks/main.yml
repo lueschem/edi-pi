@@ -1,6 +1,6 @@
 ---
 - name: Load project specific (customized) wifi configuration.
-  include_vars: "{{ item}}"
+  include_vars: "{{ item }}"
   with_first_found:
     - "{{ wifi_config_directory }}/wifi_custom.yml"
     - "{{ wifi_config_directory }}/wifi.yml"

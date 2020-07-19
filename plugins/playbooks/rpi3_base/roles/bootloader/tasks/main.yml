@@ -36,19 +36,19 @@
   when: raspberry_pi_type == "pi4"
 
 - name: Install the raspberrypi bootloader.
-  unarchive: 
+  unarchive:
     src: raspberrypi-bootloader.tar.gz
     dest: "{{ uboot_location }}"
     owner: root
-    group: root 
+    group: root
     creates: "{{ uboot_location }}/bootcode.bin"
 
 - name: Install the u-boot bootloader.
-  unarchive: 
+  unarchive:
     src: u-boot-bootloader.{{ edi_bootstrap_architecture }}.{{ raspberry_pi_type }}.tar.gz
     dest: "{{ uboot_location }}"
     owner: root
-    group: root 
+    group: root
     creates: "{{ uboot_location }}/u-boot.bin"
 
 - name: Copy the raw boot script to the boot folder.
