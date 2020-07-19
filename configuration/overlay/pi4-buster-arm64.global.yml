@@ -6,7 +6,7 @@ bootstrap:
     architecture: arm64
 
 playbooks:
-    300_rpi3_base:
+    300_board_support:
         parameters:
             edi_boot_shim_template: rpi4
             kernel_image: linux-image-4.19.93-v8+

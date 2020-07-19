@@ -6,7 +6,7 @@ bootstrap:
     architecture: armhf
 
 playbooks:
-    300_rpi3_base:
+    300_board_support:
         parameters:
             kernel_image: linux-image-armmp-lpae
 
