@@ -8,7 +8,7 @@ bootstrap:
 playbooks:
     300_board_support:
         parameters:
-            edi_boot_shim_template: rpi4
+            ebs_template: rpi4
             kernel_image: linux-image-4.19.93-v8+
 
 shared_folders:
