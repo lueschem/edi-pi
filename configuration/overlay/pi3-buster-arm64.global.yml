@@ -1,6 +1,6 @@
 general:
     parameters:
-        raspberry_pi_type: pi3
+        mender_device_type: pi3
 
 bootstrap:
     architecture: arm64

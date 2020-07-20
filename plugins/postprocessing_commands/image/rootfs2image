@@ -31,12 +31,12 @@ set -o nounset
 print_usage()
 {
     cat <<EOF
-Convert a root file system into a Raspberry Pi image.
+Convert a root file system into an image.
 
 Required arguments:
  -i DIRECTORY, --input=DIRECTORY    : Directory that contains the root file system.
- -o FILE, --output=FILE             : Name of the file that will contain the resulting Raspberry Pi image.
- -p FILE, --partition-output=FILE   : Name of the file that will contain the resulting Raspberry Pi partition image.
+ -o FILE, --output=FILE             : Name of the file that will contain the resulting image.
+ -p FILE, --partition-output=FILE   : Name of the file that will contain the resulting partition image.
 Optional arguments:
  -h, --help                         : Print help text.
  --log=LEVEL                        : Use --log=DEBUG to trace all commands.
@@ -62,8 +62,8 @@ unexpected_exit()
     local TEMPDIR="${1}"
     print_error "Going to clean up after abnormal script termination."
     clean_up "${TEMPDIR}"
-    rm -f "${RPI_IMAGE}"
-    rm -f "${RPI_PARTITION_IMAGE}"
+    rm -f "${DEVICE_IMAGE}"
+    rm -f "${DEVICE_PARTITION_IMAGE}"
     trap - EXIT
     print_error_and_exit "Abnormal script termination."
 }
@@ -97,8 +97,8 @@ eval set -- "$options"
 WORKDIR="$(pwd)"
 SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOTFS_DIR=""
-RPI_IMAGE=""
-RPI_PARTITION_IMAGE=""
+DEVICE_IMAGE=""
+DEVICE_PARTITION_IMAGE=""
 LOG_LEVEL="INFO"
 
 while true
@@ -106,8 +106,8 @@ do
     case "${1}" in
         -h|--help)             print_usage && exit 0;;
         -i|--input)            ROOTFS_DIR="${2}"; shift 2;;
-        -o|--output)           RPI_IMAGE="${2}"; shift 2;;
-        -p|--partition-output) RPI_PARTITION_IMAGE="${2}"; shift 2;;
+        -o|--output)           DEVICE_IMAGE="${2}"; shift 2;;
+        -p|--partition-output) DEVICE_PARTITION_IMAGE="${2}"; shift 2;;
         -w|--workdir)          WORKDIR="${2}"; shift 2;;
         --log)                 LOG_LEVEL="${2}"; shift 2;;
         *)                     break ;;
@@ -128,13 +128,13 @@ then
     print_error_and_exit "Missing rootfs directory parameter."
 fi
 
-if [ -z "${RPI_IMAGE}" ]
+if [ -z "${DEVICE_IMAGE}" ]
 then
     print_usage
     print_error_and_exit "Missing output archive."
 fi
 
-if [ -z "${RPI_PARTITION_IMAGE}" ]
+if [ -z "${DEVICE_PARTITION_IMAGE}" ]
 then
     print_usage
     print_error_and_exit "Missing partition output image."
@@ -178,10 +178,10 @@ ROOT_SECTORS=$(expr $(expr ${ROOTFS_SIZE_KB} + ${ROOTFS_SIZE_KB} \/ 100 \* 25) \
 IMAGE_SECTORS=$(expr ${TABLE_SECTORS} + ${FIRMWARE_SECTORS} + ${DATA_SECTORS} + ${ROOT_SECTORS})
 
 # Prepare the image file.
-dd if=/dev/zero of="${RPI_IMAGE}" bs=512 count=${IMAGE_SECTORS}
+dd if=/dev/zero of="${DEVICE_IMAGE}" bs=512 count=${IMAGE_SECTORS}
 
 # Write partition table
-sfdisk -q "${RPI_IMAGE}" <<EOM
+sfdisk -q "${DEVICE_IMAGE}" <<EOM
 ${TABLE_SECTORS},${FIRMWARE_SECTORS},c,*
 ${DATA_OFFSET_SECTOR},${DATA_SECTORS},83
 ${ROOT_OFFSET_SECTOR},${ROOT_SECTORS},83
@@ -189,9 +189,9 @@ EOM
 
 # Setup temporary loop devices:
 echo "Setting up loop devices."
-FIRMWARE_LD="$(losetup -o ${TABLE_SIZE_M}M --sizelimit ${FIRMWARE_PARTITION_SIZE_M}M -f --show ${RPI_IMAGE})"
-DATA_LD="$(losetup -o ${LOSETUP_DATA_OFFSET_M}M --sizelimit ${DATA_PARTITION_SIZE_M}M -f --show ${RPI_IMAGE})"
-ROOT_LD="$(losetup -o ${LOSETUP_ROOT_OFFSET_M}M -f --show ${RPI_IMAGE})"
+FIRMWARE_LD="$(losetup -o ${TABLE_SIZE_M}M --sizelimit ${FIRMWARE_PARTITION_SIZE_M}M -f --show ${DEVICE_IMAGE})"
+DATA_LD="$(losetup -o ${LOSETUP_DATA_OFFSET_M}M --sizelimit ${DATA_PARTITION_SIZE_M}M -f --show ${DEVICE_IMAGE})"
+ROOT_LD="$(losetup -o ${LOSETUP_ROOT_OFFSET_M}M -f --show ${DEVICE_IMAGE})"
 
 # Build filesystems
 mkfs.vfat "${FIRMWARE_LD}"
@@ -222,7 +222,7 @@ do_unmount
 
 zerofree "${ROOT_LD}"
 
-dd if="${ROOT_LD}" of="${RPI_PARTITION_IMAGE}"
+dd if="${ROOT_LD}" of="${DEVICE_PARTITION_IMAGE}"
 
 clean_up "${TEMPDIR}"
 

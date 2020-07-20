@@ -57,7 +57,7 @@ trap "abnormal_termination" EXIT
 
 echo "going to resize existing rootfs partition and adding a secondary rootfs partition"
 
-CONTROL_FILE="/etc/pi-resize-rootfs.done"
+CONTROL_FILE="/etc/edi-resize-rootfs.done"
 
 if [ -f "${CONTROL_FILE}" ] ; then
     print_and_exit "INFO" "rootfs already got modified - not going to modify rootfs again"
