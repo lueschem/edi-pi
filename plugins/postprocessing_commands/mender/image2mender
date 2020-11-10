@@ -139,9 +139,16 @@ else
 fi
 
 INPUT_OPTION="--file"
-MENDER_ARTIFACT_VERSION=$(mender-artifact --version | cut -d' ' -f 3 | cut -d'.' -f 1)
+MENDER_ARTIFACT_VERSION=$(mender-artifact --version)
+MENDER_ARTIFACT_MAJOR_VERSION=$(echo "${MENDER_ARTIFACT_VERSION}" | cut -d' ' -f 3 | cut -d'.' -f 1)
 
-if [ ${MENDER_ARTIFACT_VERSION} -eq 2 ]
+if [ ${MENDER_ARTIFACT_MAJOR_VERSION} -eq 2 ]
+then
+    INPUT_OPTION="--update"
+fi
+
+# Special treatment for the Debian buster mender-artifact package:
+if [[ ${MENDER_ARTIFACT_VERSION} == *"really2"* ]]
 then
     INPUT_OPTION="--update"
 fi
