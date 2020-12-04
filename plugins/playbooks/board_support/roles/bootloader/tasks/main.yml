@@ -33,7 +33,7 @@
   copy:
     src: cmdline.txt.rpi4
     dest: "{{ uboot_location }}/cmdline.txt"
-  when: mender_device_type == "pi4"
+  when: mender_device_type == "pi4" or mender_device_type == "pi4-v2"
 
 - name: Install the raspberrypi bootloader.
   unarchive:

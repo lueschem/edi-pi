@@ -1,6 +1,6 @@
 general:
     parameters:
-        mender_device_type: pi4
+        mender_device_type: pi4-v2
 
 bootstrap:
     architecture: arm64
@@ -8,8 +8,8 @@ bootstrap:
 playbooks:
     300_board_support:
         parameters:
-            ebs_template: rpi4
-            kernel_image: linux-image-4.19.93-v8+
+            ebs_template: rpi4-v2
+            kernel_image: linux-image-5.4.72-v8+
     400_development_tools:
         parameters:
             install_development_tools: True
