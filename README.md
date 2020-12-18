@@ -14,6 +14,19 @@ generate the following artifacts:
 cross development toolchain for C and C++.
 * An emulated arm64 or armhf LXD container.
 
+:warning: **Raspberry Pi 4 boot loader**: On the Raspberry Pi 4 the
+[stock boot loader](https://github.com/raspberrypi/firmware)
+does load the device tree binary and modifies it. For this reason it is difficult to
+do a robust update of the kernel together with the device tree binary. For now, edi-pi
+does not touch the device tree binary that gets loaded by the stock boot loader during
+a robust update and the boot process will just take over the device tree that got loaded
+by the stock boot loader instead of taking the one that gets bundled with the kernel.
+This might be a setup that is not sustainable for industrial applications that require
+long term support. For such scenarios you might want to consider other platforms such as
+[edi-var](https://github.com/lueschem/edi-var/) and
+[edi-cl](https://github.com/lueschem/edi-cl/). If I find a solid solution for the described
+boot loader issue I will update the configuration accordingly.
+
 ## Important Note
 
 Please note that image generation operations require superuser privileges
