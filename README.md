@@ -2,6 +2,9 @@
 
 Debian tool chain and image generation for the Raspberry Pi 2, 3 and 4.
 
+<img alt="Raspberry Pi" src=https://www.get-edi.io/assets/images/blog/pi-hardware.png width="75%"/>
+
+
 ## Introduction
 
 The edi configuration contained in this repository can be used to
