@@ -26,6 +26,9 @@ lxc_profiles:
     300_suppress_init:
         path: lxc_profiles/general/suppress_init/suppress_init.yml
         skip: False
+    400_gui_passthrough:
+        path: lxc_profiles/general/gui/passthrough.yml
+        skip: {{ edi_create_distributable_image }}
 
 lxc_templates:
     100_etc_hostname:
