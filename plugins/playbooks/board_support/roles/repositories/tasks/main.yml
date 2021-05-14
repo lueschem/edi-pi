@@ -9,9 +9,9 @@
     dest: /etc/apt/sources.list
     state: absent
 
-- name: Readd buster repository.
+- name: Readd bullseye repository.
   copy:
-    src: buster.list
+    src: bullseye.list
     dest: /etc/apt/sources.list.d/
 
 - name: Add get-edi packagecloud repository apt key.

@@ -10,8 +10,8 @@ Debian tool chain and image generation for the Raspberry Pi 2, 3 and 4.
 The edi configuration contained in this repository can be used to
 generate the following artifacts:
 
-* A Debian buster arm64 (64bit) image suitable for the Raspberry Pi 3 or 4.
-* A Debian buster armhf (32bit) image suitable for the Raspberry Pi 2 or 3.
+* A Debian bullseye arm64 (64bit) image suitable for the Raspberry Pi 3 or 4.
+* A Debian bullseye armhf (32bit) image suitable for the Raspberry Pi 2 or 3.
 * Matching Mender update artifacts for the above configurations.
 * An amd64/arm64 or amd64/armhf based LXD container with a pre-installed
 cross development toolchain for C and C++.
@@ -86,25 +86,25 @@ A Raspberry Pi image can be created using the following command:
 For Raspberry Pi 4, arm64:
 
 ``` bash
-sudo edi -v image create pi4-buster-arm64.yml
+sudo edi -v image create pi4-bullseye-arm64.yml
 ```
 
 For Raspberry Pi 3, arm64:
 
 ``` bash
-sudo edi -v image create pi3-buster-arm64.yml
+sudo edi -v image create pi3-bullseye-arm64.yml
 ```
 
 For Raspberry Pi 2, armhf:
 
 ``` bash
-sudo edi -v image create pi2-buster-armhf.yml
+sudo edi -v image create pi2-bullseye-armhf.yml
 ```
 
 For Raspberry Pi 3, armhf:
 
 ``` bash
-sudo edi -v image create pi3-buster-armhf.yml
+sudo edi -v image create pi3-bullseye-armhf.yml
 ```
 
 The resulting image can be copied to a SD card (here /dev/mmcblk0)
@@ -114,25 +114,25 @@ using the following command
 For Raspberry Pi 4, arm64:
 
 ``` bash
-sudo bmaptool copy artifacts/pi4-buster-arm64.img /dev/mmcblk0
+sudo bmaptool copy artifacts/pi4-bullseye-arm64.img /dev/mmcblk0
 ```
 
 For Raspberry Pi 3, arm64:
 
 ``` bash
-sudo bmaptool copy artifacts/pi3-buster-arm64.img /dev/mmcblk0
+sudo bmaptool copy artifacts/pi3-bullseye-arm64.img /dev/mmcblk0
 ```
 
 For Raspberry Pi 2, armhf:
 
 ``` bash
-sudo bmaptool copy artifacts/pi2-buster-armhf.img /dev/mmcblk0
+sudo bmaptool copy artifacts/pi2-bullseye-armhf.img /dev/mmcblk0
 ```
 
 For Raspberry Pi 3, armhf:
 
 ``` bash
-sudo bmaptool copy artifacts/pi3-buster-armhf.img /dev/mmcblk0
+sudo bmaptool copy artifacts/pi3-bullseye-armhf.img /dev/mmcblk0
 ```
 
 If the command fails, unmount the flash card and repeat the above command.
@@ -156,19 +156,19 @@ following command:
 For the Raspberry Pi 3 or 4, amd64/arm64:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-cross-dev-buster pi-buster-arm64-cross-dev.yml
+sudo edi -v lxc configure edi-pi-cross-dev-bullseye pi-bullseye-arm64-cross-dev.yml
 ```
 
 For the Raspberry Pi 2, 3 or 4, amd64/armhf:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-cross-dev-buster pi-buster-armhf-cross-dev.yml
+sudo edi -v lxc configure edi-pi-cross-dev-bullseye pi-bullseye-armhf-cross-dev.yml
 ```
 
 The container can be accessed as follows (the password is _ChangeMe!_):
 
 ``` bash
-lxc exec edi-pi-cross-dev-buster -- login ${USER}
+lxc exec edi-pi-cross-dev-bullseye -- login ${USER}
 ```
 
 Or with ssh (Hint: retrieve IP_OF_CONTAINER with `lxc list`):
@@ -202,13 +202,13 @@ The following command generates an emulated container:
 For the Raspberry Pi 3, arm64:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-arm64-dev-buster pi3-buster-arm64-dev.yml
+sudo edi -v lxc configure edi-pi-arm64-dev-bullseye pi3-bullseye-arm64-dev.yml
 ```
 
 For the Raspberry Pi 3, armhf:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-armhf-dev-buster pi3-buster-armhf-dev.yml
+sudo edi -v lxc configure edi-pi-armhf-dev-bullseye pi3-bullseye-armhf-dev.yml
 ```
 
 As above, you can access the container as follows (the password is _ChangeMe!_):
@@ -216,13 +216,13 @@ As above, you can access the container as follows (the password is _ChangeMe!_):
 For the Raspberry Pi 3, arm64:
 
 ``` bash
-lxc exec edi-pi-arm64-dev-buster -- login ${USER}
+lxc exec edi-pi-arm64-dev-bullseye -- login ${USER}
 ```
 
 For the Raspberry Pi 3, armhf:
 
 ``` bash
-lxc exec edi-pi-armhf-dev-buster -- login ${USER}
+lxc exec edi-pi-armhf-dev-bullseye -- login ${USER}
 ```
 
 Please note that no services get started in the emulated container and thus
