@@ -1,5 +1,0 @@
----
-wifi_config_directory: "{{ edi_project_directory }}/configuration/wifi"
-
-wifi_ssid: ""
-wifi_psk: ""

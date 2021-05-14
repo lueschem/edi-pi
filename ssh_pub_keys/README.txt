@@ -30,5 +30,5 @@ https://docs.get-edi.io/en/latest/config_management/plugins.html
 For even more information please read this blog post:
 https://www.get-edi.io/Secure-by-Default-ssh-Setup/
 
-Please note that password based login via ssh is disabled by default within the
-edi-pi configuration.
+Please note that password based login via ssh is disabled by default within this
+edi project configuration.

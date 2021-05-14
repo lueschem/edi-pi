@@ -1,17 +1,9 @@
-general:
-    edi_lxc_bridge_interface_name: lxdbr0
-
 bootstrap:
     architecture: amd64
 
 lxc_profiles:
     300_suppress_init:
         skip: True
-
-shared_folders:
-    edi_workspace:
-        folder: edi-workspace
-        mountpoint: edi-workspace
 
 playbooks:
     400_development_tools:
@@ -30,3 +22,10 @@ postprocessing_commands:
         skip: True
     400_mender:
         skip: True
+    500_documentation:
+        skip: True
+
+shared_folders:
+    edi_workspace:
+        folder: edi-workspace
+        mountpoint: edi-workspace

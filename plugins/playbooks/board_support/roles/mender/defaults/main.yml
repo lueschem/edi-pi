@@ -1,10 +1,10 @@
 mender_config_directory: "{{ edi_project_directory }}/configuration/mender"
 
-mender_inventory_poll_interval_seconds: 5
+mender_inventory_poll_interval_seconds: 600
 mender_retry_poll_interval_seconds: 30
 mender_rootfs_part_a: /dev/mmcblk0p3
 mender_rootfs_part_b: /dev/mmcblk0p4
 mender_server_certificate: /etc/mender/server.crt
 mender_server_url: https://hosted.mender.io
 mender_tenant_token: ""
-mender_update_poll_interval_seconds: 5
+mender_update_poll_interval_seconds: 60

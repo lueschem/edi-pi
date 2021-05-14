@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (C) 2017 Matthias Luescher
+# Copyright (C) 2020 Matthias Luescher
 #
 # Authors:
 #  Matthias Luescher
@@ -9,20 +9,20 @@
 #  The non trivial part of this script is heavily inspired by rpi23-gen-image
 #  written by Jan Wagner. See https://github.com/drtyhlpr/rpi23-gen-image.
 #
-# This file is part of edi-pi.
+# This file is part of the edi project configuration.
 #
-# edi-pi is free software: you can redistribute it and/or modify
+# This script is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# edi-pi is distributed in the hope that it will be useful,
+# This script is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with edi.  If not, see <http://www.gnu.org/licenses/>.
+# along with the edi project configuration.  If not, see <http://www.gnu.org/licenses/>.
 
 set -o errexit
 set -o pipefail
@@ -147,9 +147,6 @@ cp "${SCRIPTDIR}/fstab" "${LXD_ROOTFS}/etc/"
 # Add artifact information to rootfs.
 mkdir -p "${LXD_ROOTFS}/etc/mender/"
 echo "artifact_name=${ARTIFACT_NAME}" > "${LXD_ROOTFS}/etc/mender/artifact_info"
-
-# Do not wait for eth0 during boot.
-sed -i '/auto eth0/d' "${LXD_ROOTFS}/etc/network/interfaces.d/eth0"
 
 mv "${LXD_ROOTFS}" "${ROOTFSDIR}"
 

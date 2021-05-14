@@ -1,9 +1,4 @@
 ---
-- name: Remove eventually installed raspi3-firmware package.
-  apt:
-    name: raspi3-firmware
-    state: absent
-
 - name: Ensures edi-boot-shim config.d directory exists.
   file:
     path: /etc/edi-boot-shim/edi-boot-shim.cfg.d

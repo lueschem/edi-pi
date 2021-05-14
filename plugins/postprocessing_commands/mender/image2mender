@@ -1,24 +1,24 @@
 #!/bin/bash
 
-# Copyright (C) 2019 Matthias Luescher
+# Copyright (C) 2020 Matthias Luescher
 #
 # Authors:
 #  Matthias Luescher
 #
-# This file is part of edi-pi.
+# This file is part of the edi project configuration.
 #
-# edi-pi is free software: you can redistribute it and/or modify
+# This script is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Lesser General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# edi-pi is distributed in the hope that it will be useful,
+# This script is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Lesser General Public License for more details.
 #
 # You should have received a copy of the GNU Lesser General Public License
-# along with edi.  If not, see <http://www.gnu.org/licenses/>.
+# along with the edi project configuration.  If not, see <http://www.gnu.org/licenses/>.
 
 set -o errexit
 set -o pipefail
@@ -153,6 +153,6 @@ then
     INPUT_OPTION="--update"
 fi
 
-mender-artifact write rootfs-image --device-type ${DEVICE_TYPE} ${COMPATIBLE_DEVICE} --artifact-name ${ARTIFACT_NAME} ${INPUT_OPTION} ${INPUT_IMAGE} --version 2 --output-path ${MENDER_ARTIFACT}
+mender-artifact write rootfs-image --device-type ${DEVICE_TYPE} ${COMPATIBLE_DEVICE} --artifact-name ${ARTIFACT_NAME} ${INPUT_OPTION} ${INPUT_IMAGE} --version 2 --script ${SCRIPTDIR}/ArtifactInstall_Leave_50_ConfigurationBackup --script ${SCRIPTDIR}/ArtifactReboot_Leave_50_ConfigurationRestore --output-path ${MENDER_ARTIFACT}
 
 trap - EXIT

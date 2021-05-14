@@ -1,0 +1,134 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+set -o pipefail
+
+copy_configuration_files()
+{
+    local src_folder=${1}
+    local dst_folder=${2}
+    shift 2
+    local file_list=("$@")
+
+    mkdir -p ${dst_folder}
+
+    for config_file in "${file_list[@]}"
+    do
+        config_file_path="${src_folder}/${config_file}"
+        if [ -e ${config_file_path} ]
+        then
+            cp -a ${config_file_path} ${dst_folder}/
+        else
+            log_message "Info: File ${config_file_path} does not exist."
+        fi
+    done
+}
+
+copy_configuration_folders()
+{
+    local src_folder=${1}
+    local dst_folder=${2}
+    shift 2
+    local folder_list=("$@")
+
+    mkdir -p ${dst_folder}
+
+    for config_folder in "${folder_list[@]}"
+    do
+        config_folder_path="${src_folder}/${config_folder}"
+        if [ -e ${config_folder_path} ]
+        then
+            cp -a -r ${config_folder_path} ${dst_folder}/
+        else
+            log_message "Info: Folder ${config_folder_path} does not exist."
+        fi
+    done
+}
+
+log_message()
+{
+    local message=${1}
+
+    echo "${message}" >> ${backup_log_file_path}
+}
+
+print_error_and_exit()
+{
+    >&2 echo "Error: Script ${0} failed!"
+    exit 1
+}
+
+trap "print_error_and_exit" EXIT
+
+if [[ $EUID -ne 0 ]]
+then
+    >&2 echo "Error: Please run this script as root."
+    trap - EXIT
+    exit 1
+fi
+
+backup_folder="/data/backup"
+backup_log_file_path="${backup_folder}/log"
+
+ssh_config_folder="/etc/ssh"
+ssh_backup_folder="${backup_folder}/ssh"
+
+ssh_host_key_file_list=(
+ssh_host_dsa_key
+ssh_host_dsa_key.pub
+ssh_host_ecdsa_key
+ssh_host_ecdsa_key.pub
+ssh_host_ed25519_key
+ssh_host_ed25519_key.pub
+ssh_host_rsa_key
+ssh_host_rsa_key.pub
+)
+
+network_manager_config_folder="/etc/NetworkManager"
+network_manager_backup_folder="${backup_folder}/NetworkManager"
+
+network_manager_backup_folder_list=(
+system-connections
+)
+
+if [[ ${0} == *ConfigurationBackup* ]]
+then
+    # remove any old backup
+    rm -rf ${backup_folder}
+    mkdir -p ${backup_folder}
+    log_message "*** backup - start ***"
+
+    source /etc/mender/artifact_info
+    log_message "performing backup on ${artifact_name}"
+
+    log_message "+++ ssh host keys +++"
+    copy_configuration_files ${ssh_config_folder} ${ssh_backup_folder} ${ssh_host_key_file_list[@]}
+    
+    log_message "+++ network manager connections +++"
+    copy_configuration_folders ${network_manager_config_folder} ${network_manager_backup_folder} ${network_manager_backup_folder_list[@]}
+   
+    log_message "*** backup - end ***"
+elif [[ ${0} == *ConfigurationRestore* ]]
+then
+    # make sure that the backup folder is present for logging
+    mkdir -p ${backup_folder}
+    log_message "*** restore - start ***"
+
+    source /etc/mender/artifact_info
+    log_message "performing restore on ${artifact_name}"
+    
+    # Note: ssh host keys will be restored by dedicated service script.
+
+    log_message "+++ network manager connections +++"
+    if dpkg -s network-manager > /dev/null 2>&1
+    then
+        systemctl stop network-manager
+        copy_configuration_folders ${network_manager_backup_folder} ${network_manager_config_folder} ${network_manager_backup_folder_list[@]}
+        systemctl start network-manager
+    fi
+
+    log_message "*** restore - end ***"
+fi
+
+trap - EXIT

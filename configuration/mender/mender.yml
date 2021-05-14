@@ -1,6 +1,6 @@
 ---
-mender_inventory_poll_interval_seconds: 5
+mender_inventory_poll_interval_seconds: 600
 mender_retry_poll_interval_seconds: 30
 mender_server_url: https://hosted.mender.io
 mender_tenant_token: ""
-mender_update_poll_interval_seconds: 5
+mender_update_poll_interval_seconds: 60

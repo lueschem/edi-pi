@@ -5,4 +5,7 @@
     state: present
     install_recommends: no
 
-
+- name: Preset unused wpa_supplicant services to disabled.
+  copy:
+    src: 95-wpa_supplicant.preset
+    dest: /lib/systemd/system-preset/

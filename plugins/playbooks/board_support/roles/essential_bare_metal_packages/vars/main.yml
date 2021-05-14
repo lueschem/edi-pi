@@ -1,7 +1,10 @@
 ---
 bare_metal_packages:
   - dosfstools
+  - fdisk
   - initramfs-tools
+  - libubootenv-tool
+  - network-manager
   - udev
   - "{{ kernel_image }}"
   - firmware-brcm80211
