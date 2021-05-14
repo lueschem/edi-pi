@@ -1,7 +1,8 @@
 deb http://deb.debian.org/debian bullseye main contrib non-free
 deb http://deb.debian.org/debian bullseye-updates main contrib non-free
-deb http://security.debian.org/ bullseye/updates main contrib non-free
+#TODO: Re-add security repository once available.
+#deb http://security.debian.org/ bullseye/updates main contrib non-free
 
 deb-src http://deb.debian.org/debian bullseye main contrib non-free
 deb-src http://deb.debian.org/debian bullseye-updates main contrib non-free
-deb-src http://security.debian.org/ bullseye/updates main contrib non-free
+#deb-src http://security.debian.org/ bullseye/updates main contrib non-free
