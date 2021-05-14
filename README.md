@@ -195,46 +195,6 @@ arm-linux-gnueabihf-g++
 For your convenience, the LXD container shares the folder _edi-workspace_
 with the host operating system.
 
-### Creating an Emulated Development LXD Container
-
-The following command generates an emulated container:
-
-For the Raspberry Pi 3, arm64:
-
-``` bash
-sudo edi -v lxc configure edi-pi-arm64-dev-bullseye pi3-bullseye-arm64-dev.yml
-```
-
-For the Raspberry Pi 3, armhf:
-
-``` bash
-sudo edi -v lxc configure edi-pi-armhf-dev-bullseye pi3-bullseye-armhf-dev.yml
-```
-
-As above, you can access the container as follows (the password is _ChangeMe!_):
-
-For the Raspberry Pi 3, arm64:
-
-``` bash
-lxc exec edi-pi-arm64-dev-bullseye -- login ${USER}
-```
-
-For the Raspberry Pi 3, armhf:
-
-``` bash
-lxc exec edi-pi-armhf-dev-bullseye -- login ${USER}
-```
-
-Please note that no services get started in the emulated container and thus
-no ssh access will be possible.
-
-To enable networking within the emulated container use the following command
-to bring up the default network interface:
-
-``` bash
-sudo ip link set eth0 up && sudo dhclient eth0
-```
-
 ## Documenting an Artifact
 
 During the image build the documentation gets rendered to artifacts/CONFIGNAME_documentation
