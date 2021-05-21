@@ -139,8 +139,9 @@ find "${LXD_ROOTFS}/run/" -mindepth 1 -delete
 find "${LXD_ROOTFS}/tmp/" -mindepth 1 -delete
 # Remove qemu.
 rm -f "${LXD_ROOTFS}/usr/bin/qemu-"*"-static"
-# Remove /etc/machine-id (it should be unique for each system).
+# Remove /etc/machine-id and /var/lib/dbus/machine-id (it should be unique for each system).
 rm "${LXD_ROOTFS}/etc/machine-id"
+rm "${LXD_ROOTFS}/var/lib/dbus/machine-id"
 # Add fstab.
 cp "${SCRIPTDIR}/fstab" "${LXD_ROOTFS}/etc/"
 
