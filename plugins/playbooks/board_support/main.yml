@@ -2,7 +2,9 @@
 
   vars:
     kernel_image: linux-image-arm64
-    ebs_template: rpi
+    ebs_template: boot.cmd.rpi.${DEBIAN_ARCHITECTURE}.multiboot
+    ebs_bootloader_directory: "/boot"
+    ebs_bootloader_type: "u-boot"
     mender_device_type: ToBeOverwrittenInConfigurationOverlay
 
   roles:

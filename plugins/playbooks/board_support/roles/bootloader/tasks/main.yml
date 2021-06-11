@@ -21,14 +21,14 @@
 
 - name: Setup boot configuration.
   copy:
-    src: config.txt.{{ edi_bootstrap_architecture }}
+    src: config.txt.{{ ebs_bootloader_type }}.{{ edi_bootstrap_architecture }}
     dest: "{{ uboot_location }}/config.txt"
 
 - name: Setup the kernel command line.
   copy:
-    src: cmdline.txt.rpi4
+    src: cmdline.txt.{{ ebs_bootloader_type }}.rpi4
     dest: "{{ uboot_location }}/cmdline.txt"
-  when: mender_device_type == "pi4" or mender_device_type == "pi4-v2"
+  when: mender_device_type == "pi4" or mender_device_type == "pi4-v2" or mender_device_type == "pi4-v3"
 
 - name: Install the raspberrypi bootloader.
   unarchive:
@@ -45,30 +45,36 @@
     owner: root
     group: root
     creates: "{{ uboot_location }}/u-boot.bin"
+  when: ebs_bootloader_type == "u-boot"
 
 - name: Copy the raw boot script to the boot folder.
   copy:
     src: boot.scr.txt
     dest: "{{ uboot_location }}"
+  when: ebs_bootloader_type == "u-boot"
 
 - name: Create boot script.
   command: mkimage -A arm -T script -O linux -d boot.scr.txt boot.scr
   args:
     chdir: "{{ uboot_location }}"
     creates: "{{ uboot_location }}/boot.scr"
+  when: ebs_bootloader_type == "u-boot"
 
 - name: Create u-boot directory on data partition.
   file:
     path: /data/u-boot
     state: directory
+  when: ebs_bootloader_type == "u-boot"
 
 - name: Configure u-boot-tools.
   template:
     src: fw_env.config
     dest: /data/u-boot
+  when: ebs_bootloader_type == "u-boot"
 
 - name: Create symbolic link for the u-boot-tools config.
   file:
     src: "/data/u-boot/fw_env.config"
     dest: "/etc/fw_env.config"
     state: link
+  when: ebs_bootloader_type == "u-boot"

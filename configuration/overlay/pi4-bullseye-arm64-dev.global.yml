@@ -1,6 +1,6 @@
 general:
     parameters:
-        mender_device_type: pi4-v2
+        mender_device_type: pi4-v3
 
 bootstrap:
     architecture: arm64
@@ -23,7 +23,9 @@ playbooks:
             lxc_network_interface_manager: iproute2
     300_board_support:
         parameters:
-            ebs_template: rpi4-v2
+            ebs_template: boot.spec.rpi4.${DEBIAN_ARCHITECTURE}
+            ebs_bootloader_directory: "/boot/factory"
+            ebs_bootloader_type: "raspberry-pi"
             kernel_image: linux-image-5.10.17-v8+
     400_development_tools:
         parameters:

@@ -137,6 +137,12 @@ LXD_ROOTFS="${LXD_EXTRACTED}/rootfs"
 # Remove temporary files.
 find "${LXD_ROOTFS}/run/" -mindepth 1 -delete
 find "${LXD_ROOTFS}/tmp/" -mindepth 1 -delete
+
+# Copy kernel, initrd and dtbs to firmware partition
+if [ -d "${LXD_ROOTFS}/boot/factory" ]; then
+    chroot "${LXD_ROOTFS}" cp -r -L /boot/factory /boot/firmware/p3
+fi
+
 # Remove qemu.
 rm -f "${LXD_ROOTFS}/usr/bin/qemu-"*"-static"
 # Remove /etc/machine-id and /var/lib/dbus/machine-id (it should be unique for each system).
