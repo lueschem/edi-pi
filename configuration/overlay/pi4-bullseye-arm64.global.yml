@@ -24,7 +24,7 @@ playbooks:
     300_board_support:
         parameters:
             ebs_template: boot.spec.rpi4.${DEBIAN_ARCHITECTURE}
-            ebs_bootloader_directory: "/boot/factory"
+            ebs_bootloader_directory: "/boot/image-kernel"
             ebs_bootloader_type: "raspberry-pi"
             kernel_image: linux-image-5.10.17-v8+
 

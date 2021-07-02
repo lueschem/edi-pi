@@ -1,6 +1,6 @@
 # needs to be 8.3 format and in top level folder
-#start_file=p3start4.elf
-#fixup_file=p3fixup4.dat
+start_file=p3start4.elf
+fixup_file=p3fixup4.dat
 
 # Switch the CPU from ARMv7 into ARMv8 (aarch64) mode
 arm_64bit=1

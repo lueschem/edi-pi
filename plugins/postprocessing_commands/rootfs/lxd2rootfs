@@ -139,8 +139,15 @@ find "${LXD_ROOTFS}/run/" -mindepth 1 -delete
 find "${LXD_ROOTFS}/tmp/" -mindepth 1 -delete
 
 # Copy kernel, initrd and dtbs to firmware partition
-if [ -d "${LXD_ROOTFS}/boot/factory" ]; then
-    chroot "${LXD_ROOTFS}" cp -r -L /boot/factory /boot/firmware/p3
+if [ -d "${LXD_ROOTFS}/boot/image-kernel" ]; then
+    chroot "${LXD_ROOTFS}" cp -r -L /boot/image-kernel /boot/firmware/p3
+fi
+
+if [ -d "${LXD_ROOTFS}/boot/image-firmware" ]; then
+    chroot "${LXD_ROOTFS}" cp /boot/image-firmware/cmdline.txt /boot/firmware/p3/cmdline.txt
+    chroot "${LXD_ROOTFS}" sed -i 's@__ROOTFS_PARTITION__@3@' /boot/firmware/p3/cmdline.txt
+    chroot "${LXD_ROOTFS}" cp /boot/image-firmware/start4.elf /boot/firmware/p3start4.elf
+    chroot "${LXD_ROOTFS}" cp /boot/image-firmware/fixup4.dat /boot/firmware/p3fixup4.dat
 fi
 
 # Remove qemu.

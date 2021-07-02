@@ -1,3 +1,4 @@
 ---
 uboot_env_size: '0x4000'
-uboot_location: /boot/firmware
+bootloader_location: /boot/firmware
+bootloader_image_location: /boot/image-firmware

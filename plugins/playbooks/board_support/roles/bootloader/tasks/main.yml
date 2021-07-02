@@ -16,48 +16,70 @@
 
 - name: Create boot firmware directory.
   file:
-    path: "{{ uboot_location }}"
+    path: "{{ bootloader_location }}"
     state: directory
+
+- name: Create boot firmware image directory.
+  file:
+    path: "{{ bootloader_image_location }}"
+    state: directory
+  when: ebs_bootloader_type == "raspberry-pi"
 
 - name: Setup boot configuration.
   copy:
     src: config.txt.{{ ebs_bootloader_type }}.{{ edi_bootstrap_architecture }}
-    dest: "{{ uboot_location }}/config.txt"
+    dest: "{{ bootloader_location }}/config.txt"
+
+- name: Setup the kernel command line (u-boot).
+  copy:
+    src: cmdline.txt.{{ ebs_bootloader_type }}.rpi4
+    dest: "{{ bootloader_location }}/cmdline.txt"
+  when: (mender_device_type == "pi4" or mender_device_type == "pi4-v2" or mender_device_type == "pi4-v3") and ebs_bootloader_type == "u-boot"
 
 - name: Setup the kernel command line.
   copy:
     src: cmdline.txt.{{ ebs_bootloader_type }}.rpi4
-    dest: "{{ uboot_location }}/cmdline.txt"
-  when: mender_device_type == "pi4" or mender_device_type == "pi4-v2" or mender_device_type == "pi4-v3"
+    dest: "{{ bootloader_image_location }}/cmdline.txt"
+  when: (mender_device_type == "pi4" or mender_device_type == "pi4-v2" or mender_device_type == "pi4-v3") and ebs_bootloader_type == "raspberry-pi"
 
-- name: Install the raspberrypi bootloader.
+- name: Install the raspberrypi bootloader to the image location.
   unarchive:
     src: raspberrypi-bootloader.tar.gz
-    dest: "{{ uboot_location }}"
+    dest: "{{ bootloader_image_location }}"
     owner: root
     group: root
-    creates: "{{ uboot_location }}/bootcode.bin"
+    creates: "{{ bootloader_image_location }}/LICENCE.broadcom"
+  when: ebs_bootloader_type == "raspberry-pi"
+
+- name: Install the raspberrypi bootloader to the final location.
+  unarchive:
+    src: raspberrypi-bootloader.tar.gz
+    dest: "{{ bootloader_location }}"
+    owner: root
+    group: root
+    creates: "{{ bootloader_location }}/LICENCE.broadcom"
+  when: ebs_bootloader_type == "u-boot"
 
 - name: Install the u-boot bootloader.
   unarchive:
     src: u-boot-bootloader.{{ edi_bootstrap_architecture }}.{{ mender_device_type }}.tar.gz
-    dest: "{{ uboot_location }}"
+    dest: "{{ bootloader_location }}"
     owner: root
     group: root
-    creates: "{{ uboot_location }}/u-boot.bin"
+    creates: "{{ bootloader_location }}/u-boot.bin"
   when: ebs_bootloader_type == "u-boot"
 
 - name: Copy the raw boot script to the boot folder.
   copy:
     src: boot.scr.txt
-    dest: "{{ uboot_location }}"
+    dest: "{{ bootloader_location }}"
   when: ebs_bootloader_type == "u-boot"
 
 - name: Create boot script.
   command: mkimage -A arm -T script -O linux -d boot.scr.txt boot.scr
   args:
-    chdir: "{{ uboot_location }}"
-    creates: "{{ uboot_location }}/boot.scr"
+    chdir: "{{ bootloader_location }}"
+    creates: "{{ bootloader_location }}/boot.scr"
   when: ebs_bootloader_type == "u-boot"
 
 - name: Create u-boot directory on data partition.
