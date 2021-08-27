@@ -1,0 +1,166 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+set -o pipefail
+
+UBOOT_ENV_OVERLAY=/var/run/uboot-env-overlay
+
+print_and_exit()
+{
+    local TYPE=$1
+    local MESSAGE=$2
+    trap - EXIT
+    if [ "${TYPE}" == "ERROR" ] ; then
+        >&2 echo "error: ${MESSAGE}"
+        exit 1
+    else
+        echo "${MESSAGE}"
+        exit 0
+    fi
+}
+
+print_environment()
+{
+    echo "mender_boot_part=${mender_boot_part}"
+    echo "mender_boot_part_hex=${mender_boot_part_hex}"
+    echo "upgrade_available=${upgrade_available}"
+    echo "bootcount=${bootcount}"
+    echo "mender_uboot_separator=${mender_uboot_separator}"
+}
+
+update_environment()
+{
+    local key=${1}
+    local value=${2}
+
+    case $key in
+    mender_boot_part)
+        mender_boot_part=${value}
+        MENDER_BOOT_PART_UPDATED=1
+        ;;
+    mender_boot_part_hex)
+        mender_boot_part_hex=${value}
+        ;;
+    upgrade_available)
+        upgrade_available=${value}
+        UPGRADE_AVAILABLE_UPDATED=1
+        ;;
+    bootcount)
+        bootcount=${value}
+        ;;
+    mender_uboot_separator)
+        mender_uboot_separator=${value}
+        ;;
+    *)
+        print_and_exit "ERROR" "unsupported key ${key}"
+        ;;
+    esac
+}
+
+if [[ $EUID -ne 0 ]]; then
+    print_and_exit "ERROR" "use root user to execute this script"
+fi
+
+CURRENT_BOOT_DEVICE=$(mount | sed -n 's|^/dev/\(.*\) on / .*|\1|p')
+if [ -z "${CURRENT_BOOT_DEVICE}" ] ; then
+    print_and_exit "ERROR" "unable to detect root partition device"
+fi
+
+CURRENT_BOOT_PART=$(echo ${CURRENT_BOOT_DEVICE} | grep -o '[1-9][0-9]*$')
+if [ -z "${CURRENT_BOOT_PART}" ] ; then
+    print_and_exit "ERROR" "unable to extract partition number of ${CURRENT_ROOT_DEVICE}"
+fi
+
+mender_boot_part=${CURRENT_BOOT_PART}
+mender_boot_part_hex=$(printf '%x\n' ${CURRENT_BOOT_PART})
+upgrade_available=0
+bootcount=1
+mender_uboot_separator=""
+
+if [[ -f "${UBOOT_ENV_OVERLAY}" ]]
+then
+    source "${UBOOT_ENV_OVERLAY}"
+fi
+
+if [[ ${0} == *fw_printenv ]]
+then
+    if [[ $# -eq 0 ]]
+    then
+        print_environment
+    else
+        for cli_arg in "$@"
+        do
+            print_environment | grep "^${cli_arg}=.*"
+        done
+    fi
+elif [[ ${0} == *fw_setenv ]]
+then
+    MENDER_TRANSACTION="unknown"
+    MENDER_BOOT_PART_UPDATED=0
+    UPGRADE_AVAILABLE_UPDATED=0
+
+    if [[ $# -eq 0 ]]
+    then
+        print_and_exit "ERROR" "variable name missing"
+    elif [[ $# -eq 1 ]] || [[ $# -eq 2 ]]
+    then
+        if [[ $1 == -s ]]
+        then
+            if [[ $# -ne 2 ]]
+            then
+                print_and_exit "ERROR" "missing script parameter"
+            fi
+
+            if [[ $2 == - ]]
+            then
+                SCRIPT=$(cat)
+            else
+                if [[ ! -f ${2} ]]
+                then
+                    print_and_exit "ERROR" "file ${2} not found"
+                fi
+                SCRIPT=$(cat "${2}")
+            fi
+
+            while IFS= read -r line
+            do
+                key_value_pair=(${line})
+
+                if [[ ${#key_value_pair[@]} -eq 2 ]]
+                then
+                    update_environment "${key_value_pair[0]}" "${key_value_pair[1]}"
+                elif [[ ${#key_value_pair[@]} -eq 1 ]]
+                then
+                    update_environment "${key_value_pair[0]}" ""
+                    else
+                    print_and_exit "ERROR" "unsupported number of arguments in script"
+                fi
+            done <<< "${SCRIPT}"
+        else
+            if [[ $# -eq 2 ]]
+            then
+                update_environment "${1}" "${2}"
+            else
+                update_environment "${1}" ""
+            fi
+        fi
+
+        if [[ ${MENDER_BOOT_PART_UPDATED} -eq 1 ]] && [[ ${UPGRADE_AVAILABLE_UPDATED} -eq 1 ]] && [[ ${bootcount} -eq 0 ]] && [[ ${upgrade_available} -eq 1 ]]
+        then
+            MENDER_TRANSACTION="install"
+        elif [[ ${MENDER_BOOT_PART_UPDATED} -eq 1 ]] && [[ ${UPGRADE_AVAILABLE_UPDATED} -eq 1 ]] && [[ ${upgrade_available} -eq 0 ]]
+        then
+             MENDER_TRANSACTION="rollback"
+        elif [[ ${MENDER_BOOT_PART_UPDATED} -eq 0 ]] && [[ ${UPGRADE_AVAILABLE_UPDATED} -eq 1 ]] && [[ ${upgrade_available} -eq 0 ]]
+        then
+             MENDER_TRANSACTION="commit"
+        fi
+
+        echo "Transaction: ${MENDER_TRANSACTION}"
+
+        print_environment > "${UBOOT_ENV_OVERLAY}"
+    else
+        print_and_exit "ERROR" "unsupported number of arguments"
+    fi
+fi
