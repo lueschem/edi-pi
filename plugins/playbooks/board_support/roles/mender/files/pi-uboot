@@ -60,9 +60,25 @@ update_environment()
     esac
 }
 
-write_tryboot()
+update_boot_files()
 {
+#TODO: Move this stuff into a mender state script.
     local boot_part=${1}
+    local boot_folder="/boot/firmware/p${boot_part}"
+
+    NEXT_ROOT_MNT=$(mktemp -d -t next-root-XXXXXXXX --tmpdir=/tmp)
+    mount "/dev/mmcblk0p${boot_part}" "${NEXT_ROOT_MNT}"
+    rm -rf ${boot_folder}
+    cp -r -L ${NEXT_ROOT_MNT}/boot/image-kernel ${boot_folder}
+
+    cp ${NEXT_ROOT_MNT}/boot/image-firmware/cmdline.txt ${boot_folder}/cmdline.txt
+    sed -i "s@__ROOTFS_PARTITION__@${boot_part}@" ${boot_folder}/cmdline.txt
+
+    cp ${NEXT_ROOT_MNT}/boot/image-firmware/start4.elf /boot/firmware/p${boot_part}start4.elf
+    cp ${NEXT_ROOT_MNT}/boot/image-firmware/fixup4.dat /boot/firmware/p${boot_part}fixup4.dat
+
+    umount ${NEXT_ROOT_MNT}
+
     cat << EOF >> ${TRYBOOT_TXT}
 # needs to be 8.3 format and in top level folder
 start_file=p${boot_part}start4.elf
@@ -188,7 +204,7 @@ then
             then
                 print_and_exit "ERROR" "invalid install transaction - new boot partition is equal to committed boot partition"
             else
-                write_tryboot ${mender_boot_part}
+                update_boot_files ${mender_boot_part}
             fi
         elif [[ ${MENDER_BOOT_PART_UPDATED} -eq 1 ]] && [[ ${UPGRADE_AVAILABLE_UPDATED} -eq 1 ]] && [[ ${upgrade_available} -eq 0 ]]
         then
