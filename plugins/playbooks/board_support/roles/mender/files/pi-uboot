@@ -72,6 +72,11 @@ if [ -z "${CURRENT_BOOT_PART}" ] ; then
     print_and_exit "ERROR" "unable to extract partition number of ${CURRENT_ROOT_DEVICE}"
 fi
 
+COMMITTED_BOOT_PART=$(cat /boot/firmware/config.txt | sed -n 's|^os_prefix=p\([[:digit:]]\)/$|\1|p')
+if [ -z "${COMMITTED_BOOT_PART}" ] ; then
+    print_and_exit "ERROR" "unable to extract committed boot partition from bootloader config.txt"
+fi
+
 mender_boot_part=${CURRENT_BOOT_PART}
 mender_boot_part_hex=$(printf '%x\n' ${CURRENT_BOOT_PART})
 upgrade_available=0
