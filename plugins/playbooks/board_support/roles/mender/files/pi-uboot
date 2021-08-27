@@ -77,6 +77,7 @@ update_boot_files()
     cp ${NEXT_ROOT_MNT}/boot/image-firmware/start4.elf /boot/firmware/p${boot_part}start4.elf
     cp ${NEXT_ROOT_MNT}/boot/image-firmware/fixup4.dat /boot/firmware/p${boot_part}fixup4.dat
 
+#TODO: add trap for unmount
     umount ${NEXT_ROOT_MNT}
 
     cat << EOF >> ${TRYBOOT_TXT}
