@@ -5,6 +5,8 @@ set -o errexit
 set -o pipefail
 
 UBOOT_ENV_OVERLAY=/var/run/uboot-env-overlay
+CONFIG_TXT=/boot/firmware/config.txt
+TRYBOOT_TXT=/boot/firmware/tryboot.txt
 
 print_and_exit()
 {
@@ -72,14 +74,21 @@ if [ -z "${CURRENT_BOOT_PART}" ] ; then
     print_and_exit "ERROR" "unable to extract partition number of ${CURRENT_ROOT_DEVICE}"
 fi
 
-COMMITTED_BOOT_PART=$(cat /boot/firmware/config.txt | sed -n 's|^os_prefix=p\([[:digit:]]\)/$|\1|p')
+COMMITTED_BOOT_PART=$(cat ${CONFIG_TXT} | sed -n 's|^os_prefix=p\([[:digit:]]\)/$|\1|p')
 if [ -z "${COMMITTED_BOOT_PART}" ] ; then
-    print_and_exit "ERROR" "unable to extract committed boot partition from bootloader config.txt"
+    print_and_exit "ERROR" "unable to extract committed boot partition from ${CONFIG_TXT}"
 fi
 
 mender_boot_part=${CURRENT_BOOT_PART}
 mender_boot_part_hex=$(printf '%x\n' ${CURRENT_BOOT_PART})
-upgrade_available=0
+
+if [[ ${CURRENT_BOOT_PART} -eq ${COMMITTED_BOOT_PART} ]]
+then
+    upgrade_available=0
+else
+    upgrade_available=1
+fi
+
 bootcount=1
 mender_uboot_separator=""
 
@@ -156,15 +165,26 @@ then
             MENDER_TRANSACTION="install"
         elif [[ ${MENDER_BOOT_PART_UPDATED} -eq 1 ]] && [[ ${UPGRADE_AVAILABLE_UPDATED} -eq 1 ]] && [[ ${upgrade_available} -eq 0 ]]
         then
-             MENDER_TRANSACTION="rollback"
+            MENDER_TRANSACTION="rollback"
         elif [[ ${MENDER_BOOT_PART_UPDATED} -eq 0 ]] && [[ ${UPGRADE_AVAILABLE_UPDATED} -eq 1 ]] && [[ ${upgrade_available} -eq 0 ]]
         then
-             MENDER_TRANSACTION="commit"
+            MENDER_TRANSACTION="commit"
         fi
 
-        echo "Transaction: ${MENDER_TRANSACTION}"
-
         print_environment > "${UBOOT_ENV_OVERLAY}"
+        
+        if [[ ${MENDER_TRANSACTION} == commit ]]
+        then
+            if [[ ${CURRENT_BOOT_PART} -eq ${COMMITTED_BOOT_PART} ]]
+            then
+                : # nothing to do - commit has already been done
+            elif [[ ! -f "${TRYBOOT_TXT}" ]]
+            then
+                print_and_exit "ERROR" "missing file: ${TRYBOOT_TXT}"
+            else
+                mv ${TRYBOOT_TXT} ${CONFIG_TXT}
+            fi 
+        fi
     else
         print_and_exit "ERROR" "unsupported number of arguments"
     fi
