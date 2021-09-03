@@ -26,6 +26,8 @@ elif [ -d /boot/grub/mender_grubenv1 ]; then
     esac
 elif [ -e /etc/fw_env.config ]; then
     echo mender_bootloader_integration=uboot
+elif [ -e /usr/share/mender/integration/pi-uboot ]; then
+    echo mender_bootloader_integration=raspberry-pi
 else
     echo mender_bootloader_integration=unknown
 fi
