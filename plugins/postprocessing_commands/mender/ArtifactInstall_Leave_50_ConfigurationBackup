@@ -123,9 +123,9 @@ then
     log_message "+++ network manager connections +++"
     if dpkg -s network-manager > /dev/null 2>&1
     then
-        systemctl stop network-manager
+        systemctl stop NetworkManager
         copy_configuration_folders ${network_manager_backup_folder} ${network_manager_config_folder} ${network_manager_backup_folder_list[@]}
-        systemctl start network-manager
+        systemctl start NetworkManager
     fi
 
     log_message "*** restore - end ***"
