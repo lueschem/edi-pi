@@ -1,5 +1,27 @@
 #!/bin/bash
 
+# MIT License
+#
+# Copyright (c) 2021 Matthias Lüscher
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 set -o nounset
 set -o errexit
 set -o pipefail
@@ -68,17 +90,17 @@ update_boot_files()
 
     NEXT_ROOT_MNT=$(mktemp -d -t next-root-XXXXXXXX --tmpdir=/tmp)
     mount "/dev/mmcblk0p${boot_part}" "${NEXT_ROOT_MNT}"
-    rm -rf ${boot_folder}
-    cp -r -L ${NEXT_ROOT_MNT}/boot/image-kernel ${boot_folder}
+    rm -rf "${boot_folder}"
+    cp -r -L "${NEXT_ROOT_MNT}/boot/image-kernel" "${boot_folder}"
 
-    cp ${NEXT_ROOT_MNT}/boot/image-firmware/cmdline.txt ${boot_folder}/cmdline.txt
-    sed -i "s@__ROOTFS_PARTITION__@${boot_part}@" ${boot_folder}/cmdline.txt
+    cp "${NEXT_ROOT_MNT}/boot/image-firmware/cmdline.txt" "${boot_folder}/cmdline.txt"
+    sed -i "s@__ROOTFS_PARTITION__@${boot_part}@" "${boot_folder}/cmdline.txt"
 
-    cp ${NEXT_ROOT_MNT}/boot/image-firmware/start4.elf /boot/firmware/p${boot_part}start4.elf
-    cp ${NEXT_ROOT_MNT}/boot/image-firmware/fixup4.dat /boot/firmware/p${boot_part}fixup4.dat
+    cp "${NEXT_ROOT_MNT}/boot/image-firmware/start4.elf" "/boot/firmware/p${boot_part}start4.elf"
+    cp "${NEXT_ROOT_MNT}/boot/image-firmware/fixup4.dat" "/boot/firmware/p${boot_part}fixup4.dat"
 
 #TODO: add trap for unmount
-    umount ${NEXT_ROOT_MNT}
+    umount "${NEXT_ROOT_MNT}"
 
     cat << EOF > ${TRYBOOT_TXT}
 # needs to be 8.3 format and in top level folder
@@ -104,18 +126,18 @@ if [ -z "${CURRENT_BOOT_DEVICE}" ] ; then
     print_and_exit "ERROR" "unable to detect root partition device"
 fi
 
-CURRENT_BOOT_PART=$(echo ${CURRENT_BOOT_DEVICE} | grep -o '[1-9][0-9]*$')
+CURRENT_BOOT_PART=$(echo "${CURRENT_BOOT_DEVICE}" | grep -o '[1-9][0-9]*$')
 if [ -z "${CURRENT_BOOT_PART}" ] ; then
     print_and_exit "ERROR" "unable to extract partition number of ${CURRENT_ROOT_DEVICE}"
 fi
 
-COMMITTED_BOOT_PART=$(cat ${CONFIG_TXT} | sed -n 's|^os_prefix=p\([[:digit:]]\)/$|\1|p')
+COMMITTED_BOOT_PART=$(< "${CONFIG_TXT}" sed -n 's|^os_prefix=p\([[:digit:]]\)/$|\1|p')
 if [ -z "${COMMITTED_BOOT_PART}" ] ; then
     print_and_exit "ERROR" "unable to extract committed boot partition from ${CONFIG_TXT}"
 fi
 
 mender_boot_part=${CURRENT_BOOT_PART}
-mender_boot_part_hex=$(printf '%x\n' ${CURRENT_BOOT_PART})
+mender_boot_part_hex=$(printf '%x\n' "${CURRENT_BOOT_PART}")
 
 if [[ ${CURRENT_BOOT_PART} -eq ${COMMITTED_BOOT_PART} ]]
 then
@@ -205,7 +227,7 @@ then
             then
                 print_and_exit "ERROR" "invalid install transaction - new boot partition is equal to committed boot partition"
             else
-                update_boot_files ${mender_boot_part}
+                update_boot_files "${mender_boot_part}"
             fi
         elif [[ ${MENDER_BOOT_PART_UPDATED} -eq 1 ]] && [[ ${UPGRADE_AVAILABLE_UPDATED} -eq 1 ]] && [[ ${upgrade_available} -eq 0 ]]
         then
