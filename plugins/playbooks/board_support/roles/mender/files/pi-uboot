@@ -80,7 +80,7 @@ update_boot_files()
 #TODO: add trap for unmount
     umount ${NEXT_ROOT_MNT}
 
-    cat << EOF >> ${TRYBOOT_TXT}
+    cat << EOF > ${TRYBOOT_TXT}
 # needs to be 8.3 format and in top level folder
 start_file=p${boot_part}start4.elf
 fixup_file=p${boot_part}fixup4.dat
