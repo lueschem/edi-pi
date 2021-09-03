@@ -46,3 +46,42 @@
     mode: 0755
   with_fileglob:
     - "{{ mender_config_directory }}/identity/*"
+
+- name: Create various integration directories.
+  file:
+    path: "{{ item }}"
+    state: directory
+  with_items:
+    - /usr/share/mender/integration
+    - /etc/systemd/system/mender-client.service.d
+  when: ebs_bootloader_type == "raspberry-pi"
+
+- name: Make sure that the mender-client service picks the modified reboot script.
+  copy:
+    src: override.conf
+    dest: /etc/systemd/system/mender-client.service.d/
+  when: ebs_bootloader_type == "raspberry-pi"
+
+- name: Copy the bootloader integration script.
+  copy:
+    src: pi-uboot
+    dest: /usr/share/mender/integration/
+    mode: 0755
+  when: ebs_bootloader_type == "raspberry-pi"
+
+- name: Create a symbolic link for the reboot command.
+  file:
+    src: /usr/share/mender/integration/pi-uboot
+    dest: /usr/share/mender/integration/reboot
+    state: link
+  when: ebs_bootloader_type == "raspberry-pi"
+
+- name: Create symbolic links for fw_printenv and fw_setenv.
+  file:
+    src: /usr/share/mender/integration/pi-uboot
+    dest: /usr/bin/{{ item }}
+    state: link
+  with_items:
+    - fw_printenv
+    - fw_setenv
+  when: ebs_bootloader_type == "raspberry-pi"
