@@ -230,4 +230,15 @@ then
     else
         print_and_exit "ERROR" "unsupported number of arguments"
     fi
+elif [[ ${0} == *reboot ]]
+then
+    if [[ $# -ge 1 ]]
+    then
+        /usr/sbin/reboot "$@"
+    elif [[ ${upgrade_available} -eq 1 ]] && [[ ${COMMITTED_BOOT_PART} -ne ${mender_boot_part} ]] && [[ ${bootcount} -eq 0 ]] && [[ -f "${TRYBOOT_TXT}" ]]
+    then
+        /usr/sbin/reboot '0 tryboot'
+    else
+        /usr/sbin/reboot
+    fi
 fi
