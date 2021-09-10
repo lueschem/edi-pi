@@ -34,7 +34,6 @@ print_and_exit()
 {
     local TYPE=$1
     local MESSAGE=$2
-    trap - EXIT
     if [ "${TYPE}" == "ERROR" ] ; then
         >&2 echo "error: ${MESSAGE}"
         exit 1
@@ -82,42 +81,6 @@ update_environment()
     esac
 }
 
-update_boot_files()
-{
-#TODO: Move this stuff into a mender state script.
-    local boot_part=${1}
-    local boot_folder="/boot/firmware/p${boot_part}"
-
-    NEXT_ROOT_MNT=$(mktemp -d -t next-root-XXXXXXXX --tmpdir=/tmp)
-    mount "/dev/mmcblk0p${boot_part}" "${NEXT_ROOT_MNT}"
-    rm -rf "${boot_folder}"
-    cp -r -L "${NEXT_ROOT_MNT}/boot/image-kernel" "${boot_folder}"
-    sed -i "s@^BOOTLOADER_DIRECTORY=.*@BOOTLOADER_DIRECTORY=\"/boot/firmware/p${boot_part}\"@" "${NEXT_ROOT_MNT}/etc/edi-boot-shim/edi-boot-shim.cfg.d/multiboot.cfg"
-
-    cp "${NEXT_ROOT_MNT}/boot/image-firmware/cmdline.txt" "${boot_folder}/cmdline.txt"
-    sed -i "s@__ROOTFS_PARTITION__@${boot_part}@" "${boot_folder}/cmdline.txt"
-
-    cp "${NEXT_ROOT_MNT}/boot/image-firmware/start4.elf" "/boot/firmware/p${boot_part}start4.elf"
-    cp "${NEXT_ROOT_MNT}/boot/image-firmware/fixup4.dat" "/boot/firmware/p${boot_part}fixup4.dat"
-
-#TODO: add trap for unmount
-    umount "${NEXT_ROOT_MNT}"
-
-    cat << EOF > ${TRYBOOT_TXT}
-# needs to be 8.3 format and in top level folder
-start_file=p${boot_part}start4.elf
-fixup_file=p${boot_part}fixup4.dat
-
-# Switch the CPU from ARMv7 into ARMv8 (aarch64) mode
-arm_64bit=1
-
-enable_uart=1
-
-kernel=vmlinuz
-os_prefix=p${boot_part}/
-EOF
-}
-
 if [[ $EUID -ne 0 ]]; then
     print_and_exit "ERROR" "use root user to execute this script"
 fi
@@ -129,7 +92,7 @@ fi
 
 CURRENT_BOOT_PART=$(echo "${CURRENT_BOOT_DEVICE}" | grep -o '[1-9][0-9]*$')
 if [ -z "${CURRENT_BOOT_PART}" ] ; then
-    print_and_exit "ERROR" "unable to extract partition number of ${CURRENT_ROOT_DEVICE}"
+    print_and_exit "ERROR" "unable to extract partition number of ${CURRENT_BOOT_DEVICE}"
 fi
 
 COMMITTED_BOOT_PART=$(< "${CONFIG_TXT}" sed -n 's|^os_prefix=p\([[:digit:]]\)/$|\1|p')
@@ -168,7 +131,6 @@ then
     fi
 elif [[ ${0} == *fw_setenv ]]
 then
-    MENDER_TRANSACTION="unknown"
     MENDER_BOOT_PART_UPDATED=0
     UPGRADE_AVAILABLE_UPDATED=0
 
@@ -197,7 +159,7 @@ then
 
             while IFS= read -r line
             do
-                key_value_pair=(${line})
+                key_value_pair=("${line}")
 
                 if [[ ${#key_value_pair[@]} -eq 2 ]]
                 then
@@ -228,7 +190,7 @@ then
             then
                 print_and_exit "ERROR" "invalid install transaction - new boot partition is equal to committed boot partition"
             else
-                update_boot_files "${mender_boot_part}"
+                : # nothing to do - boot partition will be setup by state script
             fi
         elif [[ ${MENDER_BOOT_PART_UPDATED} -eq 1 ]] && [[ ${UPGRADE_AVAILABLE_UPDATED} -eq 1 ]] && [[ ${upgrade_available} -eq 0 ]]
         then

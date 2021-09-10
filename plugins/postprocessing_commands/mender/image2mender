@@ -34,10 +34,10 @@ Required arguments:
  -o ARTIFACT, --output=ARTIFACT            : Name of the resulting mender update artifact.
  -a ARTIFACT_NAME, --artifact=ARTIFACT_NAME: Mender artifact name.
  -t DEVICE_TYPE, --type=DEVICE_TYPE        : The type of device supported by the update.
+ -b BOOTLOADER, --bootloader=BOOTLOADER    : The selected bootloader ("u-boot" or "raspberry-pi").
 Optional arguments:
  -h, --help                                : Print help text.
  --log=LEVEL                               : Use --log=DEBUG to trace all commands.
- -w DIRECTORY, --workdir=DIRECTORY         : Working directory.
 EOF
 }
 
@@ -62,20 +62,20 @@ unexpected_exit()
     print_error_and_exit "Abnormal script termination."
 }
 
-if ! options=$(getopt -o hi:o:w:a:t: -l help,log:,input:,output:,workdir:,artifact:,type: -- "$@")
+if ! options=$(getopt -o hi:o:a:t:b: -l help,log:,input:,output:,artifact:,type:,bootloader: -- "$@")
 then
     print_usage
     print_error_and_exit "Invalid option."
 fi
 eval set -- "$options"
 
-WORKDIR="$(pwd)"
 SCRIPTDIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 INPUT_IMAGE=""
 MENDER_ARTIFACT=""
 ARTIFACT_NAME=""
 DEVICE_TYPE=""
 LOG_LEVEL="INFO"
+BOOTLOADER=""
 
 while true
 do
@@ -83,9 +83,9 @@ do
         -h|--help)          print_usage && exit 0;;
         -i|--input)         INPUT_IMAGE="${2}"; shift 2;;
         -o|--output)        MENDER_ARTIFACT="${2}"; shift 2;;
-        -w|--workdir)       WORKDIR="${2}"; shift 2;;
-	-a|--artifact)      ARTIFACT_NAME="${2}"; shift 2;;
-	-t|--type)          DEVICE_TYPE="${2}"; shift 2;;
+        -a|--artifact)      ARTIFACT_NAME="${2}"; shift 2;;
+        -t|--type)          DEVICE_TYPE="${2}"; shift 2;;
+        -b|--bootloader)    BOOTLOADER="${2}"; shift 2;;
         --log)              LOG_LEVEL="${2}"; shift 2;;
         *)                  break ;;
     esac
@@ -117,21 +117,27 @@ then
     print_error_and_exit "Missing device type parameter."
 fi
 
+if [ -z "${BOOTLOADER}" ]
+then
+    print_usage
+    print_error_and_exit "Missing bootloader parameter."
+fi
+
 if ! which mender-artifact > /dev/null
 then
     print_error "Missing mender-artifact executable. Mender update artifact will not be built."
     # Ignore this error for now since the update image might not be needed for every use case.
-    echo "Mender update artifact not built due to missing mender-artifact executable." >> ${MENDER_ARTIFACT}
+    echo "Mender update artifact not built due to missing mender-artifact executable." >> "${MENDER_ARTIFACT}"
     exit 0
 fi
 
-if [ ${DEVICE_TYPE} == "pi2-armhf" ]
+if [ "${DEVICE_TYPE}" == "pi2-armhf" ]
 then
     COMPATIBLE_DEVICE="--device-type rpi-armhf"
-elif [ ${DEVICE_TYPE} == "pi3-armhf" ]
+elif [ "${DEVICE_TYPE}" == "pi3-armhf" ]
 then
     COMPATIBLE_DEVICE="--device-type rpi-armhf"
-elif [ ${DEVICE_TYPE} == "pi3-arm64" ]
+elif [ "${DEVICE_TYPE}" == "pi3-arm64" ]
 then
     COMPATIBLE_DEVICE="--device-type rpi-arm64"
 else
@@ -142,7 +148,7 @@ INPUT_OPTION="--file"
 MENDER_ARTIFACT_VERSION=$(mender-artifact --version)
 MENDER_ARTIFACT_MAJOR_VERSION=$(echo "${MENDER_ARTIFACT_VERSION}" | cut -d' ' -f 3 | cut -d'.' -f 1)
 
-if [ ${MENDER_ARTIFACT_MAJOR_VERSION} -eq 2 ]
+if [[ ${MENDER_ARTIFACT_MAJOR_VERSION} -eq 2 ]]
 then
     INPUT_OPTION="--update"
 fi
@@ -153,6 +159,12 @@ then
     INPUT_OPTION="--update"
 fi
 
-mender-artifact write rootfs-image --device-type ${DEVICE_TYPE} ${COMPATIBLE_DEVICE} --artifact-name ${ARTIFACT_NAME} ${INPUT_OPTION} ${INPUT_IMAGE} --version 2 --script ${SCRIPTDIR}/ArtifactInstall_Leave_50_ConfigurationBackup --script ${SCRIPTDIR}/ArtifactCommit_Enter_50_ConfigurationRestore --output-path ${MENDER_ARTIFACT}
+BOOTPARTITION_SETUP_SCRIPT=""
+if [ "${BOOTLOADER}" == "raspberry-pi" ]
+then
+    BOOTPARTITION_SETUP_SCRIPT="--script ${SCRIPTDIR}/ArtifactInstall_Enter_50_BootpartitionSetup"
+fi
+
+mender-artifact write rootfs-image --device-type "${DEVICE_TYPE}" "${COMPATIBLE_DEVICE}" --artifact-name "${ARTIFACT_NAME}" ${INPUT_OPTION} "${INPUT_IMAGE}" --version 2 --script "${SCRIPTDIR}/ArtifactInstall_Leave_50_ConfigurationBackup" --script "${SCRIPTDIR}/ArtifactCommit_Enter_50_ConfigurationRestore" "${BOOTPARTITION_SETUP_SCRIPT}" --output-path "${MENDER_ARTIFACT}"
 
 trap - EXIT
