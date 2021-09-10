@@ -1,6 +1,7 @@
 general:
     parameters:
         mender_device_type: pi4-v3
+        ebs_bootloader_type: "raspberry-pi"
 
 bootstrap:
     architecture: arm64
@@ -25,7 +26,6 @@ playbooks:
         parameters:
             ebs_template: boot.spec.rpi4.${DEBIAN_ARCHITECTURE}
             ebs_bootloader_directory: "/boot/image-kernel"
-            ebs_bootloader_type: "raspberry-pi"
             kernel_image: linux-image-5.10.17-v8+
 
 shared_folders:

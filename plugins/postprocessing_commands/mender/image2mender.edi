@@ -5,6 +5,4 @@ set -o errexit
 
 source {{ pp_timestamp }}
 
-{{ edi_current_plugin_directory }}/image2mender --input {{ pp_partition_image }} --output {{ pp_mender_artifact }} --log {{ edi_log_level }} --artifact ${BUILD_TIMESTAMP}-{{ edi_configuration_name }} --type {{ mender_device_type }}-{{ edi_bootstrap_architecture }} --bootloader={{ ebs_bootloader_type }}
-
-
+{{ edi_current_plugin_directory }}/image2mender --input {{ pp_partition_image }} --output {{ pp_mender_artifact }} --log {{ edi_log_level }} --artifact ${BUILD_TIMESTAMP}-{{ edi_configuration_name }} --type {{ mender_device_type }}-{{ edi_bootstrap_architecture }} --bootloader {{ ebs_bootloader_type }}

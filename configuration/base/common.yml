@@ -6,6 +6,7 @@ general:
     parameters:
         mender_device_type: generic
         ansible_pipelining: true
+        ebs_bootloader_type: "u-boot"
 
 bootstrap:
     tool: debootstrap

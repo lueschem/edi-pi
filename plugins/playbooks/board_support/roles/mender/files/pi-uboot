@@ -159,7 +159,7 @@ then
 
             while IFS= read -r line
             do
-                key_value_pair=("${line}")
+                read -r -a key_value_pair <<< "${line}"
 
                 if [[ ${#key_value_pair[@]} -eq 2 ]]
                 then
