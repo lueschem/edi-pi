@@ -141,6 +141,7 @@ find "${LXD_ROOTFS}/tmp/" -mindepth 1 -delete
 # Copy kernel, initrd and dtbs to firmware partition
 if [ -d "${LXD_ROOTFS}/boot/image-kernel" ]; then
     chroot "${LXD_ROOTFS}" cp -r -L /boot/image-kernel /boot/firmware/p3
+    chroot "${LXD_ROOTFS}" sed -i "s@^BOOTLOADER_DIRECTORY=.*@BOOTLOADER_DIRECTORY=\"/boot/firmware/p3\"@" "/etc/edi-boot-shim/edi-boot-shim.cfg.d/multiboot.cfg"
 fi
 
 if [ -d "${LXD_ROOTFS}/boot/image-firmware" ]; then

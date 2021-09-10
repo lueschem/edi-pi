@@ -92,6 +92,7 @@ update_boot_files()
     mount "/dev/mmcblk0p${boot_part}" "${NEXT_ROOT_MNT}"
     rm -rf "${boot_folder}"
     cp -r -L "${NEXT_ROOT_MNT}/boot/image-kernel" "${boot_folder}"
+    sed -i "s@^BOOTLOADER_DIRECTORY=.*@BOOTLOADER_DIRECTORY=\"/boot/firmware/p${boot_part}\"@" "${NEXT_ROOT_MNT}/etc/edi-boot-shim/edi-boot-shim.cfg.d/multiboot.cfg"
 
     cp "${NEXT_ROOT_MNT}/boot/image-firmware/cmdline.txt" "${boot_folder}/cmdline.txt"
     sed -i "s@__ROOTFS_PARTITION__@${boot_part}@" "${boot_folder}/cmdline.txt"
