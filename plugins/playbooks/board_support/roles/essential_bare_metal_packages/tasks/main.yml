@@ -1,11 +1,4 @@
 ---
-- name: Install u-boot tools.
-  apt:
-    name: libubootenv-tool
-    state: present
-    install_recommends: no
-  when: ebs_bootloader_type == "u-boot"
-
 - name: Install packages that are essential for running on bare metal.
   apt:
     name: "{{ bare_metal_packages }}"

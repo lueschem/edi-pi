@@ -69,6 +69,15 @@
     creates: "{{ bootloader_location }}/u-boot.bin"
   when: ebs_bootloader_type == "u-boot"
 
+- name: Install u-boot tools.
+  apt:
+    name:
+    - libubootenv-tool
+    - u-boot-tools
+    state: present
+    install_recommends: no
+  when: ebs_bootloader_type == "u-boot"
+
 - name: Copy the raw boot script to the boot folder.
   copy:
     src: boot.scr.txt
