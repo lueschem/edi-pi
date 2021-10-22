@@ -26,11 +26,6 @@
     src: device_type
     dest: /data/mender/device_type
 
-- name: Copy the server certificate.
-  copy:
-    src: "{{ mender_config_directory }}/certificates/server.crt"
-    dest: /etc/mender/
-
 - name: Copy inventory scripts.
   copy:
     src: "{{ item }}"
