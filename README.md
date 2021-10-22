@@ -148,6 +148,15 @@ ssh pi@IP_ADDRESS
 The password for the user _pi_ is _raspberry_ (just in case you want to
 execute a command using `sudo` or login via a local terminal).
 
+### Connecting to Mender
+
+To enable over the air (OTA) updates, the generated images are configured
+to connect to [https://hosted.mender.io/](https://hosted.mender.io/).
+In order to connect to your Mender tenant you have to provide your tenant token prior to building the images.
+The tenant token can be added to `configuration/mender/mender.yml`. If you do not want to
+add the tenant token to the version control system you can also copy `configuration/mender/mender.yml` to
+`configuration/mender/mender_custom.yml` and add the tenant token there.
+
 ### Creating a Cross Development LXD Container
 
 A cross development container can be created using the
@@ -223,3 +232,5 @@ For details about the Mender based robust update integration please refer to thi
 
 If you are curious about the U-Boot bootloader setup please take a look at this
 [blog post](https://www.get-edi.io/Booting-Debian-with-U-Boot/).
+
+The WiFi setup is [documented here](docs/wifi_setup.md).
