@@ -233,4 +233,7 @@ For details about the Mender based robust update integration please refer to thi
 If you are curious about the U-Boot bootloader setup please take a look at this
 [blog post](https://www.get-edi.io/Booting-Debian-with-U-Boot/).
 
+For the kernel build instructions related to the Raspberry Pi 4 please check
+[this blog post](https://www.get-edi.io/Getting-Started-with-a-new-Embedded-System/).
+
 The WiFi setup is [documented here](docs/wifi_setup.md).
