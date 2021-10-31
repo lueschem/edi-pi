@@ -147,6 +147,8 @@ fi
 if [ -d "${LXD_ROOTFS}/boot/image-firmware" ]; then
     chroot "${LXD_ROOTFS}" cp /boot/image-firmware/cmdline.txt /boot/firmware/p3/cmdline.txt
     chroot "${LXD_ROOTFS}" sed -i 's@__ROOTFS_PARTITION__@3@' /boot/firmware/p3/cmdline.txt
+    chroot "${LXD_ROOTFS}" cp /boot/image-firmware/config.txt /boot/firmware/config.txt
+    chroot "${LXD_ROOTFS}" sed -i 's@__ROOTFS_PARTITION__@3@' /boot/firmware/config.txt
     chroot "${LXD_ROOTFS}" cp /boot/image-firmware/start4.elf /boot/firmware/p3start4.elf
     chroot "${LXD_ROOTFS}" cp /boot/image-firmware/fixup4.dat /boot/firmware/p3fixup4.dat
 fi

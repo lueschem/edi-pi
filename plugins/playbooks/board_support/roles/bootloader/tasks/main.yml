@@ -25,10 +25,17 @@
     state: directory
   when: ebs_bootloader_type == "raspberry-pi"
 
-- name: Setup boot configuration.
+- name: Setup boot configuration (u-boot).
   copy:
     src: config.txt.{{ ebs_bootloader_type }}.{{ edi_bootstrap_architecture }}
     dest: "{{ bootloader_location }}/config.txt"
+  when: ebs_bootloader_type == "u-boot"
+
+- name: Setup boot configuration (raspberry-pi).
+  copy:
+    src: config.txt.{{ ebs_bootloader_type }}.{{ edi_bootstrap_architecture }}
+    dest: "{{ bootloader_image_location }}/config.txt"
+  when: ebs_bootloader_type == "raspberry-pi"
 
 - name: Setup the kernel command line (u-boot).
   copy:
