@@ -1,7 +1,39 @@
 ---
-- name: Install mender-client.
+- name: Create mender directory on data partition.
+  file:
+    path: /data/mender
+    state: directory
+
+- name: Create a symbolic link to the data partition.
+  file:
+    src: /data/mender
+    dest: /var/lib/mender
+    state: link
+
+- name: Mask some files that shall not be provided by the mender-client Debian package.
+  copy:
+    src: 05_mender_client
+    dest: /etc/dpkg/dpkg.cfg.d/
+
+- name: Add mender repository apt key.
+  apt_key:
+    data: "{{ lookup('file', 'mender.gpgkey') }}"
+    state: present
+
+- name: Add mender repository to sources.list.d.
+  template:
+    src: mender.list
+    dest: /etc/apt/sources.list.d/
+
+- name: Update apt cache.
   apt:
-    name: mender-client
+    update_cache: yes
+
+- name: Install mender-client and mender-connect.
+  apt:
+    name:
+    - mender-client
+    - mender-connect
     state: present
     install_recommends: no
 
@@ -16,10 +48,10 @@
     src: mender.conf
     dest: /etc/mender/
 
-- name: Create mender directory on data partition.
-  file:
-    path: /data/mender
-    state: directory
+- name: Write mender-connect configuration.
+  copy:
+    src: mender-connect.conf
+    dest: /etc/mender/
 
 - name: Configure the device type.
   template:

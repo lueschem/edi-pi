@@ -1,0 +1,1 @@
+deb [arch={{ edi_bootstrap_architecture }}] https://downloads.mender.io/repos/debian stable main
