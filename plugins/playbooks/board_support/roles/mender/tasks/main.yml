@@ -29,11 +29,13 @@
   apt:
     update_cache: yes
 
-- name: Install mender-client and mender-connect.
+- name: Install mender-client, mender-connect, mender-configure and jq.
   apt:
     name:
     - mender-client
     - mender-connect
+    - mender-configure
+    - jq
     state: present
     install_recommends: no
 
