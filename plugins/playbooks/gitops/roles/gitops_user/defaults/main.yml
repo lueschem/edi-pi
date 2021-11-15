@@ -1,0 +1,9 @@
+---
+gitops_user_group_name: gitops
+gitops_user_gid: 3000
+
+gitops_user_name: gitops
+gitops_user_uid: 3000
+gitops_user_shell: /bin/bash
+gitops_user_groups: adm,sudo
+gitops_user_password: "*"

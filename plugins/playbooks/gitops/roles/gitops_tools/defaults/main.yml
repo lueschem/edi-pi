@@ -1,0 +1,4 @@
+---
+gitops_packages:
+  - ansible
+  - git

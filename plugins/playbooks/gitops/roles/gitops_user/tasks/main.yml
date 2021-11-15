@@ -1,0 +1,21 @@
+- name: Add a group for the gitops user.
+  group:
+    name: "{{ gitops_user_group_name }}"
+    gid: "{{ gitops_user_gid }}"
+    state: present
+
+- name: Add the gitops user.
+  user:
+    name: "{{ gitops_user_name }}"
+    group: "{{ gitops_user_group_name }}"
+    uid: "{{ gitops_user_uid }}"
+    shell: "{{ gitops_user_shell }}"
+    groups: "{{ gitops_user_groups }}"
+    password: "{{ gitops_user_password }}"
+    append: yes
+    update_password: on_create
+
+- name: Enable sudo without password for the gitops user.
+  template:
+    src: no_passwd
+    dest: /etc/sudoers.d/{{ gitops_user_name }}

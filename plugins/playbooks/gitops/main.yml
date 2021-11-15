@@ -1,0 +1,9 @@
+- hosts: all
+
+  roles:
+    - role: gitops_user
+      become: True
+      become_user: root
+    - role: gitops_tools
+      become: True
+      become_user: root

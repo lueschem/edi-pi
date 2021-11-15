@@ -1,0 +1,6 @@
+---
+- name: Install gitops related packages.
+  apt:
+    name: "{{ gitops_packages }}"
+    state: present
+    install_recommends: no
