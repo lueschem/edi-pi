@@ -1,0 +1,81 @@
+#!/bin/bash
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+GITOPS_USER="sudo -u gitops"
+WORKDIR=/home/gitops
+
+print_error()
+{
+    local MESSAGE="${1}"
+    >&2 echo -e "Error: ${MESSAGE}"
+}
+
+unexpected_exit()
+{
+    local TEMPDIR="${1}"
+    print_error "Going to clean up after abnormal script termination."
+    clean_up "${TEMPDIR}"
+    trap - EXIT
+    exit 3
+}
+
+clean_up()
+{
+    local TEMPDIR="${1}"
+    ${GITOPS_USER} rm -rf "${TEMPDIR}"
+}
+
+if [ $# -ne 1 ]
+then
+    >&2 echo "Error: This script is expecting exactly one argument (the configuration file)."
+    exit 2
+fi
+
+CONFIG="$1"
+
+if [ ! -e "${CONFIG}" ]
+then
+    >&2 echo "Error: The configuration file ${CONFIG} does not exist."
+    exit 1
+fi
+
+if ! PLAYBOOK_URL="$(jq -r -e .playbook_url < "${CONFIG}")"
+then
+    echo "${0}: Nothing to do as there is no 'playbook_url'."
+    exit 0
+fi
+
+if ! PLAYBOOK_VERSION="$(jq -r -e .playbook_version < "${CONFIG}")"
+then
+    echo "${0}: Nothing to do as there is no 'playbook_version'."
+    exit 0
+fi
+
+TEMPDIR="$(${GITOPS_USER} mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)"
+trap "unexpected_exit ${TEMPDIR}" EXIT
+
+cd "${TEMPDIR}"
+
+${GITOPS_USER} git clone --branch "${PLAYBOOK_VERSION}" --depth 1 "${PLAYBOOK_URL}" playbook
+
+ROLES_PATH="${TEMPDIR}/playbook/roles"
+${GITOPS_USER} mkdir -p "${ROLES_PATH}"
+
+cd "${TEMPDIR}/playbook"
+
+if [ -e requirements.yml ]
+then
+    ${GITOPS_USER} ansible-galaxy install --roles-path "${ROLES_PATH}" -r requirements.yml
+fi
+
+${GITOPS_USER} ansible-playbook --connection=local --inventory 127.0.0.1, playbook.yml --extra-vars "@${CONFIG}"
+
+clean_up "${TEMPDIR}"
+
+trap - EXIT
+
+# Request reboot (for now).
+exit 20
