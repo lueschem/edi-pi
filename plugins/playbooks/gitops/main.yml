@@ -1,5 +1,9 @@
 - hosts: all
 
+  vars:
+    gitops_user_name: gitops
+    gitops_user_group_name: gitops
+
   roles:
     - role: gitops_user
       become: True

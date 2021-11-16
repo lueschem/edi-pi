@@ -4,8 +4,8 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-GITOPS_USER="sudo -u gitops"
-WORKDIR=/home/gitops
+GITOPS_USER="sudo -u {{ gitops_user_name }}"
+WORKDIR="/home/{{ gitops_user_name }}"
 
 print_error()
 {
@@ -65,13 +65,16 @@ ROLES_PATH="${TEMPDIR}/playbook/roles"
 ${GITOPS_USER} mkdir -p "${ROLES_PATH}"
 
 cd "${TEMPDIR}/playbook"
+cp ${CONFIG} .
+CONFIG_FILE=$(basename -- "${CONFIG}")
+chown {{ gitops_user_name }}:{{ gitops_user_group_name }} "${CONFIG_FILE}"
 
 if [ -e requirements.yml ]
 then
     ${GITOPS_USER} ansible-galaxy install --roles-path "${ROLES_PATH}" -r requirements.yml
 fi
 
-${GITOPS_USER} ansible-playbook --connection=local --inventory 127.0.0.1, playbook.yml --extra-vars "@${CONFIG}"
+${GITOPS_USER} ansible-playbook --connection=local --inventory 127.0.0.1, playbook.yml --extra-vars "@${CONFIG_FILE}"
 
 clean_up "${TEMPDIR}"
 
