@@ -89,6 +89,12 @@ For Raspberry Pi 4, arm64:
 sudo edi -v image create pi4-bullseye-arm64.yml
 ```
 
+For Raspberry Pi4, arm64, prepared for GitOps (git and Ansible preinstalled):
+
+``` bash
+sudo edi -v image create pi4-bullseye-arm64-gitops.yml
+```
+
 For Raspberry Pi 3, arm64:
 
 ``` bash
@@ -237,3 +243,5 @@ For the kernel build instructions related to the Raspberry Pi 4 please check
 [this blog post](https://www.get-edi.io/Getting-Started-with-a-new-Embedded-System/).
 
 The WiFi setup is [documented here](docs/wifi_setup.md).
+
+A GitOps example can be found [here](https://www.get-edi.io/Surprisingly-Easy-IoT-Device-Management/).
