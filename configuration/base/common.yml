@@ -7,6 +7,8 @@ general:
         mender_device_type: generic
         ansible_pipelining: true
         ebs_bootloader_type: "u-boot"
+        default_user_name: pi
+        default_user_group_name: pi
 
 bootstrap:
     tool: debootstrap
@@ -54,8 +56,6 @@ playbooks:
         path: playbooks/debian/base_system/main.yml
         parameters:
             create_default_user: True
-            default_user_name: pi
-            default_user_group_name: pi
             # password is raspberry
             default_user_password: "$6$UFxTVMw7t4D3xPRl$GikrlPLW3hr34zssKC1w9rP9kUoSoa1UPoGMIylT8qb3fYM2lDAe9Mvr7hl1VRjz8wR84tfEkZ6.uot.K2B/F0"
             install_openssh_server: True

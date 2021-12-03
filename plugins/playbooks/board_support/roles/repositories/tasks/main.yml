@@ -24,7 +24,6 @@
     src: edi-repository.list
     dest: /etc/apt/sources.list.d/
 
-
 - name: Update apt cache.
   apt:
     update_cache: yes

@@ -165,6 +165,6 @@ then
     BOOTPARTITION_SETUP_SCRIPT=( "--script" "${SCRIPTDIR}/ArtifactInstall_Enter_50_BootpartitionSetup" )
 fi
 
-mender-artifact write rootfs-image --device-type "${DEVICE_TYPE}" "${COMPATIBLE_DEVICE[@]}" --artifact-name "${ARTIFACT_NAME}" ${INPUT_OPTION} "${INPUT_IMAGE}" --version 3 --script "${SCRIPTDIR}/ArtifactInstall_Leave_50_ConfigurationBackup" --script "${SCRIPTDIR}/ArtifactCommit_Enter_50_ConfigurationRestore" "${BOOTPARTITION_SETUP_SCRIPT[@]}" --output-path "${MENDER_ARTIFACT}"
+mender-artifact write rootfs-image --device-type "${DEVICE_TYPE}" "${COMPATIBLE_DEVICE[@]}" --artifact-name "${ARTIFACT_NAME}" ${INPUT_OPTION} "${INPUT_IMAGE}" --version 3 --script "${SCRIPTDIR}/ArtifactInstall_Leave_50_ConfigurationBackup" --script "${SCRIPTDIR}/ArtifactReboot_Leave_50_ConfigurationRestore" "${BOOTPARTITION_SETUP_SCRIPT[@]}" --output-path "${MENDER_ARTIFACT}"
 
 trap - EXIT
