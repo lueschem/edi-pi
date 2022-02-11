@@ -42,6 +42,18 @@ then
     exit 1
 fi
 
+if [ ! -s "${CONFIG}" ]
+then
+    >&2 echo "Error: The configuration file ${CONFIG} is empty."
+    exit 1
+fi
+
+if ! jq -e . >/dev/null 2>&1 < "${CONFIG}"
+then
+    >&2 echo "Error: Failed to parse ${CONFIG}."
+    exit 1
+fi
+
 if ! PLAYBOOK_URL="$(jq -r -e .playbook_url < "${CONFIG}")"
 then
     echo "${0}: Nothing to do as there is no 'playbook_url'."
@@ -80,5 +92,14 @@ clean_up "${TEMPDIR}"
 
 trap - EXIT
 
-# Request reboot (for now).
-exit 20
+if ! PLAYBOOK_NEEDS_REBOOT="$(jq -r -e .playbook_needs_reboot < "${CONFIG}")"
+then
+    exit 0
+else
+    if [ "${PLAYBOOK_NEEDS_REBOOT}" == "true" ]
+    then
+        exit 20
+    else
+        exit 0
+    fi
+fi
