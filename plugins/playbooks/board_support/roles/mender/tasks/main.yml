@@ -1,14 +1,22 @@
 ---
-- name: Create mender directory on data partition.
+- name: Create mender directories on data partition.
   file:
-    path: /data/mender
+    path: /data/{{ item }}
     state: directory
+  loop:
+    - mender
+    - mender-configure
+    - mender-monitor
 
-- name: Create a symbolic link to the data partition.
+- name: Create symbolic links to the data partition.
   file:
-    src: /data/mender
-    dest: /var/lib/mender
+    src: /data/{{ item }}
+    dest: /var/lib/{{ item }}
     state: link
+  loop:
+    - mender
+    - mender-configure
+    - mender-monitor
 
 - name: Mask some files that shall not be provided by the mender-client Debian package.
   copy:
