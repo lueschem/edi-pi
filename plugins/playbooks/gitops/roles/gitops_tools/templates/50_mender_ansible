@@ -4,8 +4,10 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-GITOPS_USER="sudo -u {{ gitops_user_name }}"
-WORKDIR="/home/{{ gitops_user_name }}"
+GITOPS_USER_NAME="{{ gitops_user_name }}"
+GITOPS_USER_GROUP_NAME="{{ gitops_user_group_name }}"
+GITOPS_USER="sudo -u ${GITOPS_USER_NAME}"
+WORKDIR="/home/${GITOPS_USER_NAME}"
 
 print_error()
 {
@@ -66,20 +68,42 @@ then
     exit 0
 fi
 
-TEMPDIR="$(${GITOPS_USER} mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)"
-trap "unexpected_exit ${TEMPDIR}" EXIT
+RETRY_SEC=( 0 60 120 240 480 960 )
+
+PLAYBOOK_URL_REACHABLE=0
+
+for seconds in "${RETRY_SEC[@]}"
+do
+    sleep "$seconds"
+    if ${GITOPS_USER} GIT_TERMINAL_PROMPT=0 git ls-remote --heads "${PLAYBOOK_URL}" > /dev/null 2>&1
+    then
+        PLAYBOOK_URL_REACHABLE=1
+        break
+    else
+        echo "${0}: Unable to fetch playbook '${PLAYBOOK_URL}'. Going to retry!"
+    fi
+done
+
+if [[ "${PLAYBOOK_URL_REACHABLE}" -eq 0 ]]
+then
+    >&2 echo "Error: Failed to fetch playbook '${PLAYBOOK_URL}'."
+    exit 1
+fi
+
+TEMPDIR=$(${GITOPS_USER} mktemp -p "${WORKDIR}" -d -t .tmp.XXXXXXXX)
+trap 'unexpected_exit "${TEMPDIR}"' EXIT
 
 cd "${TEMPDIR}"
 
-${GITOPS_USER} git clone --branch "${PLAYBOOK_VERSION}" --depth 1 "${PLAYBOOK_URL}" playbook
+${GITOPS_USER} GIT_TERMINAL_PROMPT=0 git clone --branch "${PLAYBOOK_VERSION}" --depth 1 "${PLAYBOOK_URL}" playbook
 
 ROLES_PATH="${TEMPDIR}/playbook/roles"
 ${GITOPS_USER} mkdir -p "${ROLES_PATH}"
 
 cd "${TEMPDIR}/playbook"
-cp ${CONFIG} .
+cp "${CONFIG}" .
 CONFIG_FILE=$(basename -- "${CONFIG}")
-chown {{ gitops_user_name }}:{{ gitops_user_group_name }} "${CONFIG_FILE}"
+chown "${GITOPS_USER_NAME}":"${GITOPS_USER_GROUP_NAME}" "${CONFIG_FILE}"
 
 if [ -e requirements.yml ]
 then
