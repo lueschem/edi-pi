@@ -1,4 +1,5 @@
 enable_uart=1
+disable_overscan=1
 
 kernel=u-boot.bin
 

@@ -6,6 +6,7 @@ fixup_file=p__ROOTFS_PARTITION__fixup4.dat
 arm_64bit=1
 
 enable_uart=1
+disable_overscan=1
 
 kernel=vmlinuz
 os_prefix=p__ROOTFS_PARTITION__/
