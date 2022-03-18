@@ -68,6 +68,11 @@ then
     exit 0
 fi
 
+TEMPDIR=$(${GITOPS_USER} mktemp -p "${WORKDIR}" -d -t .tmp.XXXXXXXX)
+trap 'unexpected_exit "${TEMPDIR}"' EXIT
+
+cd "${TEMPDIR}"
+
 RETRY_SEC=( 0 60 120 240 480 960 )
 
 PLAYBOOK_URL_REACHABLE=0
@@ -89,11 +94,6 @@ then
     >&2 echo "Error: Failed to fetch playbook '${PLAYBOOK_URL}'."
     exit 1
 fi
-
-TEMPDIR=$(${GITOPS_USER} mktemp -p "${WORKDIR}" -d -t .tmp.XXXXXXXX)
-trap 'unexpected_exit "${TEMPDIR}"' EXIT
-
-cd "${TEMPDIR}"
 
 ${GITOPS_USER} GIT_TERMINAL_PROMPT=0 git clone --branch "${PLAYBOOK_VERSION}" --depth 1 "${PLAYBOOK_URL}" playbook
 
