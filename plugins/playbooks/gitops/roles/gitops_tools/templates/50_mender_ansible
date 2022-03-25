@@ -110,7 +110,7 @@ then
     ${GITOPS_USER} ansible-galaxy install --roles-path "${ROLES_PATH}" -r requirements.yml
 fi
 
-${GITOPS_USER} ansible-playbook --connection=local --inventory 127.0.0.1, playbook.yml --extra-vars "@${CONFIG_FILE}"
+${GITOPS_USER} ansible-playbook --connection=local --inventory 127.0.0.1, playbook.yml --extra-vars "@${CONFIG_FILE}" 1>&2
 
 clean_up "${TEMPDIR}"
 
