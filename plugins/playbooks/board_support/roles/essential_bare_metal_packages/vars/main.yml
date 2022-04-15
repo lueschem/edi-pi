@@ -2,10 +2,11 @@
 bare_metal_packages:
   - dosfstools
   - fdisk
-  - initramfs-tools
-  - network-manager
-  - udev
-  - "{{ kernel_image }}"
   - firmware-brcm80211
   - haveged
+  - initramfs-tools
+  - "{{ kernel_image }}"
+  - network-manager
+  - systemd-timesyncd
+  - udev
 
