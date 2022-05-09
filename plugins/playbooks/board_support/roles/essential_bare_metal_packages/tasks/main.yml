@@ -5,7 +5,10 @@
     state: present
     install_recommends: no
 
-- name: Preset unused wpa_supplicant services to disabled.
+- name: Preset unused wpa_supplicant and systemd-networkd services to disabled.
   copy:
-    src: 95-wpa_supplicant.preset
+    src: "{{ item }}"
     dest: /lib/systemd/system-preset/
+  loop:
+    - 95-wpa_supplicant.preset
+    - 95-systemd_networkd.preset

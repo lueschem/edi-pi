@@ -1,0 +1,3 @@
+disable systemd-networkd-wait-online.service
+disable systemd-networkd.service
+disable systemd-networkd.socket
