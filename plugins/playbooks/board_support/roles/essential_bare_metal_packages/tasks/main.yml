@@ -11,4 +11,4 @@
     dest: /lib/systemd/system-preset/
   loop:
     - 95-wpa_supplicant.preset
-    - 95-systemd_networkd.preset
+    - 85-systemd_networkd.preset
