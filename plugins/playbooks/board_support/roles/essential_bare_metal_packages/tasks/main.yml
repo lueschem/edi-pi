@@ -12,3 +12,8 @@
   loop:
     - 95-wpa_supplicant.preset
     - 85-systemd_networkd.preset
+
+- name: Disable persistent logging to protect the eMMC/flash.
+  file:
+    path: /var/log/journal
+    state: absent
