@@ -1,8 +1,0 @@
-#!/bin/bash
-
-set -o errexit
-set -o nounset
-
-if [ -f /var/run/reconfiguration-requests-device-reboot ]; then
-    shutdown -r +2
-fi

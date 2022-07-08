@@ -5,7 +5,6 @@
     state: directory
   loop:
     - mender
-    - mender-configure
     - mender-monitor
 
 - name: Create symbolic links to the data partition.
@@ -15,8 +14,19 @@
     state: link
   loop:
     - mender
-    - mender-configure
     - mender-monitor
+
+- name: Create directory for mender-configure configuration.
+  file:
+    dest: /var/lib/mender-configure
+    state: directory
+    mode: 0755
+
+- name: Add an empty mender-configure configuration.
+  copy:
+    src: empty.json
+    dest: /var/lib/mender-configure/device-config.json
+    mode: 0600
 
 - name: Mask some files that shall not be provided by the mender-client Debian package.
   copy:
