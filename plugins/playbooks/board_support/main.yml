@@ -1,4 +1,5 @@
 - hosts: all
+  gather_facts: no
 
   vars:
     kernel_image: linux-image-arm64

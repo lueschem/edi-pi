@@ -1,4 +1,5 @@
 - hosts: all
+  gather_facts: no
 
   vars:
     gitops_user_name: gitops
