@@ -12,7 +12,7 @@ general:
 
 bootstrap:
     tool: debootstrap
-    repository: deb http://deb.debian.org/debian/ bullseye main
+    repository: deb http://deb.debian.org/debian/ bookworm main
     repository_key: https://ftp-master.debian.org/keys/archive-key-10.asc
     additional_packages:
       - python3
