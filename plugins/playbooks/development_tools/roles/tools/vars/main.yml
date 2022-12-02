@@ -16,11 +16,10 @@ base_development_tools:
   - build-essential
 
 cross_development_tools:
-  - crossbuild-essential-{{ cross_architecture }}
   - dpkg-cross
   - qemu-user-static
 
 foreign_base_libraries:
-  - "libc6:{{ cross_architecture }}"
-  - "libstdc++6:{{ cross_architecture }}"
+  - "libc6"
+  - "libstdc++6"
 
