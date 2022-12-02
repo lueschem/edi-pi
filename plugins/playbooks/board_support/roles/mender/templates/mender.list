@@ -1,1 +1,2 @@
-deb [arch={{ edi_bootstrap_architecture }}] https://downloads.mender.io/repos/debian debian/bullseye/stable main
+#TODO: Readd mender repository once it is available for Debian buster.
+#deb [arch={{ edi_bootstrap_architecture }}] https://downloads.mender.io/repos/debian debian/{{ ansible_distribution_release }}/stable main
