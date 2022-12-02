@@ -8,8 +8,13 @@ MAC_FILE=/sys/class/net/eth0/address
 
 if [ ! -f "${MAC_FILE}" ]
 then
-    >&2 echo "Error: ${MAC_FILE} not found!"
-    exit 1
+    MAC_FILE=/sys/class/net/end0/address
+
+    if [ ! -f "${MAC_FILE}" ]
+    then
+        >&2 echo "Error: ${MAC_FILE} not found!"
+        exit 1
+    fi
 fi
 
-echo "mac=$(cat /sys/class/net/eth0/address)"
+echo "mac=$(cat ${MAC_FILE})"
