@@ -1,0 +1,2 @@
+deb [signed-by=/usr/share/keyrings/get-edi-io-archive-keyring.gpg] https://packagecloud.io/get-edi/debian/debian/ {{ ansible_distribution_release }} main
+# deb-src [signed-by=/usr/share/keyrings/get-edi-io-archive-keyring.gpg] https://packagecloud.io/get-edi/debian/debian/ {{ ansible_distribution_release }} main
