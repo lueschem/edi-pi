@@ -51,8 +51,9 @@
   apt:
     name:
     - mender-client
-    - mender-connect
-    - mender-configure
+# TODO: Readd mender-connect and mender-configure once they are available.
+#    - mender-connect
+#    - mender-configure
     - jq
     state: present
     install_recommends: no
