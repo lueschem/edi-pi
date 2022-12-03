@@ -5,5 +5,5 @@ set -o nounset
 
 source {{ pp_timestamp }}
 
-{{ edi_current_plugin_directory }}/lxd2rootfs --input {{ edi_input_artifact }} --output {{ pp_rootfs }} --workdir {{ edi_work_directory }} --artifact ${BUILD_TIMESTAMP}-{{ edi_configuration_name }} --log {{ edi_log_level }}
+{{ edi_current_plugin_directory }}/lxd2rootfs --input {{ edi_input_artifact }} --output {{ pp_rootfs }} --workdir {{ edi_work_directory }} --artifact ${BUILD_TIMESTAMP}-{{ edi_configuration_name }}-{{ debian_distribution_release }}-{{ edi_bootstrap_architecture }} --log {{ edi_log_level }}
 
