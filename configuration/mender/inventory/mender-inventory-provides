@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# Returns the current list of providees for the devices, using
+# the Mender client's `show-provides` command
+
+# TODO: Remove this script as soon as it is provided by the mender-client Debian package!
+
+set -e
+
+/usr/bin/mender show-provides
+
+exit 0

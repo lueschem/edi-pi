@@ -1,0 +1,11 @@
+#!/bin/sh
+
+# Determines what the root filesystem type is.
+
+# TODO: Remove this script as soon as it is provided by the mender-client Debian package!
+
+FS_TYPE="$(grep ' / ' /proc/mounts | grep -v "^rootfs" | awk '{print $3}')"
+if [ -z "${FS_TYPE}" ]; then
+    FS_TYPE=Unknown
+fi
+echo rootfs_type="$FS_TYPE"
