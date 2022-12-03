@@ -1,5 +1,5 @@
 general:
-    edi_required_minimal_edi_version: 1.9.0
+    edi_required_minimal_edi_version: 1.13.0
     edi_compression: gz
     edi_lxc_network_interface_name: eth0
     edi_lxc_bridge_interface_name: edibr0
@@ -9,6 +9,7 @@ general:
         ebs_bootloader_type: "u-boot"
         default_user_name: pi
         default_user_group_name: pi
+        debian_distribution_release: bookworm
 
 bootstrap:
     tool: debootstrap
