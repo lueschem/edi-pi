@@ -1,6 +1,3 @@
-bootstrap:
-    architecture: amd64
-
 lxc_profiles:
     300_suppress_init:
         skip: True
