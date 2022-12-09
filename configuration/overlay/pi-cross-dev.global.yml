@@ -40,6 +40,8 @@ postprocessing_commands:
         skip: True
     500_documentation:
         skip: True
+    600_fully_named_artifacts:
+        skip: True
 
 shared_folders:
     edi_workspace:

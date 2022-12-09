@@ -110,6 +110,10 @@ postprocessing_commands:
             pp_documentation: {{ edi_configuration_name }}_documentation
         parameters:
             author: The edi-pi Project Team
+    600_fully_named_artifacts:
+        path: postprocessing_commands/fully_named_artifacts/create_full_names.edi
+        output:
+            pp_fully_named_artifacts: {{ edi_configuration_name }}_fully_named_artifacts
 
 documentation_steps:
     100_index:

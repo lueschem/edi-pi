@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+
+source {{ pp_timestamp }}
+
+mkdir -p "{{ pp_fully_named_artifacts }}"
+ln -f "{{ pp_mender_artifact }}" "{{ pp_fully_named_artifacts }}/${BUILD_TIMESTAMP}_{{ edi_configuration_name }}-{{ debian_distribution_release }}-{{ edi_bootstrap_architecture }}.mender"
+ln -f "{{ pp_image }}" "{{ pp_fully_named_artifacts }}/${BUILD_TIMESTAMP}_{{ edi_configuration_name }}-{{ debian_distribution_release }}-{{ edi_bootstrap_architecture }}.img"
+ln -f "{{ pp_bmap }}" "{{ pp_fully_named_artifacts }}/${BUILD_TIMESTAMP}_{{ edi_configuration_name }}-{{ debian_distribution_release }}-{{ edi_bootstrap_architecture }}.bmap"
+
