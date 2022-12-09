@@ -5,6 +5,13 @@
     state: present
     install_recommends: no
 
+- name: Install wpasupplicant on devices that have WiFi.
+  apt:
+    name: wpasupplicant
+    state: present
+    install_recommends: no
+  when: mender_device_type != "pi2"
+
 - name: Preset unused wpa_supplicant and systemd-networkd services to disabled.
   copy:
     src: "{{ item }}"

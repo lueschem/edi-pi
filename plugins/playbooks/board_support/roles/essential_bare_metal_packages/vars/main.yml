@@ -9,5 +9,4 @@ bare_metal_packages:
   - network-manager
   - systemd-timesyncd
   - udev
-  - wpasupplicant
 
