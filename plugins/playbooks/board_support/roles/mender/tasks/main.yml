@@ -51,9 +51,8 @@
   apt:
     name:
     - mender-client
-# TODO: Readd mender-connect and mender-configure once they are available.
-#    - mender-connect
-#    - mender-configure
+    - mender-connect
+    - mender-configure
     - jq
     state: present
     install_recommends: no
@@ -108,8 +107,7 @@
   copy:
     src: override.conf
     dest: /etc/systemd/system/mender-client.service.d/
-# TODO: Uncomment the conditional statement as soon as the mender-client PR is merged.
-#  when: ebs_bootloader_type == "raspberry-pi"
+  when: ebs_bootloader_type == "raspberry-pi"
 
 - name: Copy the bootloader integration script.
   copy:
