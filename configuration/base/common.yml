@@ -26,7 +26,6 @@ bootstrap:
       - isc-dhcp-client
       - resolvconf
       - systemd
-      - systemd-resolved
       - systemd-sysv
       - gnupg
       - dumb-init
