@@ -14,6 +14,7 @@ bootstrap:
       - iputils-ping
       - isc-dhcp-client
       - systemd
+      - systemd-resolved
       - systemd-sysv
       - gnupg
       - dumb-init
