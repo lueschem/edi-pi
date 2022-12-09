@@ -31,6 +31,12 @@
     dest: /etc/apt/sources.list.d/get-edi-io.list
     mode: 0644
 
+# TODO: Remove preference as soon as packages are available directly from Mender or Debian.
+- name: Prefer packages from get-edi-io repository.
+  copy:
+    src: 50-get-edi-io
+    dest: /etc/apt/preferences.d/
+
 - name: Update apt cache.
   apt:
     update_cache: yes
