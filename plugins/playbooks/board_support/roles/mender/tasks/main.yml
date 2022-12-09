@@ -33,14 +33,15 @@
     src: 05_mender_client
     dest: /etc/dpkg/dpkg.cfg.d/
 
-- name: Add mender repository apt key.
-  apt_key:
-    data: "{{ lookup('file', 'mender.gpgkey') }}"
-    state: present
+- name: Add Mender repository key.
+  copy:
+    src: mender-io-archive-keyring.gpg
+    dest: /usr/share/keyrings/
+    mode: 0644
 
 - name: Add mender repository to sources.list.d.
   template:
-    src: mender.list
+    src: mender-io.list
     dest: /etc/apt/sources.list.d/
 
 - name: Update apt cache.

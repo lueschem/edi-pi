@@ -22,7 +22,7 @@
 - name: Add edi repository key.
   copy:
     src: get-edi-io-archive-keyring.gpg
-    dest: /usr/share/keyrings/get-edi-io-archive-keyring.gpg
+    dest: /usr/share/keyrings/
     mode: 0644
 
 - name: Add edi repository.
