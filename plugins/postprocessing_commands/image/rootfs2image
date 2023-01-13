@@ -178,7 +178,7 @@ ROOT_SECTORS=$(expr $(expr ${ROOTFS_SIZE_KB} + ${ROOTFS_SIZE_KB} \/ 100 \* 25) \
 IMAGE_SECTORS=$(expr ${TABLE_SECTORS} + ${FIRMWARE_SECTORS} + ${DATA_SECTORS} + ${ROOT_SECTORS})
 
 # Prepare the image file.
-dd if=/dev/zero of="${DEVICE_IMAGE}" bs=512 count=${IMAGE_SECTORS}
+dd if=/dev/zero of="${DEVICE_IMAGE}" bs=512 count=${IMAGE_SECTORS} conv=fsync
 
 # Write partition table
 sfdisk -q "${DEVICE_IMAGE}" <<EOM
@@ -186,6 +186,8 @@ ${TABLE_SECTORS},${FIRMWARE_SECTORS},c,*
 ${DATA_OFFSET_SECTOR},${DATA_SECTORS},83
 ${ROOT_OFFSET_SECTOR},${ROOT_SECTORS},83
 EOM
+
+partprobe "${DEVICE_IMAGE}"
 
 # Setup temporary loop devices:
 echo "Setting up loop devices."
@@ -222,7 +224,7 @@ do_unmount
 
 zerofree "${ROOT_LD}"
 
-dd if="${ROOT_LD}" of="${DEVICE_PARTITION_IMAGE}"
+dd if="${ROOT_LD}" of="${DEVICE_PARTITION_IMAGE}" conv=fsync
 
 clean_up "${TEMPDIR}"
 
