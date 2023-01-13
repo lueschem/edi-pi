@@ -1,3 +1,11 @@
 Package: *
-Pin: origin packagecloud.io
+Pin: release a=unstable
+Pin-Priority: 450
+
+Package: mender-connect
+Pin: release a=unstable
+Pin-Priority: 750
+
+Package: mender-client
+Pin: release a=unstable
 Pin-Priority: 750
