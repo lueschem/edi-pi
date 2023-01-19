@@ -23,6 +23,10 @@
       become: True
       become_user: root
       when: edi_create_distributable_image and (edi_bootstrap_architecture == 'arm64' or edi_bootstrap_architecture == 'armhf')
+    - role: set_hostname
+      become: True
+      become_user: root
+      when: edi_create_distributable_image and (edi_bootstrap_architecture == 'arm64' or edi_bootstrap_architecture == 'armhf')
     - role: mender
       become: True
       become_user: root
