@@ -69,12 +69,14 @@ if [[ $EUID -ne 0 ]]; then
 fi
 
 OLD_HOSTNAME=$(cat /etc/hostname)
-NEW_HOSTNAME="${OLD_HOSTNAME}"-$("${IDENTITY_SCRIPT}" | cut -d= -f2 | sed 's/://g')
+HOSTNAME_SUFFIX="$("${IDENTITY_SCRIPT}" | cut -d= -f2 | sed 's/://g')"
+# take care of idempotency by not adding the suffix twice
+NEW_HOSTNAME="${OLD_HOSTNAME%-${HOSTNAME_SUFFIX}}-${HOSTNAME_SUFFIX}"
 
 # static hostname
 echo "${NEW_HOSTNAME}" > /etc/hostname
 # transient hostname
 hostname "${NEW_HOSTNAME}"
-sed -i "s/$OLD_HOSTNAME/$NEW_HOSTNAME/g" /etc/hosts
+sed -i "s/^127.0.1.1.*/127.0.1.1   ${NEW_HOSTNAME}/" /etc/hosts
 
 print_and_exit "INFO" "hostname successfully adjusted"
