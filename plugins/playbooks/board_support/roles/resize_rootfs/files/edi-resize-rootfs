@@ -57,12 +57,6 @@ trap "abnormal_termination" EXIT
 
 echo "going to resize existing rootfs partition and adding a secondary rootfs partition"
 
-CONTROL_FILE="/etc/edi-resize-rootfs.done"
-
-if [ -f "${CONTROL_FILE}" ] ; then
-    print_and_exit "INFO" "rootfs already got modified - not going to modify rootfs again"
-fi
-
 if systemd-detect-virt --container > /dev/null ; then
     print_and_exit "INFO" "detected container virtualization - not going to modify rootfs"
 fi
@@ -131,8 +125,6 @@ if [ "$(expr ${ROOTFS_START_S} + ${ROOTFS_SIZE_S} + 1)" -lt "${DISK_SIZE_S}" ] ;
 fi
 
 resize2fs /dev/${ROOT_PART}
-
-touch ${CONTROL_FILE}
 
 print_and_exit "INFO" "disk layout of ${ROOT_DEV} successfully changed"
 
