@@ -10,6 +10,7 @@ general:
         default_user_name: pi
         default_user_group_name: pi
         debian_distribution_release: bookworm
+        ansible_python_interpreter: /usr/bin/python3
 
 bootstrap:
     tool: debootstrap
