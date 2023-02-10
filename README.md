@@ -57,26 +57,10 @@ will need a proper ssh key setup in order to access the container or
 the Rasperry Pi using ssh.
 
 The image post processing commands require some additional tools. On
-Ubuntu 18.04 those tools can be installed as follows:
+Ubuntu 20.04 those tools can be installed as follows:
 
 ``` bash
-sudo apt install e2fsprogs dosfstools bmap-tools mtools parted rsync zerofree python3-sphinx
-```
-
-To generate the Mender update artifact, the [mender-artifact](https://docs.mender.io/downloads#mender-artifact)
-tool is required. For Ubuntu Bionic and Debian Stretch please [download](https://docs.mender.io/downloads#mender-artifact)
-the standalone binary and make it visible and executable:
-
-``` bash
-sudo cp ~/Downloads/mender-artifact /usr/local/bin/
-sudo chmod +x /usr/local/bin/mender-artifact
-```
-
-If you are on Ubuntu Focal or Debian Buster or newer you can also use the following command to install
-mender-artifact:
-
-``` bash
-sudo apt install mender-artifact
+sudo apt install e2fsprogs dosfstools bmap-tools mtools parted rsync zerofree python3-sphinx mender-artifact
 ```
 
 ### Creating a Raspberry Pi Image
