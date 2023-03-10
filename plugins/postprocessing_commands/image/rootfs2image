@@ -197,8 +197,8 @@ ROOT_LD="$(losetup -o ${LOSETUP_ROOT_OFFSET_M}M -f --show ${DEVICE_IMAGE})"
 
 # Build filesystems
 mkfs.vfat "${FIRMWARE_LD}"
-mkfs.ext4 "${DATA_LD}"
-mkfs.ext4 "${ROOT_LD}"
+mkfs.ext4 -I 256 "${DATA_LD}"
+mkfs.ext4 -I 256 "${ROOT_LD}"
 
 fatlabel "${FIRMWARE_LD}" boot
 e2label "${DATA_LD}" data
