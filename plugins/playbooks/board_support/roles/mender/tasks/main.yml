@@ -88,7 +88,7 @@
     - "{{ mender_config_directory }}/inventory/*"
 
 - name: Copy identity scripts.
-  copy:
+  template:
     src: "{{ item }}"
     dest: /usr/share/mender/identity/
     mode: 0755

@@ -1,20 +1,15 @@
 #!/bin/bash
 
-# This identity script returns the MAC address of eth0 as the device identity.
+# This identity script returns the MAC address of {{ 'end0' if mender_device_type == 'pi4_v3' else 'eth0' }} as the device identity.
 
 set -ue
 
-MAC_FILE=/sys/class/net/eth0/address
+MAC_FILE=/sys/class/net/{{ 'end0' if mender_device_type == 'pi4_v3' else 'eth0' }}/address
 
 if [ ! -f "${MAC_FILE}" ]
 then
-    MAC_FILE=/sys/class/net/end0/address
-
-    if [ ! -f "${MAC_FILE}" ]
-    then
-        >&2 echo "Error: ${MAC_FILE} not found!"
-        exit 1
-    fi
+    >&2 echo "Error: ${MAC_FILE} not found!"
+    exit 1
 fi
 
 echo "mac=$(cat ${MAC_FILE})"
