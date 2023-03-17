@@ -47,12 +47,12 @@ Special thanks go to the people behind those two projects:
 
 ### Preparation
 
-Prior to using edi-pi you have to install [edi](https://www.get-edi.io)
-according to
-[this description](https://docs.get-edi.io/en/latest/getting_started.html).
+Prior to using this edi project configuration you have to install
+[edi](https://www.get-edi.io) according to
+[this instructions](https://docs.get-edi.io/en/latest/getting_started.html).
 Please take a careful look at the "Setting up ssh Keys" section since you
 will need a proper ssh key setup in order to access the container or
-the Raspberry Pi using ssh.
+the target device using ssh.
 
 The image post-processing commands require some additional tools. On
 Ubuntu 20.04 and newer those tools can be installed as follows:
@@ -192,7 +192,7 @@ make PDFLATEX=xelatex latexpdf
 
 ### More Information
 
-For more information please read the [edi documentation](https://docs.get-edi.io) and
+For more information about this setup please read the [edi documentation](https://docs.get-edi.io) and
 [this blog post](https://www.get-edi.io/A-new-Approach-to-Operating-System-Image-Generation/).
 
 For details about the Mender based robust update integration please refer to this

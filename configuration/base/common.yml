@@ -32,12 +32,8 @@ bootstrap:
 lxc_profiles:
     100_lxc_networking:
         path: lxc_profiles/general/lxc_networking/default_interface.yml
-
-{% if edi_lxd_version is defined and (edi_lxd_version.split('.')[0] | int >= 3 or edi_lxd_version.split('.')[1] | int >= 9) %}
     200_default_root_device:
         path: lxc_profiles/general/default_root_device/default_root_device.yml
-{% endif %}
-
     300_suppress_init:
         path: lxc_profiles/general/suppress_init/suppress_init.yml
         skip: False
