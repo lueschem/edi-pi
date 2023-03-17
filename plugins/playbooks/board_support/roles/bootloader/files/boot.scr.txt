@@ -55,6 +55,8 @@ else
     echo "Trying to reset an environment setup that does not match the current installation!"
     setenv edi_first_boot_done false
     saveenv
+    # avoid busy reboot loop
+    sleep 60
     reset
 fi
 

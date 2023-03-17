@@ -1,0 +1,18 @@
+[Unit]
+Description=Set Hostname on First Boot
+DefaultDependencies=no
+Conflicts=shutdown.target
+After=systemd-remount-fs.service sys-subsystem-net-devices-{{ 'end0' if mender_device_type == 'pi4-v3' else 'eth0' }}.device
+Before=sysinit.target first-boot-complete.target shutdown.target
+Wants=first-boot-complete.target sys-subsystem-net-devices-{{ 'end0' if mender_device_type == 'pi4-v3' else 'eth0' }}.device
+ConditionPathIsReadWrite=/etc
+ConditionFirstBoot=yes
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/edi-set-hostname
+
+[Install]
+WantedBy=sysinit.target
+

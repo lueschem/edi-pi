@@ -1,4 +1,9 @@
 ---
+- name: Check Debian release compatibility.
+  fail:
+    msg: "Error: The playbooks can not be applied to the given target as the distribution release is incompatible! Only Debian {{ debian_distribution_release }} is currently supported!"
+  when: ansible_distribution_release != debian_distribution_release
+
 - name: Install ca-certificates.
   apt:
     name: ca-certificates
@@ -9,20 +14,28 @@
     dest: /etc/apt/sources.list
     state: absent
 
-- name: Readd bullseye repository.
-  copy:
-    src: bullseye.list
+- name: Readd Debian repository.
+  template:
+    src: debian.list
     dest: /etc/apt/sources.list.d/
 
-- name: Add get-edi packagecloud repository apt key.
-  apt_key:
-    data: "{{ lookup('file', 'packagecloud.gpgkey') }}"
-    state: present
-
-- name: Add get-edi packagecloud repository to sources.list.d.
+- name: Add edi repository key.
   copy:
-    src: edi-repository.list
-    dest: /etc/apt/sources.list.d/
+    src: get-edi-io-archive-keyring.gpg
+    dest: /usr/share/keyrings/
+    mode: 0644
+
+- name: Add edi repository.
+  template:
+    src: get-edi-io.list
+    dest: /etc/apt/sources.list.d/get-edi-io.list
+    mode: 0644
+
+# TODO: Remove preference as soon as packages are available directly from Mender or Debian.
+- name: Prefer packages from get-edi-io repository.
+  copy:
+    src: 50-get-edi-io
+    dest: /etc/apt/preferences.d/
 
 - name: Update apt cache.
   apt:

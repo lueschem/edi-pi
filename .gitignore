@@ -7,4 +7,3 @@ main.retry
 .idea/*
 /plugins/playbooks/rpi3_base/roles/bootloader/files/upstream-*.tar.gz
 /configuration/mender/mender_custom.yml
-/configuration/wifi/wifi_custom.yml

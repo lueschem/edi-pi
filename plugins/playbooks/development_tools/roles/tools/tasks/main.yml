@@ -11,9 +11,17 @@
     state: present
   when: install_cross_development_tools
 
+- name: Install crossbuild essentials.
+  apt:
+    name:  crossbuild-essential-{{ item }}
+    state: present
+  loop: "{{ cross_architectures }}"
+  when: install_cross_development_tools
+
 - name: Install foreign base libraries.
   apt:
-    name: "{{ foreign_base_libraries }}"
+    name: "{{ item.0 }}:{{ item.1 }}"
     state: present
+  loop: "{{ foreign_base_libraries|product(cross_architectures)|list }}"
   when: install_cross_development_tools
 

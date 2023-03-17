@@ -1,0 +1,14 @@
+---
+- name: Copy the script that adjusts the hostname.
+  copy:
+    src: edi-set-hostname
+    dest: /usr/bin/
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Add a systemd service that adjusts the hostname on first boot.
+  template:
+    src: edi-set-hostname.service
+    dest: /lib/systemd/system/
+

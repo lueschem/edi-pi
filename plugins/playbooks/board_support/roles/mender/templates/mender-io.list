@@ -1,0 +1,2 @@
+#TODO: Readd mender repository once it is available for Debian bookworm.
+#deb [arch={{ edi_bootstrap_architecture }} signed-by=/usr/share/keyrings/mender-io-archive-keyring.gpg] https://downloads.mender.io/repos/debian debian/{{ ansible_distribution_release }}/stable main

@@ -1,0 +1,11 @@
+general:
+    parameters:
+        mender_device_type: pi3
+
+bootstrap:
+    architecture: arm64
+
+shared_folders:
+    edi_workspace:
+        folder: edi-workspace
+        mountpoint: edi-workspace

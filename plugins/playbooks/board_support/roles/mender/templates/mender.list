@@ -1,1 +1,0 @@
-deb [arch={{ edi_bootstrap_architecture }}] https://downloads.mender.io/repos/debian debian/bullseye/stable main

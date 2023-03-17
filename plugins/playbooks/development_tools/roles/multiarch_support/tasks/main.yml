@@ -1,8 +1,9 @@
 ---
-- name: Enable foreign architecture.
-  command: bash -c "dpkg --add-architecture {{ cross_architecture }} && touch /etc/{{ cross_architecture }}.enabled.edi"
+- name: Enable foreign architectures.
+  command: bash -c "dpkg --add-architecture {{ item }} && touch /etc/{{ item }}.enabled.edi"
   args:
-    creates: /etc/{{ cross_architecture }}.enabled.edi
+    creates: /etc/{{ item }}.enabled.edi
+  loop: "{{ cross_architectures }}"
 
 - name: Update apt cache.
   apt:

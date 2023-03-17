@@ -1,5 +1,5 @@
 general:
-    edi_required_minimal_edi_version: 1.9.0
+    edi_required_minimal_edi_version: 1.14.1
     edi_compression: gz
     edi_lxc_network_interface_name: eth0
     edi_lxc_bridge_interface_name: edibr0
@@ -9,11 +9,12 @@ general:
         ebs_bootloader_type: "u-boot"
         default_user_name: pi
         default_user_group_name: pi
+        debian_distribution_release: bookworm
         ansible_python_interpreter: /usr/bin/python3
 
 bootstrap:
     tool: debootstrap
-    repository: deb http://deb.debian.org/debian/ bullseye main
+    repository: deb http://deb.debian.org/debian/ bookworm main
     repository_key: https://ftp-master.debian.org/keys/archive-key-10.asc
     additional_packages:
       - python3
@@ -22,9 +23,7 @@ bootstrap:
       - netbase
       - net-tools
       - iputils-ping
-      - ifupdown
       - isc-dhcp-client
-      - resolvconf
       - systemd
       - systemd-sysv
       - gnupg
@@ -33,12 +32,8 @@ bootstrap:
 lxc_profiles:
     100_lxc_networking:
         path: lxc_profiles/general/lxc_networking/default_interface.yml
-
-{% if edi_lxd_version is defined and (edi_lxd_version.split('.')[0] | int >= 3 or edi_lxd_version.split('.')[1] | int >= 9) %}
     200_default_root_device:
         path: lxc_profiles/general/default_root_device/default_root_device.yml
-{% endif %}
-
     300_suppress_init:
         path: lxc_profiles/general/suppress_init/suppress_init.yml
         skip: False
@@ -63,6 +58,7 @@ playbooks:
             disable_ssh_password_authentication: True
             install_documentation: {% if edi_create_distributable_image %}changelog{% else %}full{% endif %}
             translations_filter: {% if edi_create_distributable_image %}en_translations_only{% else %}""{% endif %}
+            lxc_network_interface_manager: iproute2
     200_development_user_facilities:
         path: playbooks/debian/development_user_facilities/main.yml
         parameters:
@@ -111,6 +107,10 @@ postprocessing_commands:
             pp_documentation: {{ edi_configuration_name }}_documentation
         parameters:
             author: The edi-pi Project Team
+    600_fully_named_artifacts:
+        path: postprocessing_commands/fully_named_artifacts/create_full_names.edi
+        output:
+            pp_fully_named_artifacts: {{ edi_configuration_name }}_fully_named_artifacts
 
 documentation_steps:
     100_index:
