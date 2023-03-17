@@ -1,4 +1,4 @@
-# edi-pi
+# edi Project Configuration for Raspberry Pi Devices
 
 Debian tool chain and image generation for the Raspberry Pi 2, 3 and 4.
 
