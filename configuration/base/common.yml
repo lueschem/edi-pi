@@ -1,5 +1,5 @@
 general:
-    edi_required_minimal_edi_version: 1.13.0
+    edi_required_minimal_edi_version: 1.14.1
     edi_compression: gz
     edi_lxc_network_interface_name: eth0
     edi_lxc_bridge_interface_name: edibr0

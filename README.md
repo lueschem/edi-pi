@@ -4,6 +4,9 @@ Debian tool chain and image generation for the Raspberry Pi 2, 3 and 4.
 
 <img alt="Raspberry Pi" src=https://www.get-edi.io/assets/images/blog/pi-hardware.png width="75%"/>
 
+> **Note**
+> The *master* branch is currently basing upon Debian *bookworm*.
+> For Debian *bullseye* please check out the *debian_bullseye* branch. 
 
 ## Introduction
 
