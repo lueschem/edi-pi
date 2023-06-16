@@ -9,16 +9,6 @@
     name: ca-certificates
     install_recommends: no
 
-- name: Remove /etc/apt/sources.list.
-  file:
-    dest: /etc/apt/sources.list
-    state: absent
-
-- name: Readd Debian repository.
-  template:
-    src: debian.list
-    dest: /etc/apt/sources.list.d/
-
 - name: Add edi repository key.
   copy:
     src: get-edi-io-archive-keyring.gpg
