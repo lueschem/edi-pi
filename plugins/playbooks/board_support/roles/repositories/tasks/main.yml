@@ -4,15 +4,10 @@
     name: ca-certificates
     install_recommends: no
 
-- name: Remove /etc/apt/sources.list.
+- name: Remove /etc/apt/sources.list.d/bullseye.list.
   file:
-    dest: /etc/apt/sources.list
+    dest: /etc/apt/sources.list.d/bullseye.list
     state: absent
-
-- name: Readd bullseye repository.
-  copy:
-    src: bullseye.list
-    dest: /etc/apt/sources.list.d/
 
 - name: Add get-edi packagecloud repository apt key.
   apt_key:

@@ -1,5 +1,5 @@
 general:
-    edi_required_minimal_edi_version: 1.9.0
+    edi_required_minimal_edi_version: 1.15.0
     edi_compression: gz
     edi_lxc_network_interface_name: eth0
     edi_lxc_bridge_interface_name: edibr0
@@ -14,7 +14,7 @@ general:
 bootstrap:
     tool: debootstrap
     repository: deb http://deb.debian.org/debian/ bullseye main
-    repository_key: https://ftp-master.debian.org/keys/archive-key-10.asc
+    repository_key: https://ftp-master.debian.org/keys/archive-key-11.asc
     additional_packages:
       - python3
       - python3-apt
@@ -63,6 +63,7 @@ playbooks:
             disable_ssh_password_authentication: True
             install_documentation: {% if edi_create_distributable_image %}changelog{% else %}full{% endif %}
             translations_filter: {% if edi_create_distributable_image %}en_translations_only{% else %}""{% endif %}
+            base_system_sources_list_template: debian.list
     200_development_user_facilities:
         path: playbooks/debian/development_user_facilities/main.yml
         parameters:
