@@ -81,46 +81,46 @@ else
     fi
 fi
 
+PLAYBOOK_SOURCE_IS_GIT="false"
+GIT_URL_REGEX='^(https://|git@|ssh://).*'
+if [[ ${PLAYBOOK_URL} =~ ${GIT_URL_REGEX} ]]
+then
+    PLAYBOOK_SOURCE_IS_GIT="true"
+fi
+
 TEMPDIR=$(${GITOPS_USER} mktemp -p "${WORKDIR}" -d -t .tmp.XXXXXXXX)
 trap 'unexpected_exit "${TEMPDIR}"' EXIT
 
-cd "${TEMPDIR}"
-
-RETRY_SEC=( 0 60 120 240 480 960 )
-
-PLAYBOOK_URL_REACHABLE=0
-
-for seconds in "${RETRY_SEC[@]}"
-do
-    sleep "$seconds"
-    if ${GITOPS_USER} GIT_TERMINAL_PROMPT=0 git ls-remote --heads "${PLAYBOOK_URL}" > /dev/null 2>&1
-    then
-        PLAYBOOK_URL_REACHABLE=1
-        break
-    else
-        echo "${0}: Unable to fetch playbook '${PLAYBOOK_URL}'. Going to retry!"
-    fi
-done
-
-if [[ "${PLAYBOOK_URL_REACHABLE}" -eq 0 ]]
-then
-    print_error "Failed to fetch playbook '${PLAYBOOK_URL}'."
-    exit 1
-fi
-
-${GITOPS_USER} GIT_TERMINAL_PROMPT=0 git clone --branch "${PLAYBOOK_VERSION}" --depth 1 "${PLAYBOOK_URL}" playbook
-
-ROLES_PATH="${TEMPDIR}/playbook/roles"
-${GITOPS_USER} mkdir -p "${ROLES_PATH}"
-
-cd "${TEMPDIR}/playbook"
-cp "${CONFIG}" .
-CONFIG_FILE=$(basename -- "${CONFIG}")
+CONFIG_FILE="${TEMPDIR}"/$(basename -- "${CONFIG}")
+cp "${CONFIG}" "${CONFIG_FILE}"
 chown "${GITOPS_USER_NAME}":"${GITOPS_USER_GROUP_NAME}" "${CONFIG_FILE}"
 
-if [ -e requirements.yml ]
+DEBIAN_FRONTEND=noninteractive apt-get update > /dev/null
+
+if [ "${PLAYBOOK_SOURCE_IS_GIT}" == "true" ]
 then
-    ${GITOPS_USER} ansible-galaxy install --roles-path "${ROLES_PATH}" -r requirements.yml
+    DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends -y install git > /dev/null
+    cd "${TEMPDIR}"
+    ${GITOPS_USER} GIT_TERMINAL_PROMPT=0 git clone -c advice.detachedHead=false --branch "${PLAYBOOK_VERSION}" --depth 1 "${PLAYBOOK_URL}" playbook > /dev/null
+
+    ROLES_PATH="${TEMPDIR}/playbook/roles"
+    ${GITOPS_USER} mkdir -p "${ROLES_PATH}"
+    cd "${TEMPDIR}/playbook"
+
+    if [ -e requirements.yml ]
+    then
+        ${GITOPS_USER} ansible-galaxy install --roles-path "${ROLES_PATH}" -r requirements.yml
+    fi
+else
+    # there is no VERSION_ID in testing
+    VERSION_ID="99"
+    source /etc/os-release
+
+    PLAYBOOK_PACKAGE="${PLAYBOOK_URL}"
+    apt-mark unhold "${PLAYBOOK_PACKAGE}" || true
+    DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends -y install "${PLAYBOOK_PACKAGE}=${PLAYBOOK_VERSION}+deb${VERSION_ID//./}" > /dev/null
+    apt-mark hold "${PLAYBOOK_PACKAGE}"
+    cd "/usr/share/${PLAYBOOK_PACKAGE}"
 fi
 
 ${GITOPS_USER} ansible-playbook --connection=local --inventory 127.0.0.1, playbook.yml --extra-vars "@${CONFIG_FILE}" 1>&2

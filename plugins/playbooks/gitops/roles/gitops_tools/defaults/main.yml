@@ -1,7 +1,6 @@
 ---
 gitops_packages:
   - ansible-core
-  - git
 
 gitops_user_name: gitops
 gitops_user_group_name: gitops
