@@ -47,6 +47,12 @@ lxc_templates:
     200_etc_hosts:
         path: lxc_templates/debian/hosts/hosts.yml
 
+preprocessing_commands:
+    050_mmdebstrap:
+        path: preprocessing_commands/bootstrap/mmdebstrap.edi
+        output:
+            edi_bootstrapped_rootfs: {{ edi_configuration_name }}_bootstrapped-rootfs.tar
+
 playbooks:
     100_base_system:
         path: playbooks/debian/base_system/main.yml
