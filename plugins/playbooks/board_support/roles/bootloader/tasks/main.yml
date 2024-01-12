@@ -41,13 +41,13 @@
   copy:
     src: cmdline.txt.{{ ebs_bootloader_type }}.rpi4
     dest: "{{ bootloader_location }}/cmdline.txt"
-  when: (mender_device_type == "pi4" or mender_device_type == "pi4-v2" or mender_device_type == "pi4-v3") and ebs_bootloader_type == "u-boot"
+  when: (mender_device_type in ["pi4", "pi4-v2", "pi4-v3", "pi5-v3"]) and ebs_bootloader_type == "u-boot"
 
 - name: Setup the kernel command line.
   copy:
     src: cmdline.txt.{{ ebs_bootloader_type }}.rpi4
     dest: "{{ bootloader_image_location }}/cmdline.txt"
-  when: (mender_device_type == "pi4" or mender_device_type == "pi4-v2" or mender_device_type == "pi4-v3") and ebs_bootloader_type == "raspberry-pi"
+  when: (mender_device_type in ["pi4", "pi4-v2", "pi4-v3", "pi5-v3"]) and ebs_bootloader_type == "raspberry-pi"
 
 - name: Install the raspberrypi bootloader to the image location.
   unarchive:

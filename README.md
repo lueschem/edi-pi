@@ -1,6 +1,6 @@
 # edi Project Configuration for Raspberry Pi Devices
 
-Debian tool chain and image generation for the Raspberry Pi 2, 3 and 4.
+Debian tool chain and image generation for the Raspberry Pi 2, 3, 4 and 5.
 
 <img alt="Raspberry Pi" src=https://www.get-edi.io/assets/images/blog/pi-hardware.png width="75%"/>
 
@@ -68,13 +68,26 @@ sudo apt install e2fsprogs dosfstools bmap-tools mtools parted rsync zerofree py
 
 A Raspberry Pi image can be created using the following command:
 
+For Raspberry Pi 5, arm64:
+
+``` bash
+sudo edi -v image create pi5.yml
+```
+
+For Raspberry Pi 5, arm64, prepared for GitOps (git and Ansible preinstalled):
+
+``` bash
+sudo edi -v image create pi5-gitops.yml
+```
+
+
 For Raspberry Pi 4, arm64:
 
 ``` bash
 sudo edi -v image create pi4.yml
 ```
 
-For Raspberry Pi4, arm64, prepared for GitOps (git and Ansible preinstalled):
+For Raspberry Pi 4, arm64, prepared for GitOps (git and Ansible preinstalled):
 
 ``` bash
 sudo edi -v image create pi4-gitops.yml
@@ -95,6 +108,12 @@ sudo edi -v image create pi2.yml
 The resulting image can be copied to a SD card (here /dev/mmcblk0)
 using the following command
 (**Please note that everything on the SD card will be erased!**):
+
+For Raspberry Pi 5, arm64:
+
+``` bash
+sudo bmaptool copy artifacts/pi5.img /dev/mmcblk0
+```
 
 For Raspberry Pi 4, arm64:
 
@@ -160,7 +179,7 @@ ssh IP_OF_CONTAINER
 You can directly start to cross compile applications:
 
 
-For the Raspberry Pi 3 or 4, arm64:
+For the Raspberry Pi 3, 4 or 5, arm64:
 
 ``` bash
 aarch64-linux-gnu-g++ ...
@@ -204,7 +223,7 @@ For details about the Mender based robust update integration please refer to thi
 If you are curious about the U-Boot bootloader setup please take a look at this
 [blog post](https://www.get-edi.io/Booting-Debian-with-U-Boot/).
 
-For the kernel build instructions related to the Raspberry Pi 4 please check
+For the kernel build instructions related to the Raspberry Pi 4 and 5 please check
 [this blog post](https://www.get-edi.io/Getting-Started-with-a-new-Embedded-System/).
 
 The WiFi setup is [documented here](docs/wifi_setup.md).
