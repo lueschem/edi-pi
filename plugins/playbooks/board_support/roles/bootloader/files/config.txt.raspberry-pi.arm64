@@ -2,16 +2,40 @@
 start_file=p__ROOTFS_PARTITION__start4.elf
 fixup_file=p__ROOTFS_PARTITION__fixup4.dat
 
-# Switch the CPU from ARMv7 into ARMv8 (aarch64) mode
+# Enable audio (loads snd_bcm2835)
+dtparam=audio=on
+
+# Run in 64-bit mode
 arm_64bit=1
 
 enable_uart=1
+
+# Disable compensation for displays with overscan
 disable_overscan=1
+
+# Run as fast as firmware / board allows
+arm_boost=1
 
 kernel=vmlinuz
 os_prefix=p__ROOTFS_PARTITION__/
+
+[cm4]
+# Enable host mode on the 2711 built-in XHCI USB controller.
+# This line should be removed if the legacy DWC2 controller is required
+# (e.g. for USB device mode) or if USB support is not required.
+otg_mode=1
 
 [pi4]
 # Enable DRM VC4 V3D driver on top of the dispmanx display stack
 dtoverlay=vc4-fkms-v3d
 max_framebuffers=2
+
+[pi5]
+# Enable DRM VC4 V3D driver
+dtoverlay=vc4-kms-v3d
+max_framebuffers=2
+
+# Don't have the firmware create an initial video= setting in cmdline.txt.
+# Use the kernel's default instead.
+disable_fw_kms_setup=1
+
