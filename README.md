@@ -4,7 +4,7 @@ Debian tool chain and image generation for the Raspberry Pi 2, 3, 4 and 5.
 
 <img alt="Raspberry Pi" src=https://www.get-edi.io/assets/images/blog/pi-hardware.png width="75%"/>
 
-> **Note**
+> [!NOTE]
 > The *master* branch is currently basing upon Debian *bookworm*.
 > For Debian *bullseye* please check out the *debian_bullseye* branch. 
 
@@ -13,23 +13,26 @@ Debian tool chain and image generation for the Raspberry Pi 2, 3, 4 and 5.
 The edi configuration contained in this repository can be used to
 generate the following artifacts:
 
-* A Debian bookworm arm64 (64bit) image suitable for the Raspberry Pi 3 or 4.
+* A Debian bookworm arm64 (64bit) image suitable for the Raspberry Pi 3, 4 or 5.
 * A Debian bookworm armhf (32bit) image suitable for the Raspberry Pi 2.
 * Matching Mender update artifacts for the above configurations.
 * An LXD container with a pre-installed cross development toolchains (armhf/arm64) for C and C++.
 
-:warning: **New Raspberry Pi 4 bootloader integration**: Starting with Debian bullseye
-the Raspberry Pi 4 setup in regard to the bootloader integration has changed: Instead of
-U-Boot the setup now directly relies upon the Raspberry Pi bootloader. The new "tryboot feature"
-together with a custom Mender integration allowed us to solve the
-[device tree handling during A/B updates issue](https://github.com/lueschem/edi-pi/issues/23). To
-make use of this new setup a
-[recent (>=2021-04-19) bootloader EEPROM](https://github.com/raspberrypi/rpi-eeprom/blob/master/firmware/release-notes.md)
-is required. **Please upgrade your Raspberry Pi 4 EEPROM prior to using this new setup.**
-Unfortunately this **new bootloader integration is incompatible with the previous setup**.
-Additional work would be required to migrate an existing installation over the air from the previous
-setup to this new setup. At the moment an existing installation using the old bootloader setup will need to be re-flashed.
-As the new bootloader integration required quite some rework, some rough edges are still to be expected.
+> [!NOTE]
+> **Raspberry Pi 5**: The Raspberry Pi 5 integration is brand new and might still come with a few glitches.
+
+> [!WARNING]
+> **New Raspberry Pi 4 bootloader integration**: Starting with Debian bullseye
+> the Raspberry Pi 4 setup in regard to the bootloader integration has changed: Instead of
+> U-Boot the setup now directly relies upon the Raspberry Pi bootloader. The new "tryboot feature"
+> together with a custom Mender integration allowed us to solve the
+> [device tree handling during A/B updates issue](https://github.com/lueschem/edi-pi/issues/23). To
+> make use of this new setup a
+> [recent (>=2021-04-19) bootloader EEPROM](https://github.com/raspberrypi/rpi-eeprom/blob/master/firmware/release-notes.md)
+> is required. **Please upgrade your Raspberry Pi 4 EEPROM prior to using this new setup.**
+> Unfortunately this **new bootloader integration is incompatible with the previous setup**.
+> Additional work would be required to migrate an existing installation over the air from the previous
+> setup to this new setup. At the moment an existing installation using the old bootloader setup will need to be re-flashed.
 
 ## Important Note
 
