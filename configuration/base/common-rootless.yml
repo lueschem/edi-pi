@@ -12,40 +12,11 @@ general:
         debian_distribution_release: bookworm
         ansible_python_interpreter: /usr/bin/python3
 
-bootstrap:
-    tool: debootstrap
-    repository: deb http://deb.debian.org/debian/ bookworm main
-    repository_key: https://ftp-master.debian.org/keys/archive-key-11.asc
-    additional_packages:
-      - python3
-      - python3-apt
-      - sudo
-      - netbase
-      - net-tools
-      - iputils-ping
-      - isc-dhcp-client
-      - systemd
-      - systemd-sysv
-      - gnupg
-      - dumb-init
-
-lxc_profiles:
-    100_lxc_networking:
-        path: lxc_profiles/general/lxc_networking/default_interface.yml
-    200_default_root_device:
-        path: lxc_profiles/general/default_root_device/default_root_device.yml
-    300_suppress_init:
-        path: lxc_profiles/general/suppress_init/suppress_init.yml
-        skip: False
-    400_gui_passthrough:
-        path: lxc_profiles/general/gui/passthrough.yml
-        skip: {{ edi_create_distributable_image }}
-
-lxc_templates:
-    100_etc_hostname:
-        path: lxc_templates/debian/hostname/hostname.yml
-    200_etc_hosts:
-        path: lxc_templates/debian/hosts/hosts.yml
+preprocessing_commands:
+    050_mmdebstrap:
+        path: preprocessing_commands/bootstrap/mmdebstrap.edi
+        output:
+            edi_bootstrapped_rootfs: {{ edi_configuration_name }}_bootstrapped-rootfs.tar
 
 playbooks:
     100_base_system:
@@ -77,41 +48,11 @@ playbooks:
             ssh_host_key_backup_folder: /data/backup/ssh
 
 postprocessing_commands:
-    050_timestamp:
-        path: postprocessing_commands/timestamp/timestamp.edi
-        require_root: False
-        output:
-            pp_timestamp: {{ edi_configuration_name }}_timestamp
-    100_lxd2rootfs:
-        path: postprocessing_commands/rootfs/lxd2rootfs.edi
-        require_root: True
-        output: 
-            pp_rootfs: {{ edi_configuration_name }}_rootfs
-    200_rootfs2image:
-        path: postprocessing_commands/image/rootfs2image.edi
-        require_root: True
+    100_snapshot2image:
+        path: postprocessing_commands/genimage/snapshot2image.edi
         output:
             pp_image: {{ edi_configuration_name }}.img
             pp_partition_image: {{ edi_configuration_name }}_rootfs.ext4
-    300_blockmap:
-        path: postprocessing_commands/blockmap/blockmap.edi
-        output:
-            pp_bmap: {{ edi_configuration_name }}.bmap
-    400_mender:
-        path: postprocessing_commands/mender/image2mender.edi
-        require_root: True
-        output:
-            pp_mender_artifact: {{ edi_configuration_name }}.mender
-    500_documentation:
-        path: postprocessing_commands/documentation/write_doc.edi
-        output:
-            pp_documentation: {{ edi_configuration_name }}_documentation
-        parameters:
-            author: The edi-pi Project Team
-    600_fully_named_artifacts:
-        path: postprocessing_commands/fully_named_artifacts/create_full_names.edi
-        output:
-            pp_fully_named_artifacts: {{ edi_configuration_name }}_fully_named_artifacts
 
 documentation_steps:
     100_index:
