@@ -1,0 +1,140 @@
+#!/bin/bash
+
+# Copyright (C) 2024 Matthias Luescher
+#
+# Authors:
+#  Matthias Luescher
+#
+# This file is part of the edi project configuration.
+#
+# This script is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This script is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with the edi project configuration.  If not, see <http://www.gnu.org/licenses/>.
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+print_usage()
+{
+    cat <<EOF
+Convert a root file system archive into a device image.
+The script is supposed to run in a fakeroot environment.
+
+Required arguments:
+ -i ARCHIVE, --input=ARCHIVE        : Archive that contains the root file system.
+ -p DIRECTORY, --plugin=DIRECTORY   : Plugin directory that contains additional files
+Optional arguments:
+ -h, --help                         : Print help text.
+ --log=LEVEL                        : Use --log=DEBUG to trace all commands.
+EOF
+}
+
+print_error()
+{
+    local MESSAGE="${1}"
+    >&2 echo -e "\033[91mError: ${MESSAGE}\033[0m"
+}
+
+print_error_and_exit()
+{
+    local MESSAGE="${1}"
+    print_error "${MESSAGE}"
+    exit 1
+}
+
+unexpected_exit()
+{
+    trap - EXIT
+    print_error_and_exit "Abnormal script termination."
+}
+
+if ! options=$(getopt -o hi:p: -l help,log:,input:,plugin: -- "$@")
+then
+    print_usage
+    print_error_and_exit "Invalid option."
+fi
+eval set -- "$options"
+
+INPUT_ARCHIVE=""
+PLUGIN_DIRECTORY=""
+LOG_LEVEL="INFO"
+
+while true
+do
+    case "${1}" in
+        -h|--help)             print_usage && exit 0;;
+        -i|--input)            INPUT_ARCHIVE="${2}"; shift 2;;
+        -p|--plugin)           PLUGIN_DIRECTORY="${2}"; shift 2;;
+        --log)                 LOG_LEVEL="${2}"; shift 2;;
+        *)                     break ;;
+    esac
+done
+
+if [ "${LOG_LEVEL}" == "DEBUG" ]; then
+    set -x
+fi
+
+if [ -z "${INPUT_ARCHIVE}" ]
+then
+    print_usage
+    print_error_and_exit "Missing input archive parameter."
+fi
+
+if [ -z "${PLUGIN_DIRECTORY}" ]
+then
+    print_usage
+    print_error_and_exit "Missing plugin directory parameter."
+fi
+
+trap "unexpected_exit" EXIT
+
+mkdir rootfs
+
+tar --numeric-owner -C rootfs/ -axf "${INPUT_ARCHIVE}"
+
+# TODO: verify hardlinks, exclude files:
+# rsync -a -H --exclude 'usr/share/doc/*/changelog.Debian.gz' --exclude 'usr/share/doc/*/changelog.gz' "${ROOTFS_DIR}/" "${ROOT_MNT}/"
+
+find rootfs/run/ -mindepth 1 -delete
+find rootfs/tmp/ -mindepth 1 -delete
+
+# Copy kernel, initrd and dtbs to firmware partition
+if [ -d "rootfs/boot/image-kernel" ]; then
+    cp -r -L rootfs/boot/image-kernel rootfs/boot/firmware/p3
+    sed -i "s@^BOOTLOADER_DIRECTORY=.*@BOOTLOADER_DIRECTORY=\"/boot/firmware/p3\"@" "rootfs/etc/edi-boot-shim/edi-boot-shim.cfg.d/multiboot.cfg"
+fi
+
+if [ -d "rootfs/boot/image-firmware" ]; then
+    cp rootfs/boot/image-firmware/cmdline.txt rootfs/boot/firmware/p3/cmdline.txt
+    sed -i 's@__ROOTFS_PARTITION__@3@' rootfs/boot/firmware/p3/cmdline.txt
+    cp rootfs/boot/image-firmware/config.txt rootfs/boot/firmware/config.txt
+    sed -i 's@__ROOTFS_PARTITION__@3@' rootfs/boot/firmware/config.txt
+    cp rootfs/boot/image-firmware/start4.elf rootfs/boot/firmware/p3start4.elf
+    cp rootfs/boot/image-firmware/fixup4.dat rootfs/boot/firmware/p3fixup4.dat
+fi
+
+# Remove /etc/machine-id and /var/lib/dbus/machine-id (it should be unique for each system).
+rm rootfs/etc/machine-id
+rm rootfs/var/lib/dbus/machine-id
+# Add fstab.
+cp "${PLUGIN_DIRECTORY}/fstab" rootfs/etc/
+
+# TODO: # Add artifact information to rootfs.
+#mkdir -p "${LXD_ROOTFS}/etc/mender/"
+#echo "artifact_name=${ARTIFACT_NAME}" > "${LXD_ROOTFS}/etc/mender/artifact_info"
+
+# TODO: adjust hostname
+
+genimage --rootpath rootfs --config "${PLUGIN_DIRECTORY}/genimage.cfg" --tmppath genimage-workdir
+
+trap - EXIT
