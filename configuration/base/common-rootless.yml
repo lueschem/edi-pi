@@ -48,11 +48,16 @@ playbooks:
             ssh_host_key_backup_folder: /data/backup/ssh
 
 postprocessing_commands:
-    100_snapshot2image:
-        path: postprocessing_commands/genimage/snapshot2image.edi
+    100_buildah2rootfs:
+        path: postprocessing_commands/rootfs/buildah2rootfs.edi
         output:
-            pp_image: {{ edi_configuration_name }}.img
-            pp_partition_image: {{ edi_configuration_name }}_rootfs.ext4
+            post_rootfs_archive: {{ edi_configuration_name }}_configured-rootfs.tar
+    200_rootfs2image:
+        path: postprocessing_commands/genimage/rootfs2image.edi
+        require_root: "fakeroot"
+        output:
+            post_image: {{ edi_configuration_name }}.img
+            post_partition_image: {{ edi_configuration_name }}_rootfs.ext4
 
 documentation_steps:
     100_index:

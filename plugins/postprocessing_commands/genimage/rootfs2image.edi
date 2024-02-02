@@ -24,20 +24,12 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
-print_usage()
-{
-    cat <<EOF
-Convert a root file system archive into a device image.
-The script is supposed to run in a fakeroot environment.
-
-Required arguments:
- -i ARCHIVE, --input=ARCHIVE        : Archive that contains the root file system.
- -p DIRECTORY, --plugin=DIRECTORY   : Plugin directory that contains additional files
-Optional arguments:
- -h, --help                         : Print help text.
- --log=LEVEL                        : Use --log=DEBUG to trace all commands.
-EOF
-}
+LOG_LEVEL="{{ edi_log_level }}"
+INPUT_ARCHIVE="{{ post_rootfs_archive }}"
+PLUGIN_DIRECTORY="{{ edi_current_plugin_directory }}"
+DISK_IMAGE="{{ post_image }}"
+PARTITION_IMAGE="{{ post_partition_image }}"
+WORKDIR="{{ edi_work_directory }}"
 
 print_error()
 {
@@ -54,49 +46,29 @@ print_error_and_exit()
 
 unexpected_exit()
 {
+    local TEMPDIR="${1}"
+    print_error "Going to clean up after abnormal script termination."
+    rm -rf "${TEMPDIR}"
     trap - EXIT
     print_error_and_exit "Abnormal script termination."
 }
-
-if ! options=$(getopt -o hi:p: -l help,log:,input:,plugin: -- "$@")
-then
-    print_usage
-    print_error_and_exit "Invalid option."
-fi
-eval set -- "$options"
-
-INPUT_ARCHIVE=""
-PLUGIN_DIRECTORY=""
-LOG_LEVEL="INFO"
-
-while true
-do
-    case "${1}" in
-        -h|--help)             print_usage && exit 0;;
-        -i|--input)            INPUT_ARCHIVE="${2}"; shift 2;;
-        -p|--plugin)           PLUGIN_DIRECTORY="${2}"; shift 2;;
-        --log)                 LOG_LEVEL="${2}"; shift 2;;
-        *)                     break ;;
-    esac
-done
 
 if [ "${LOG_LEVEL}" == "DEBUG" ]; then
     set -x
 fi
 
-if [ -z "${INPUT_ARCHIVE}" ]
-then
-    print_usage
-    print_error_and_exit "Missing input archive parameter."
+if touch /etc/edi-fakeroot-check > /dev/null 2>&1; then
+    print_error_and_exit "This script must not be run as real root - please use fakeroot."
 fi
 
-if [ -z "${PLUGIN_DIRECTORY}" ]
-then
-    print_usage
-    print_error_and_exit "Missing plugin directory parameter."
+if [[ ${EUID} -ne 0 ]]; then
+    print_error_and_exit "This script must be run using fakeroot."
 fi
 
-trap "unexpected_exit" EXIT
+TEMPDIR="$(mktemp -p "${WORKDIR}" -d -t .tmp.XXXXXXXX)"
+trap "unexpected_exit ${TEMPDIR}" EXIT
+
+pushd "${TEMPDIR}" > /dev/null
 
 mkdir rootfs
 
@@ -137,4 +109,10 @@ cp "${PLUGIN_DIRECTORY}/fstab" rootfs/etc/
 
 genimage --rootpath rootfs --config "${PLUGIN_DIRECTORY}/genimage.cfg" --tmppath genimage-workdir
 
+popd > /dev/null
+
+mv "${TEMPDIR}/images/disk-image.img" "${DISK_IMAGE}"
+mv "${TEMPDIR}/images/root.ext4" "${PARTITION_IMAGE}"
+
+rm -rf "${TEMPDIR}"
 trap - EXIT
