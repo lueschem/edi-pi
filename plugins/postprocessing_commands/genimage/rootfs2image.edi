@@ -24,12 +24,16 @@ set -o errexit
 set -o pipefail
 set -o nounset
 
+source "{{ pp_timestamp }}"
+
 LOG_LEVEL="{{ edi_log_level }}"
-INPUT_ARCHIVE="{{ post_rootfs_archive }}"
+INPUT_ARCHIVE="{{ pp_rootfs_archive }}"
 PLUGIN_DIRECTORY="{{ edi_current_plugin_directory }}"
-DISK_IMAGE="{{ post_image }}"
-PARTITION_IMAGE="{{ post_partition_image }}"
+DISK_IMAGE="{{ pp_image }}"
+PARTITION_IMAGE="{{ pp_partition_image }}"
 WORKDIR="{{ edi_work_directory }}"
+HOSTNAME="{{ hostname }}"
+ARTIFACT_NAME="${BUILD_TIMESTAMP}-{{ edi_configuration_name }}-{{ debian_distribution_release }}-{{ edi_bootstrap_architecture }}"
 
 print_error()
 {
@@ -72,13 +76,7 @@ pushd "${TEMPDIR}" > /dev/null
 
 mkdir rootfs
 
-tar --numeric-owner -C rootfs/ -axf "${INPUT_ARCHIVE}"
-
-# TODO: verify hardlinks, exclude files:
-# rsync -a -H --exclude 'usr/share/doc/*/changelog.Debian.gz' --exclude 'usr/share/doc/*/changelog.gz' "${ROOTFS_DIR}/" "${ROOT_MNT}/"
-
-find rootfs/run/ -mindepth 1 -delete
-find rootfs/tmp/ -mindepth 1 -delete
+tar --numeric-owner --exclude-from "${PLUGIN_DIRECTORY}/exclude-patterns" -C rootfs/ -axf "${INPUT_ARCHIVE}"
 
 # Copy kernel, initrd and dtbs to firmware partition
 if [ -d "rootfs/boot/image-kernel" ]; then
@@ -101,11 +99,15 @@ rm rootfs/var/lib/dbus/machine-id
 # Add fstab.
 cp "${PLUGIN_DIRECTORY}/fstab" rootfs/etc/
 
-# TODO: # Add artifact information to rootfs.
-#mkdir -p "${LXD_ROOTFS}/etc/mender/"
-#echo "artifact_name=${ARTIFACT_NAME}" > "${LXD_ROOTFS}/etc/mender/artifact_info"
+# Add artifact information to rootfs.
+mkdir -p "rootfs/etc/mender/"
+echo "artifact_name=${ARTIFACT_NAME}" > rootfs/etc/mender/artifact_info
 
-# TODO: adjust hostname
+# Adjust hostname.
+cp "${PLUGIN_DIRECTORY}/hosts" rootfs/etc/
+sed -i "s@__HOSTNAME__@${HOSTNAME}@" rootfs/etc/hosts
+cp "${PLUGIN_DIRECTORY}/hostname" rootfs/etc/
+sed -i "s@__HOSTNAME__@${HOSTNAME}@" rootfs/etc/hostname
 
 genimage --rootpath rootfs --config "${PLUGIN_DIRECTORY}/genimage.cfg" --tmppath genimage-workdir
 

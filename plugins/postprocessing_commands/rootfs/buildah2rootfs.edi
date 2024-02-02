@@ -4,6 +4,11 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
+WORKDIR="{{ edi_work_directory }}"
+CONTAINER_NAME="{{ edi_project_container }}"
+ROOTFS_ARCHIVE="{{ pp_rootfs_archive }}"
+LOG_LEVEL="{{ edi_log_level }}"
+
 print_error()
 {
     local MESSAGE="${1}"
@@ -31,11 +36,6 @@ clean_up()
     local TEMPDIR="${1}"
     rm -rf "${TEMPDIR}"
 }
-
-WORKDIR="{{ edi_work_directory }}"
-CONTAINER_NAME="{{ edi_project_container }}"
-ROOTFS_ARCHIVE="{{ post_rootfs_archive }}"
-LOG_LEVEL="{{ edi_log_level }}"
 
 if [ "${LOG_LEVEL}" == "DEBUG" ]; then
     set -x

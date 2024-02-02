@@ -3,4 +3,45 @@
 set -o nounset
 set -o errexit
 
-mmdebstrap --include=python3,python3-apt,sudo,netbase,net-tools,iputils-ping,isc-dhcp-client,systemd,systemd-sysv,gnupg,dumb-init --arch=arm64 --variant=minbase bookworm {{ edi_bootstrapped_rootfs }}
+LOG_LEVEL="{{ edi_log_level }}"
+ROOTFS_ARCHIVE="{{ edi_bootstrapped_rootfs }}"
+DISTRIBUTION_RELEASE="{{ debian_distribution_release }}"
+DEBIAN_ARCHITECTURE="{{ edi_bootstrap_architecture }}"
+WORKDIR="{{ edi_work_directory }}"
+
+print_error()
+{
+    local MESSAGE="${1}"
+    >&2 echo -e "\033[91mError: ${MESSAGE}\033[0m"
+}
+
+print_error_and_exit()
+{
+    local MESSAGE="${1}"
+    print_error "${MESSAGE}"
+    exit 1
+}
+
+unexpected_exit()
+{
+    local TEMPDIR="${1}"
+    print_error "Going to clean up after abnormal script termination."
+    rm -rf "${TEMPDIR}"
+    trap - EXIT
+    print_error_and_exit "Abnormal script termination."
+}
+
+if [ "${LOG_LEVEL}" == "DEBUG" ]; then
+    set -x
+fi
+
+TEMPDIR="$(mktemp -p "${WORKDIR}" -d -t .tmp.XXXXXXXX)"
+trap "unexpected_exit ${TEMPDIR}" EXIT
+
+TEMP_ARCHIVE="${TEMPDIR}/archive.tar"
+mmdebstrap --include=python3-apt,sudo --arch="${DEBIAN_ARCHITECTURE}" --variant=minbase "${DISTRIBUTION_RELEASE}" "${TEMP_ARCHIVE}"
+
+mv "${TEMP_ARCHIVE}" "${ROOTFS_ARCHIVE}"
+
+rm -rf "${TEMPDIR}"
+trap - EXIT

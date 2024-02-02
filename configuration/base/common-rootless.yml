@@ -1,8 +1,5 @@
 general:
     edi_required_minimal_edi_version: 1.15.0
-    edi_compression: gz
-    edi_lxc_network_interface_name: eth0
-    edi_lxc_bridge_interface_name: edibr0
     parameters:
         mender_device_type: generic
         ansible_pipelining: true
@@ -29,12 +26,10 @@ playbooks:
             disable_ssh_password_authentication: True
             install_documentation: {% if edi_create_distributable_image %}changelog{% else %}full{% endif %}
             translations_filter: {% if edi_create_distributable_image %}en_translations_only{% else %}""{% endif %}
-            lxc_network_interface_manager: iproute2
             base_system_sources_list_template: debian.list
+            configure_lxc_network_interface: False
     200_development_user_facilities:
         path: playbooks/debian/development_user_facilities/main.yml
-        parameters:
-            export_display: {{ not edi_create_distributable_image }}
     300_board_support:
         path: playbooks/board_support/main.yml
     400_development_tools:
@@ -42,22 +37,31 @@ playbooks:
     900_base_system_cleanup:
         path: playbooks/debian/base_system_cleanup/main.yml
         parameters:
-            hostname: raspberry
             document_build_setup: true
             document_installed_packages: true
             ssh_host_key_backup_folder: /data/backup/ssh
 
 postprocessing_commands:
-    100_buildah2rootfs:
+    100_timestamp:
+        path: postprocessing_commands/timestamp/timestamp.edi
+        output:
+            pp_timestamp: {{ edi_configuration_name }}_timestamp
+    200_buildah2rootfs:
         path: postprocessing_commands/rootfs/buildah2rootfs.edi
         output:
-            post_rootfs_archive: {{ edi_configuration_name }}_configured-rootfs.tar
-    200_rootfs2image:
+            pp_rootfs_archive: {{ edi_configuration_name }}_configured-rootfs.tar
+    300_rootfs2image:
         path: postprocessing_commands/genimage/rootfs2image.edi
         require_root: "fakeroot"
         output:
-            post_image: {{ edi_configuration_name }}.img
-            post_partition_image: {{ edi_configuration_name }}_rootfs.ext4
+            pp_image: {{ edi_configuration_name }}.img
+            pp_partition_image: {{ edi_configuration_name }}_rootfs.ext4
+        parameters:
+            hostname: raspberry
+    400_mender:
+        path: postprocessing_commands/mender/image2mender.edi
+        output:
+            pp_mender_artifact: {{ edi_configuration_name }}.mender
 
 documentation_steps:
     100_index:

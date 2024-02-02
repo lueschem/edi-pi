@@ -1,0 +1,9 @@
+./usr/share/doc/*/changelog.Debian.gz
+./usr/share/doc/*/changelog.gz
+./run/*
+./tmp/*
+./var/cache/debconf/*
+./var/cache/ldconfig/aux-cache
+./var/log/apt/*
+./var/log/alternatives.log
+./var/log/dpkg.log

@@ -95,10 +95,6 @@ if [ "${LOG_LEVEL}" == "DEBUG" ]; then
     set -x
 fi
 
-if [[ ${EUID} -ne 0 ]]; then
-   print_error_and_exit "This script must be run as root."
-fi
-
 if [ -z "${INPUT_IMAGE}" ]
 then
     print_usage
