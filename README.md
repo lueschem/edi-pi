@@ -64,7 +64,7 @@ The image post-processing commands require some additional tools. On
 Ubuntu 20.04 and newer those tools can be installed as follows:
 
 ``` bash
-sudo apt install e2fsprogs dosfstools bmap-tools mtools parted rsync zerofree python3-sphinx mender-artifact
+sudo apt install e2fsprogs dosfstools fdisk bmap-tools mtools parted rsync zerofree python3-sphinx mender-artifact
 ```
 
 ### Creating a Raspberry Pi Image
