@@ -39,7 +39,7 @@ TEMPDIR="$(mktemp -p "${WORKDIR}" -d -t .tmp.XXXXXXXX)"
 trap "unexpected_exit ${TEMPDIR}" EXIT
 
 TEMP_ARCHIVE="${TEMPDIR}/archive.tar"
-mmdebstrap --include=python3-apt,sudo --arch="${DEBIAN_ARCHITECTURE}" --variant=minbase "${DISTRIBUTION_RELEASE}" "${TEMP_ARCHIVE}"
+mmdebstrap --include=python3-apt,sudo,systemd,systemd-sysv --arch="${DEBIAN_ARCHITECTURE}" --variant=minbase "${DISTRIBUTION_RELEASE}" "${TEMP_ARCHIVE}"
 
 mv "${TEMP_ARCHIVE}" "${ROOTFS_ARCHIVE}"
 
