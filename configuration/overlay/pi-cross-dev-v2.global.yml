@@ -1,5 +1,6 @@
-bootstrap:
-    architecture:
+general:
+    parameters:
+        edi_bootstrap_architecture: {{ edi_host_architecture }}
 
 playbooks:
     100_base_system:

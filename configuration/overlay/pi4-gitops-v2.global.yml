@@ -2,9 +2,7 @@ general:
     parameters:
         mender_device_type: pi4-v3
         ebs_bootloader_type: "raspberry-pi"
-
-bootstrap:
-    architecture: arm64
+        edi_bootstrap_architecture: arm64
 
 playbooks:
     300_board_support:
