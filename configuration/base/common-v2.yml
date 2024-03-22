@@ -62,6 +62,16 @@ postprocessing_commands:
         path: postprocessing_commands/mender/image2mender.edi
         output:
             pp_mender_artifact: {{ edi_configuration_name }}.mender
+    500_documentation:
+        path: postprocessing_commands/documentation/write_doc_v2.edi
+        output:
+            pp_documentation: {{ edi_configuration_name }}_documentation
+        parameters:
+            author: The edi-pi Project Team
+    600_fully_named_artifacts:
+        path: postprocessing_commands/fully_named_artifacts/create_full_names.edi
+        output:
+            pp_fully_named_artifacts: {{ edi_configuration_name }}_fully_named_artifacts
 
 documentation_steps:
     100_index:
@@ -87,7 +97,7 @@ documentation_steps:
             file: changelog.rst
         parameters:
             edi_doc_include_changelog: True
-            edi_doc_changelog_baseline: 2019-12-01 00:00:00 GMT
+            edi_doc_changelog_baseline: 2023-06-10 00:00:00 GMT
             edi_doc_replacements:
             - pattern: '(CVE-[0-9]{4}-[0-9]{4,6})'
               replacement: '`\1 <https://cve.mitre.org/cgi-bin/cvename.cgi?name=\1>`_'

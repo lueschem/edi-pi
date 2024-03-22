@@ -27,4 +27,7 @@ postprocessing_commands:
         skip: True
     400_mender:
         skip: True
-
+    500_documentation:
+        skip: True
+    600_fully_named_artifacts:
+        skip: True
