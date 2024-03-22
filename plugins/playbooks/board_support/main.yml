@@ -6,6 +6,7 @@
     ebs_bootloader_directory: "/boot"
     ebs_bootloader_type: "u-boot"
     mender_device_type: ToBeOverwrittenInConfigurationOverlay
+    target_is_bare_metal: True
 
   roles:
     - role: repositories
@@ -14,20 +15,20 @@
     - role: bootloader
       become: True
       become_user: root
-      when: edi_create_distributable_image and (edi_bootstrap_architecture == 'arm64' or edi_bootstrap_architecture == 'armhf')
+      when: target_is_bare_metal
     - role: essential_bare_metal_packages
       become: True
       become_user: root
-      when: edi_create_distributable_image and (edi_bootstrap_architecture == 'arm64' or edi_bootstrap_architecture == 'armhf')
+      when: target_is_bare_metal
     - role: resize_rootfs
       become: True
       become_user: root
-      when: edi_create_distributable_image and (edi_bootstrap_architecture == 'arm64' or edi_bootstrap_architecture == 'armhf')
+      when: target_is_bare_metal
     - role: set_hostname
       become: True
       become_user: root
-      when: edi_create_distributable_image and (edi_bootstrap_architecture == 'arm64' or edi_bootstrap_architecture == 'armhf')
+      when: target_is_bare_metal
     - role: mender
       become: True
       become_user: root
-      when: edi_create_distributable_image and (edi_bootstrap_architecture == 'arm64' or edi_bootstrap_architecture == 'armhf')
+      when: target_is_bare_metal

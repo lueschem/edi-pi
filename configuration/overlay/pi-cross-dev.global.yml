@@ -22,6 +22,11 @@ playbooks:
     100_base_system:
         parameters:
             lxc_network_interface_manager: ifupdown
+            install_documentation: full
+            translations_filter: ""
+    300_board_support:
+        parameters:
+            target_is_bare_metal: False
     400_development_tools:
         parameters:
             install_development_tools: True
