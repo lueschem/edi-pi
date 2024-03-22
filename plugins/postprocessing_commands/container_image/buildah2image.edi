@@ -1,0 +1,42 @@
+#!/bin/bash
+
+# Copyright (C) 2024 Matthias Luescher
+#
+# Authors:
+#  Matthias Luescher
+#
+# This file is part of the edi project configuration.
+#
+# This script is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This script is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with the edi project configuration.  If not, see <http://www.gnu.org/licenses/>.
+
+set -o errexit
+set -o pipefail
+set -o nounset
+
+LOG_LEVEL="{{ edi_log_level }}"
+PODMAN_IMAGE="{{ pp_podman_image }}"
+BUILDAH_CONTAINER="{{ edi_project_container }}"
+
+if [ "${LOG_LEVEL}" == "DEBUG" ]; then
+    set -x
+fi
+
+buildah commit "${BUILDAH_CONTAINER}" "${PODMAN_IMAGE}"
+
+echo "********************************************************************************"
+echo " Hint: Use distrobox to launch a container."
+echo " Examples:"
+echo " distrobox create --image ${PODMAN_IMAGE} --name CONTAINER_NAME --unshare-all"
+echo " distrobox create --image ${PODMAN_IMAGE} --name CONTAINER_NAME --init --unshare-all --additional-packages \"systemd libpam-systemd\""
+echo "********************************************************************************"
