@@ -5,7 +5,7 @@ general:
         edi_bootstrap_architecture: arm64
 
 playbooks:
-    300_board_support:
+    100_os_setup:
         parameters:
             ebs_template: boot.spec.rpi4.${DEBIAN_ARCHITECTURE}
             ebs_bootloader_directory: "/boot/image-kernel"

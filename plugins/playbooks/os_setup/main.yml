@@ -1,0 +1,110 @@
+---
+- hosts: all
+  vars:
+    apply_proxy_settings: True
+    create_default_user: False
+    install_openssh_server: False
+    disable_ssh_password_authentication: True
+    authorize_current_user: True
+    ssh_pub_key_directory: '{{ edi_project_directory }}/ssh_pub_keys'
+    install_documentation: full
+    translations_filter: ""
+    base_system_sources_list_template: ""
+    kernel_image: linux-image-arm64
+    ebs_template: boot.cmd.rpi.${DEBIAN_ARCHITECTURE}.multiboot
+    ebs_bootloader_directory: "/boot"
+    ebs_bootloader_type: "u-boot"
+    mender_device_type: ToBeOverwrittenInConfigurationOverlay
+    enable_gitops: False
+    gitops_user_name: gitops
+    gitops_user_group_name: gitops
+    target_is_bare_metal: True
+    install_development_tools: False
+    install_cross_development_tools: False
+    cross_architectures:
+      - arm64
+      - armhf
+    regenerate_openssh_server_keys: True
+    # revert proxy settings
+    cleanup_proxy_settings: True
+    document_build_setup: False
+    document_installed_packages: False
+    package_baseline_source_file: "{{ edi_project_directory }}/configuration/documentation/packages-baseline.yml"
+  roles:
+    - role: get_edi_io.debian_setup.proxy_settings
+      become: True
+      become_user: root
+      when: apply_proxy_settings
+    - role: get_edi_io.debian_setup.apt_setup
+      become: True
+      become_user: root
+    - role: get_edi_io.debian_setup.default_user
+      become: True
+      become_user: root
+      when: create_default_user
+    - role: get_edi_io.debian_setup.openssh_server
+      become: True
+      become_user: root
+      when: install_openssh_server
+    - role: repositories
+      become: True
+      become_user: root
+    - role: bootloader
+      become: True
+      become_user: root
+      when: target_is_bare_metal
+    - role: essential_bare_metal_packages
+      become: True
+      become_user: root
+      when: target_is_bare_metal
+    - role: resize_rootfs
+      become: True
+      become_user: root
+      when: target_is_bare_metal
+    - role: set_hostname
+      become: True
+      become_user: root
+      when: target_is_bare_metal
+    - role: mender
+      become: True
+      become_user: root
+      when: target_is_bare_metal
+    - role: get_edi_io.debian_setup.gitops_user
+      become: True
+      become_user: root
+      when: enable_gitops
+    - role: get_edi_io.debian_setup.gitops_tools
+      become: True
+      become_user: root
+      when: enable_gitops
+    - role: get_edi_io.debian_setup.multiarch_support
+      become: True
+      become_user: root
+      when: install_cross_development_tools
+    - role: get_edi_io.debian_setup.development_tools
+      become: True
+      become_user: root
+      when: install_development_tools or install_cross_development_tools
+    - role: get_edi_io.debian_setup.openssh_server_keys
+      become: True
+      become_user: root
+      when: regenerate_openssh_server_keys
+    - role: get_edi_io.debian_setup.apt_cleanup
+      become: True
+      become_user: root
+    - role: get_edi_io.debian_setup.proxy_settings
+      become: True
+      become_user: root
+      vars:
+        target_http_proxy: ""
+        target_https_proxy: ""
+        target_ftp_proxy: ""
+        target_socks_proxy: ""
+        target_no_proxy: ""
+      when: cleanup_proxy_settings
+    - role: get_edi_io.debian_setup.replace_temp_hostname
+      become: True
+      become_user: root
+    - role: get_edi_io.debian_setup.document_artifact
+      become: True
+      become_user: root

@@ -3,17 +3,13 @@ general:
         edi_bootstrap_architecture: {{ edi_host_architecture }}
 
 playbooks:
-    100_base_system:
+    100_os_setup:
         parameters:
             install_openssh_server: False
             authorize_current_user: False
             install_documentation: full
             translations_filter: ""
-    300_board_support:
-        parameters:
             target_is_bare_metal: False
-    400_development_tools:
-        parameters:
             install_development_tools: True
             install_cross_development_tools: True
 
