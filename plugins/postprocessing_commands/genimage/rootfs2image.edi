@@ -105,6 +105,7 @@ echo "artifact_name=${ARTIFACT_NAME}" > rootfs/etc/mender/artifact_info
 
 # Adjust hostname.
 cp "${PLUGIN_DIRECTORY}/hosts" rootfs/etc/
+chmod 0644 rootfs/etc/hosts
 sed -i "s@__HOSTNAME__@${HOSTNAME}@" rootfs/etc/hosts
 cp "${PLUGIN_DIRECTORY}/hostname" rootfs/etc/
 sed -i "s@__HOSTNAME__@${HOSTNAME}@" rootfs/etc/hostname
