@@ -21,8 +21,9 @@ postprocessing_commands:
     200_buildah2image:
         path: postprocessing_commands/container_image/buildah2image.edi
         output:
+            pp_podman_image_manifest: {{ edi_configuration_name }}_manifest
             pp_podman_image:
-                location: {{ edi_configuration_name }}:latest
+                location: {{ edi_configuration_name }}-{{ edi_project_directory_hash }}:latest
                 type: podman-image
     300_rootfs2image:
         skip: True

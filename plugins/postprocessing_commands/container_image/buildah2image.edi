@@ -27,11 +27,13 @@ set -o nounset
 LOG_LEVEL="{{ edi_log_level }}"
 PODMAN_IMAGE="{{ pp_podman_image }}"
 BUILDAH_CONTAINER="{{ edi_project_container }}"
+PODMAN_IMAGE_MANIFEST="{{ pp_podman_image_manifest }}"
 
 if [ "${LOG_LEVEL}" == "DEBUG" ]; then
     set -x
 fi
 
+echo "podman_image=${PODMAN_IMAGE}" > "${PODMAN_IMAGE_MANIFEST}"
 buildah commit "${BUILDAH_CONTAINER}" "${PODMAN_IMAGE}"
 
 echo "********************************************************************************"

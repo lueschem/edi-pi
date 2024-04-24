@@ -1,5 +1,5 @@
 general:
-    edi_required_minimal_edi_version: 1.17.0
+    edi_required_minimal_edi_version: 1.19.0
     parameters:
         mender_device_type: generic
         ansible_pipelining: true
