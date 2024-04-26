@@ -13,7 +13,9 @@ preprocessing_commands:
     050_mmdebstrap:
         path: preprocessing_commands/bootstrap/mmdebstrap.edi
         output:
-            edi_bootstrapped_rootfs: {{ edi_configuration_name }}_bootstrapped-rootfs.tar
+            edi_bootstrapped_rootfs:
+                location: {{ edi_configuration_name }}_bootstrapped-rootfs.tar
+                type: path
 
 playbooks:
     100_os_setup:
@@ -36,33 +38,47 @@ postprocessing_commands:
     100_timestamp:
         path: postprocessing_commands/timestamp/timestamp.edi
         output:
-            pp_timestamp: {{ edi_configuration_name }}_timestamp
+            pp_timestamp:
+                location: {{ edi_configuration_name }}_timestamp
+                type: path
     200_buildah2rootfs:
         path: postprocessing_commands/rootfs/buildah2rootfs.edi
         output:
-            pp_rootfs_archive: {{ edi_configuration_name }}_configured-rootfs.tar
+            pp_rootfs_archive:
+                location: {{ edi_configuration_name }}_configured-rootfs.tar
+                type: path
     300_rootfs2image:
         path: postprocessing_commands/genimage/rootfs2image.edi
         require_root: "fakeroot"
         output:
-            pp_image: {{ edi_configuration_name }}.img
-            pp_partition_image: {{ edi_configuration_name }}_rootfs.ext4
+            pp_image:
+                location: {{ edi_configuration_name }}.img
+                type: path
+            pp_partition_image:
+                location: {{ edi_configuration_name }}_rootfs.ext4
+                type: path
         parameters:
             hostname: raspberry
     400_mender:
         path: postprocessing_commands/mender/image2mender.edi
         output:
-            pp_mender_artifact: {{ edi_configuration_name }}.mender
+            pp_mender_artifact:
+                location: {{ edi_configuration_name }}.mender
+                type: path
     500_documentation:
         path: postprocessing_commands/documentation/write_doc_v2.edi
         output:
-            pp_documentation: {{ edi_configuration_name }}_documentation
+            pp_documentation: 
+                location: {{ edi_configuration_name }}_documentation
+                type: path
         parameters:
             author: The edi-pi Project Team
     600_fully_named_artifacts:
         path: postprocessing_commands/fully_named_artifacts/create_full_names.edi
         output:
-            pp_fully_named_artifacts: {{ edi_configuration_name }}_fully_named_artifacts
+            pp_fully_named_artifacts:
+                location: {{ edi_configuration_name }}_fully_named_artifacts
+                type: path
 
 documentation_steps:
     100_index:
