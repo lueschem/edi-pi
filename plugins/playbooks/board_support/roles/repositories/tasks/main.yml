@@ -1,7 +1,8 @@
 ---
 - name: Check Debian release compatibility.
   fail:
-    msg: "Error: The playbooks can not be applied to the given target as the distribution release is incompatible! Only Debian {{ debian_distribution_release }} is currently supported!"
+    msg: "Error: The playbooks can not be applied to the given target as the distribution release is incompatible!
+      Only Debian {{ debian_distribution_release }} is currently supported!"
   when: ansible_distribution_release != debian_distribution_release
 
 - name: Install ca-certificates.
