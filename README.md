@@ -4,17 +4,13 @@ Debian tool chain and image generation for the Raspberry Pi 2, 3, 4 and 5.
 
 <img alt="Raspberry Pi" src=https://www.get-edi.io/assets/images/blog/pi-hardware.png width="75%"/>
 
-> [!NOTE]
-> The *master* branch is currently basing upon Debian *bookworm*.
-> For Debian *bullseye* please check out the *debian_bullseye* branch. 
-
 ## Introduction
 
 The edi configuration contained in this repository can be used to
 generate the following artifacts:
 
-* A Debian bookworm arm64 (64bit) image suitable for the Raspberry Pi 3, 4 or 5.
-* A Debian bookworm armhf (32bit) image suitable for the Raspberry Pi 2.
+* A Debian trixie arm64 (64bit) image suitable for the Raspberry Pi 3, 4 or 5.
+* A Debian trixie armhf (32bit) image suitable for the Raspberry Pi 2.
 * Matching Mender update artifacts for the above configurations.
 * An LXD container with a pre-installed cross development toolchains (armhf/arm64) for C and C++.
 
@@ -164,13 +160,13 @@ A cross development container can be created using the
 following command:
 
 ``` bash
-sudo edi -v lxc configure edi-pi-cross-dev-bookworm pi-cross-dev.yml
+sudo edi -v lxc configure edi-pi-cross-dev-trixie pi-cross-dev.yml
 ```
 
 The container can be accessed as follows (the password is _ChangeMe!_):
 
 ``` bash
-lxc exec edi-pi-cross-dev-bookworm -- login ${USER}
+lxc exec edi-pi-cross-dev-trixie -- login ${USER}
 ```
 
 Or with ssh (Hint: retrieve IP_OF_CONTAINER with `lxc list`):

@@ -6,7 +6,7 @@ general:
         ebs_bootloader_type: "u-boot"
         default_user_name: pi
         default_user_group_name: pi
-        debian_distribution_release: bookworm
+        debian_distribution_release: trixie
         ansible_python_interpreter: /usr/bin/python3
 
 preprocessing_commands:

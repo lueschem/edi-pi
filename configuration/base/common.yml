@@ -9,12 +9,12 @@ general:
         ebs_bootloader_type: "u-boot"
         default_user_name: pi
         default_user_group_name: pi
-        debian_distribution_release: bookworm
+        debian_distribution_release: trixie
         ansible_python_interpreter: /usr/bin/python3
 
 bootstrap:
     tool: debootstrap
-    repository: deb http://deb.debian.org/debian/ bookworm main
+    repository: deb http://deb.debian.org/debian/ trixie main
     repository_key: https://ftp-master.debian.org/keys/archive-key-11.asc
     additional_packages:
       - python3
