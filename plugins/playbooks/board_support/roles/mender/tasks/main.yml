@@ -53,7 +53,8 @@
     name:
     - mender-client
     - mender-connect
-    - mender-configure
+# TODO_TRIXIE: Readd mender-configure
+#    - mender-configure
     - jq
     state: present
     install_recommends: no
