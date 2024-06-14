@@ -30,6 +30,9 @@
     document_build_setup: False
     document_installed_packages: False
     package_baseline_source_file: "{{ edi_project_directory }}/configuration/documentation/packages-baseline.yml"
+    qemu_emulated_cpu: max
+  environment:
+    QEMU_CPU: "{{ qemu_emulated_cpu }}"
   roles:
     - role: get_edi_io.debian_setup.proxy_settings
       become: True

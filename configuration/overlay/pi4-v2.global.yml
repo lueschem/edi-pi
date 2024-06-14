@@ -3,6 +3,7 @@ general:
         mender_device_type: pi4-v3
         ebs_bootloader_type: "raspberry-pi"
         edi_bootstrap_architecture: arm64
+        qemu_emulated_cpu: cortex-a57
 
 playbooks:
     100_os_setup:

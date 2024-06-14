@@ -8,6 +8,7 @@ ROOTFS_ARCHIVE="{{ edi_bootstrapped_rootfs }}"
 DISTRIBUTION_RELEASE="{{ debian_distribution_release }}"
 DEBIAN_ARCHITECTURE="{{ edi_bootstrap_architecture }}"
 WORKDIR="{{ edi_work_directory }}"
+QEMU_EMULATED_CPU="{{ qemu_emulated_cpu }}"
 
 print_error()
 {
@@ -37,6 +38,10 @@ fi
 
 TEMPDIR="$(mktemp -p "${WORKDIR}" -d -t .tmp.XXXXXXXX)"
 trap "unexpected_exit ${TEMPDIR}" EXIT
+
+if [ ! -z "${QEMU_EMULATED_CPU}" ]; then
+    export QEMU_CPU="${QEMU_EMULATED_CPU}"
+fi
 
 TEMP_ARCHIVE="${TEMPDIR}/archive.tar"
 mmdebstrap --include=python3-apt,sudo,systemd,systemd-sysv --arch="${DEBIAN_ARCHITECTURE}" --variant=minbase "${DISTRIBUTION_RELEASE}" "${TEMP_ARCHIVE}"
