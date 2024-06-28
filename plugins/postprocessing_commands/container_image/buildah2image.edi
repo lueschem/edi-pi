@@ -28,12 +28,19 @@ LOG_LEVEL="{{ edi_log_level }}"
 PODMAN_IMAGE="{{ pp_podman_image }}"
 BUILDAH_CONTAINER="{{ edi_project_container }}"
 PODMAN_IMAGE_MANIFEST="{{ pp_podman_image_manifest }}"
+DEBIAN_RELEASE="{{ debian_distribution_release }}"
+DEBIAN_ARCHITECTURE="{{ edi_bootstrap_architecture }}"
 
 if [ "${LOG_LEVEL}" == "DEBUG" ]; then
     set -x
 fi
 
-echo "podman_image=${PODMAN_IMAGE}" > "${PODMAN_IMAGE_MANIFEST}"
+cat << EOF >> "${PODMAN_IMAGE_MANIFEST}"
+podman_image=${PODMAN_IMAGE}
+debian_architecture=${DEBIAN_ARCHITECTURE}
+debian_release=${DEBIAN_RELEASE}
+EOF
+
 buildah commit "${BUILDAH_CONTAINER}" "${PODMAN_IMAGE}"
 
 echo "********************************************************************************"
