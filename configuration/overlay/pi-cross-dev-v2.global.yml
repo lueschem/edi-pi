@@ -12,6 +12,21 @@ playbooks:
             target_is_bare_metal: False
             install_development_tools: True
             install_cross_development_tools: True
+            cross_development_tools:
+              - dpkg-cross
+              - pkg-config
+              - qemu-user-static
+              - wget
+            foreign_base_libraries:
+              - libc6
+              - libc6-dev
+              - libc-dev
+              - libglib2.0-dev
+              - liblzma-dev
+              - libmount-dev
+              - libssl-dev
+              - libstdc++6
+              - linux-libc-dev
 
 postprocessing_commands:
     100_timestamp:
