@@ -22,6 +22,7 @@
     install_development_tools: False
     install_cross_development_tools: False
     cross_architectures:
+      - amd64
       - arm64
       - armhf
     regenerate_openssh_server_keys: True
