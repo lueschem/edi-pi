@@ -1,4 +1,4 @@
-# exclude some files we do not want to be provided by the mender-client package
+# exclude some files we do not want to be provided by the mender-updated package
 path-exclude /etc/mender/artifact_info
 path-exclude /usr/share/mender/identity/mender-device-identity
 path-exclude /usr/share/mender/inventory/mender-inventory-bootloader-integration

@@ -2,7 +2,7 @@
 
 # MIT License
 #
-# Copyright (c) 2021 Matthias Lüscher
+# Copyright (c) 2024 Matthias Lüscher
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -50,12 +50,23 @@ print_environment()
     echo "upgrade_available=${upgrade_available}"
     echo "bootcount=${bootcount}"
     echo "mender_uboot_separator=${mender_uboot_separator}"
+    echo "mender_check_saveenv_canary=0"
 }
 
 update_environment()
 {
-    local key=${1}
-    local value=${2}
+    local SPLIT_NEEDED
+    local key
+    local value
+    SPLIT_NEEDED=$(echo "${1}" | tr -dc '=' | wc -c)
+
+    if [ "${SPLIT_NEEDED}" -eq 1 ]; then
+        key=$(echo "${1}" | cut -d '=' -f 1)
+        value=$(echo "${1}" | cut -d '=' -f 2)
+    else
+        key=${1}
+        value=${2}
+    fi
 
     case $key in
     mender_boot_part)
@@ -167,7 +178,7 @@ then
                 elif [[ ${#key_value_pair[@]} -eq 1 ]]
                 then
                     update_environment "${key_value_pair[0]}" ""
-                    else
+                else
                     print_and_exit "ERROR" "unsupported number of arguments in script"
                 fi
             done <<< "${SCRIPT}"
