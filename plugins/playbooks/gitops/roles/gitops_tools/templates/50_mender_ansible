@@ -81,6 +81,19 @@ else
     fi
 fi
 
+# Wait max 10min until system clock got synchronized.
+for i in {1..60}
+do
+    sync_status="$(timedatectl show --property=NTPSynchronized --value)"
+    if [[ $sync_status =~ "yes" ]]
+    then
+        break
+    else
+        echo "Waiting for system clock synchronization."
+    fi
+    sleep 10
+done
+
 PLAYBOOK_SOURCE_IS_GIT="false"
 GIT_URL_REGEX='^(https://|git@|ssh://).*'
 if [[ ${PLAYBOOK_URL} =~ ${GIT_URL_REGEX} ]]
