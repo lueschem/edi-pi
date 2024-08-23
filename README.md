@@ -109,7 +109,7 @@ using the following command
 Example for Raspberry Pi 5, arm64:
 
 ``` bash
-sudo umount /dev/mmcblk0?
+sudo umount /dev/mmcblk0p?
 sudo dd if=artifacts/pi5.img of=/dev/mmcblk0 bs=4M conv=fsync status=progress
 ```
 
