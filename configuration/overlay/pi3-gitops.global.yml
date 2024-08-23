@@ -1,15 +1,10 @@
 general:
     parameters:
         mender_device_type: pi3
-
-bootstrap:
-    architecture: arm64
+        edi_bootstrap_architecture: arm64
+        qemu_emulated_cpu: cortex-a57
 
 playbooks:
-    500_gitops:
-        path: playbooks/gitops/main.yml
-
-shared_folders:
-    edi_workspace:
-        folder: edi-workspace
-        mountpoint: edi-workspace
+    100_os_setup:
+        parameters:
+            enable_gitops: True

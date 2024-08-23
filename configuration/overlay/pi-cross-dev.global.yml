@@ -1,45 +1,48 @@
-bootstrap:
-    additional_packages:
-      - python3
-      - python3-apt
-      - sudo
-      - netbase
-      - net-tools
-      - iputils-ping
-      - ifupdown
-      - isc-dhcp-client
-      - resolvconf
-      - systemd
-      - systemd-sysv
-      - gnupg
-      - dumb-init
-
-lxc_profiles:
-    300_suppress_init:
-        skip: True
+general:
+    parameters:
+        edi_bootstrap_architecture: {{ edi_host_architecture }}
 
 playbooks:
-    100_base_system:
+    100_os_setup:
         parameters:
-            lxc_network_interface_manager: ifupdown
+            install_openssh_server: False
+            authorize_current_user: False
             install_documentation: full
             translations_filter: ""
-    300_board_support:
-        parameters:
             target_is_bare_metal: False
-    400_development_tools:
-        parameters:
             install_development_tools: True
             install_cross_development_tools: True
+            cross_development_tools:
+              - dpkg-cross
+              - pkg-config
+              - qemu-user-static
+              - wget
+            foreign_base_libraries:
+              - libc6
+              - libc6-dev
+              - libc-dev
+              - libglib2.0-dev
+              - liblzma-dev
+              - libmount-dev
+              - libssl-dev
+              - libstdc++6
+              - linux-libc-dev
 
 postprocessing_commands:
-    050_timestamp:
+    100_timestamp:
         skip: True
-    100_lxd2rootfs:
+    200_buildah2rootfs:
         skip: True
-    200_rootfs2image:
-        skip: True
-    300_blockmap:
+    200_buildah2image:
+        path: postprocessing_commands/container_image/buildah2image.edi
+        output:
+            pp_podman_image_manifest:
+                location: {{ edi_configuration_name }}_manifest
+                type: path
+            pp_podman_image:
+                location: {{ edi_configuration_name }}-{{ edi_project_directory_hash }}:latest
+                type: podman-image
+    300_rootfs2image:
         skip: True
     400_mender:
         skip: True
@@ -47,8 +50,3 @@ postprocessing_commands:
         skip: True
     600_fully_named_artifacts:
         skip: True
-
-shared_folders:
-    edi_workspace:
-        folder: edi-workspace
-        mountpoint: edi-workspace
