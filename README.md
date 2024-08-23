@@ -22,10 +22,10 @@ Prior to using this edi project configuration you have to install
 [edi](https://www.get-edi.io) according to
 [this instructions](https://docs.get-edi.io/en/latest/getting_started.html).
 Please take a careful look at the "Setting up ssh Keys" section since you
-will need a proper ssh key setup in order to access the container or
+will need a proper ssh key setup in order to access the
 the target device using ssh.
 
-The image post-processing commands require some additional tools. On
+The artifact generation requires some additional tools. On
 Ubuntu 24.04 and newer those tools can be installed as follows:
 
 ``` bash
