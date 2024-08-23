@@ -1,7 +1,0 @@
-#!/bin/bash
-
-set -o nounset
-set -o errexit
-
-{{ edi_current_plugin_directory }}/rootfs2image --input {{ pp_rootfs }} --output {{ pp_image }} --partition-output {{ pp_partition_image }} --workdir {{ edi_work_directory }} --log {{ edi_log_level }}
-
