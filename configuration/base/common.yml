@@ -29,7 +29,6 @@ playbooks:
             install_documentation: changelog
             translations_filter: en_translations_only
             base_system_sources_list_template: debian.list
-            configure_lxc_network_interface: False
             document_build_setup: true
             document_installed_packages: true
             ssh_host_key_backup_folder: /data/backup/ssh
