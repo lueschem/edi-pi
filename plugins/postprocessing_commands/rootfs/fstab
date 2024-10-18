@@ -1,5 +1,0 @@
-# Custom fstab added by lxd2rootfs script.
-# <file system> <mount point> <type> <options> <dump> <pass>
-/dev/root / ext4 rw 0 1
-/dev/mmcblk0p1 /boot/firmware vfat rw 0 2
-/dev/mmcblk0p2 /data ext4 defaults 0 0

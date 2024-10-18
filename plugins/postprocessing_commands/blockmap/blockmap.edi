@@ -1,6 +1,0 @@
-#!/bin/bash
-
-set -o nounset
-set -o errexit
-
-bmaptool create -o "{{ pp_bmap }}" "{{ pp_image }}"

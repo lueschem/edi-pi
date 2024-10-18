@@ -28,9 +28,9 @@
     dest: /var/lib/mender-configure/device-config.json
     mode: 0600
 
-- name: Mask some files that shall not be provided by the mender-client Debian package.
+- name: Mask some files that shall not be provided by the mender-update Debian package.
   copy:
-    src: 05_mender_client
+    src: 05_mender_update
     dest: /etc/dpkg/dpkg.cfg.d/
 
 - name: Add Mender repository key.
@@ -48,10 +48,11 @@
   apt:
     update_cache: yes
 
-- name: Install mender-client, mender-connect, mender-configure and jq.
+- name: Install mender-update, mender-flash, mender-connect, mender-configure and jq.
   apt:
     name:
-    - mender-client
+    - mender-update
+    - mender-flash
     - mender-connect
     - mender-configure
     - jq
@@ -101,13 +102,13 @@
     state: directory
   with_items:
     - /usr/share/mender/integration
-    - /etc/systemd/system/mender-client.service.d
+    - /etc/systemd/system/mender-updated.service.d
   when: ebs_bootloader_type == "raspberry-pi"
 
-- name: Make sure that the mender-client service picks the modified reboot script.
+- name: Make sure that the mender-updated service picks the modified reboot script.
   copy:
     src: override.conf
-    dest: /etc/systemd/system/mender-client.service.d/
+    dest: /etc/systemd/system/mender-updated.service.d/
   when: ebs_bootloader_type == "raspberry-pi"
 
 - name: Copy the bootloader integration script.

@@ -5,5 +5,4 @@ main.retry
 
 # pycharm files
 .idea/*
-/plugins/playbooks/rpi3_base/roles/bootloader/files/upstream-*.tar.gz
 /configuration/mender/mender_custom.yml

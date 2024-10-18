@@ -1,6 +1,3 @@
-[submodule "plugins/playbooks/os_setup/collections/ansible_collections/get_edi_io/debian_setup"]
-	path = plugins/playbooks/os_setup/collections/ansible_collections/get_edi_io/debian_setup
-	url = https://github.com/lueschem/debian_setup.git
 [submodule "submodules/ansible_collections/get_edi_io/debian_setup"]
 	path = submodules/ansible_collections/get_edi_io/debian_setup
 	url = https://github.com/lueschem/debian_setup.git
