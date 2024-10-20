@@ -24,7 +24,7 @@ generate the following artifacts:
 
 Prior to using this edi project configuration you have to install
 [edi](https://www.get-edi.io) according to
-[this instructions](https://docs.get-edi.io/en/latest/getting_started.html).
+[this instructions](https://docs.get-edi.io/en/stable/getting_started_v2.html).
 Please take a careful look at the "Setting up ssh Keys" section since you
 will need a proper ssh key setup in order to access the
 the target device using ssh.
