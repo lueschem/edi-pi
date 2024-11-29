@@ -1,0 +1,50 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+set -o pipefail
+
+required_packages=(
+"ansible-core 2.14.16"
+"buildah 1.28.2"
+"mmdebstrap 1.3.5"
+)
+
+is_package_installed()
+{
+    local package="${1}"
+    # shellcheck disable=SC2091
+    dpkg -s "${package}" > /dev/null 2>&1
+}
+
+version_greater_equal()
+{
+    local lhs_version="${1}"
+    local rhs_version="${2}"
+    [ "$(echo -e "${lhs_version}\n${rhs_version}" | sort --reverse --version-sort | head -n 1)" == "${lhs_version}" ]
+}
+
+check_passed=0
+
+for item in "${required_packages[@]}"
+do
+    IFS=' ' read -r package required_version <<< "${item}"
+    if is_package_installed "${package}"
+    then
+        actual_version=$(dpkg-query --showformat='${Version}' --show "${package}")
+        if version_greater_equal "${actual_version}" "${required_version}"
+        then
+            echo "${package} $actual_version: OK"
+        else
+            echo "${package} $actual_version: NOK"
+            >&2 echo "Error: Package ${package} does not meet the version requirements (>= ${required_version})!"
+            check_passed=1
+        fi
+    else
+        echo "${package} (missing): NOK"
+        >&2 echo "Error: Package ${package} is not installed!"
+        check_passed=1
+    fi
+done
+
+exit "${check_passed}"

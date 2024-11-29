@@ -10,7 +10,13 @@ general:
         ansible_python_interpreter: /usr/bin/python3
 
 preprocessing_commands:
-    050_mmdebstrap:
+    100_prerequisites:
+        path: preprocessing_commands/prerequisites/check_prerequisites.edi
+        output:
+            edi_prerequisites_log:
+                location: {{ edi_configuration_name }}_prerequisites.log
+                type: path
+    200_mmdebstrap:
         path: preprocessing_commands/bootstrap/mmdebstrap.edi
         output:
             edi_bootstrapped_rootfs:
