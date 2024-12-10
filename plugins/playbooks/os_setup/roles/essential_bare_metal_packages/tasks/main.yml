@@ -24,3 +24,9 @@
   file:
     path: /var/log/journal
     state: absent
+
+- name: Disable DUMP_OBSS on brcmfmac.
+  copy:
+    src: brcmfmac.conf
+    dest: /etc/modprobe.d/
+
