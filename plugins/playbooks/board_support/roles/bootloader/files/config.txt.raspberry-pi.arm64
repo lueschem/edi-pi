@@ -1,9 +1,26 @@
+# For more options and information see
+# http://rptl.io/configtxt
+# Some settings may impact device functionality. See link above for details
+
 # needs to be 8.3 format and in top level folder
 start_file=p__ROOTFS_PARTITION__start4.elf
 fixup_file=p__ROOTFS_PARTITION__fixup4.dat
 
+# Uncomment some or all of these to enable the optional hardware interfaces
+#dtparam=i2c_arm=on
+#dtparam=i2s=on
+#dtparam=spi=on
+
 # Enable audio (loads snd_bcm2835)
 dtparam=audio=on
+
+# Enable DRM VC4 V3D driver
+dtoverlay=vc4-kms-v3d
+max_framebuffers=2
+
+# Don't have the firmware create an initial video= setting in cmdline.txt.
+# Use the kernel's default instead.
+disable_fw_kms_setup=1
 
 # Run in 64-bit mode
 arm_64bit=1
@@ -25,17 +42,7 @@ os_prefix=p__ROOTFS_PARTITION__/
 # (e.g. for USB device mode) or if USB support is not required.
 otg_mode=1
 
-[pi4]
-# Enable DRM VC4 V3D driver on top of the dispmanx display stack
-dtoverlay=vc4-fkms-v3d
-max_framebuffers=2
+[cm5]
+dtoverlay=dwc2,dr_mode=host
 
-[pi5]
-# Enable DRM VC4 V3D driver
-dtoverlay=vc4-kms-v3d
-max_framebuffers=2
-
-# Don't have the firmware create an initial video= setting in cmdline.txt.
-# Use the kernel's default instead.
-disable_fw_kms_setup=1
-
+[all]
