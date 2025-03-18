@@ -1,6 +1,7 @@
 ---
 bare_metal_packages:
   - dosfstools
+  - e2fsprogs
   - fdisk
   - firmware-brcm80211
   - haveged
