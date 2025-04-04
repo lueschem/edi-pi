@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (C) 2020 Matthias Luescher
+# Copyright (C) 2025 Matthias Luescher
 #
 # Authors:
 #  Matthias Luescher
@@ -24,7 +24,7 @@
 # along with the edi project configuration.  If not, see <http://www.gnu.org/licenses/>.
 
 # ----------------------------------------------------------------------------
-# adds another partition for a scondary root file system and resizes both
+# adds another partition for a secondary root file system and resizes both
 # partitions in order to make use of the full available disk space
 #
 # ATTENTION: Resizing file systems can lead to data loss!
@@ -50,6 +50,7 @@ print_and_exit()
 
 abnormal_termination()
 {
+    # shellcheck disable=SC2317
     print_and_exit "ERROR" "failed to resize rootfs due to abnormal script termination"
 }
 
@@ -71,9 +72,21 @@ if [ -z "${ROOT_PART}" ] ; then
 fi
 
 ROOT_DEV=""
+ROOT_DEV_PARTITION_PREFIX="p"
 case "${ROOT_PART}" in
-    mmcblk0*) ROOT_DEV=mmcblk0 ;;
-    sda*)     ROOT_DEV=sda ;;
+    mmcblk0p*)
+        ROOT_DEV=mmcblk0
+        ;;
+    mmcblk1p*)
+        ROOT_DEV=mmcblk1
+        ;;
+    mmcblk2p*)
+        ROOT_DEV=mmcblk2
+        ;;
+    sda*)
+        ROOT_DEV=sda
+        ROOT_DEV_PARTITION_PREFIX=""
+        ;;
 esac
 
 if [ -z "${ROOT_DEV}" ] ; then
@@ -84,47 +97,68 @@ if [ "${ROOT_DEV}" = "${ROOT_PART}" ] ; then
     print_and_exit "ERROR" "${ROOT_PART} does not look like a partition"
 fi
 
-PART_NUM=$(echo ${ROOT_PART} | grep -o '[1-9][0-9]*$')
+PART_NUM=$(echo "${ROOT_PART}" | grep -o '[1-9][0-9]*$')
 if [ -z "${PART_NUM}" ] ; then
     print_and_exit "ERROR" "unable to extract partition number of ${ROOT_PART}"
 fi
 
 PARTITION_INFO=$(parted /dev/${ROOT_DEV} -ms unit s print)
 
+PARTITION_TABLE_TYPE=$(echo "${PARTITION_INFO}" | grep -o "^/dev/${ROOT_DEV}.*" | cut -d':' -f6)
 DISK_SIZE_S=$(echo "${PARTITION_INFO}" | grep -o "^/dev/${ROOT_DEV}.*" | cut -d':' -f2 | sed 's/s//g')
 ROOTFS_START_S=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -d':' -f2 | sed 's/s//g')
 ROOTFS_SIZE_S=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -d':' -f4 | sed 's/s//g')
+MIB_ALIGNMENT_S=2048  # 2048 * 512 = 1MiB
 
-if [ "$(expr ${ROOTFS_START_S} + ${ROOTFS_SIZE_S} + 1)" -lt "${DISK_SIZE_S}" ] ; then
+if [ "${PARTITION_TABLE_TYPE}" == "msdos" ] ; then
+    BACKUP_TABLE_SIZE_M=0
+    ROOTFS_PARTITION_TYPE="83"
+else
+    if [ "${PARTITION_TABLE_TYPE}" != "gpt" ] ; then
+        print_and_exit "ERROR" "unexpected partition table type ${PARTITION_TABLE_TYPE}"
+    fi
+    BACKUP_TABLE_SIZE_M=1
+    ROOTFS_PARTITION_TYPE="B921B045-1DF0-41C3-AF44-4C6F280D3FAE"
+fi
+
+BACKUP_TABLE_SIZE_S=$(( BACKUP_TABLE_SIZE_M * 1024 * 1024 / 512 ))
+
+if [ "$(( ROOTFS_START_S + ROOTFS_SIZE_S + 2 * MIB_ALIGNMENT_S + BACKUP_TABLE_SIZE_S ))" -lt "${DISK_SIZE_S}" ] ; then
     LAST_PART_NUM=$(echo "${PARTITION_INFO}" | tail -n 1 | cut -f 1 -d':')
-    if [ ${LAST_PART_NUM} -ne ${PART_NUM} ]; then
+    if [ "${LAST_PART_NUM}" -ne "${PART_NUM}" ]; then
         print_and_exit "ERROR" "${ROOT_PART} is not the last partition"
     fi
 
-    SPLIT_SIZE_S=$(expr $(expr ${DISK_SIZE_S} - ${ROOTFS_START_S}) \/ 2)
+    SPLIT_SIZE_S=$(( (DISK_SIZE_S - BACKUP_TABLE_SIZE_S - ROOTFS_START_S) / 2 / MIB_ALIGNMENT_S * MIB_ALIGNMENT_S ))
 
     if [ "${SPLIT_SIZE_S}" -lt "${ROOTFS_SIZE_S}" ] ; then
         print_and_exit "ERROR" "${ROOT_DEV} is too small to duplicate the root file system"
     fi
 
+    if [ "${PARTITION_TABLE_TYPE}" == "gpt" ] ; then
+        # relocate GPT backup header to end of disk
+        sfdisk --relocate gpt-bak-std /dev/${ROOT_DEV}
+    fi
+
     TEMP_PARTITION_TABLE=$(mktemp /tmp/partition-table.XXXXXX)
 
     # dump the existing disk layout
-    sfdisk -d /dev/${ROOT_DEV} > ${TEMP_PARTITION_TABLE}
+    sfdisk -d /dev/${ROOT_DEV} > "${TEMP_PARTITION_TABLE}"
     # remove line that describes last (root) partition
-    sed -i '$ d' ${TEMP_PARTITION_TABLE}
+    sed -i '$ d' "${TEMP_PARTITION_TABLE}"
 
-    # add two new partitions with the same size
-    NEW_ROOT_PART=${ROOT_DEV}p$(expr ${PART_NUM} + 1)
-    echo "/dev/${ROOT_PART}: start=${ROOTFS_START_S} size=${SPLIT_SIZE_S}, type=83" >> ${TEMP_PARTITION_TABLE}
-    echo "/dev/${NEW_ROOT_PART}: start=$(expr ${ROOTFS_START_S} + ${SPLIT_SIZE_S}) size=${SPLIT_SIZE_S}, type=83" >> ${TEMP_PARTITION_TABLE}
+    # add two new partitions with (almost) the same size
+    NEW_ROOT_PART=${ROOT_DEV}${ROOT_DEV_PARTITION_PREFIX}$(( PART_NUM + 1 ))
+    REMAINING_SIZE_S=$(( DISK_SIZE_S - BACKUP_TABLE_SIZE_S - ROOTFS_START_S - SPLIT_SIZE_S ))
+    echo "/dev/${ROOT_PART}: start=${ROOTFS_START_S} size=${SPLIT_SIZE_S}, type=${ROOTFS_PARTITION_TYPE}" >> "${TEMP_PARTITION_TABLE}"
+    echo "/dev/${NEW_ROOT_PART}: start=$(( ROOTFS_START_S + SPLIT_SIZE_S )) size=${REMAINING_SIZE_S}, type=${ROOTFS_PARTITION_TYPE}" >> "${TEMP_PARTITION_TABLE}"
 
-    sfdisk --no-reread /dev/${ROOT_DEV} < ${TEMP_PARTITION_TABLE}
+    sfdisk --no-reread /dev/${ROOT_DEV} < "${TEMP_PARTITION_TABLE}"
 
     partprobe
 fi
 
-resize2fs /dev/${ROOT_PART}
+resize2fs /dev/"${ROOT_PART}"
 
 print_and_exit "INFO" "disk layout of ${ROOT_DEV} successfully changed"
 
