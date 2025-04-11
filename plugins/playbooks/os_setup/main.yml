@@ -61,14 +61,6 @@
       become: True
       become_user: root
       when: target_is_bare_metal
-    - role: resize_rootfs
-      become: True
-      become_user: root
-      when: target_is_bare_metal
-    - role: set_hostname
-      become: True
-      become_user: root
-      when: target_is_bare_metal
     - role: mender
       become: True
       become_user: root

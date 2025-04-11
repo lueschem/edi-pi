@@ -1,13 +1,12 @@
 ---
 bare_metal_packages:
-  - dosfstools
-  - e2fsprogs
-  - fdisk
+  - edi-resize-rootfs
+  - edi-set-hostname
   - firmware-brcm80211
   - haveged
-  - initramfs-tools
   - iproute2
   - "{{ kernel_image }}"
+  - kmod
   - network-manager
   - systemd-timesyncd
   - udev

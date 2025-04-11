@@ -30,3 +30,15 @@
     src: brcmfmac.conf
     dest: /etc/modprobe.d/
 
+- name: Create directory for edi-set-hostname customization.
+  file:
+    path: /etc/systemd/system/edi-set-hostname.service.d
+    state: directory
+    mode: 0755
+
+- name: Customize edi-set-hostname service.
+  template:
+    src: edi-set-hostname.override.conf
+    dest: /etc/systemd/system/edi-set-hostname.service.d/override.conf
+    mode: 0644
+
