@@ -18,6 +18,13 @@ generate the following artifacts:
 * Matching Mender update artifacts for the above configurations.
 * A Podman/Docker image with a pre-installed cross development toolchains (armhf/arm64) for C and C++.
 
+> [!NOTE]
+> The Raspberry Pi 3 images are now making use of the tryboot feature too and do no longer
+> rely on u-boot to switch the boot partitions. A bookworm or older image is therefore incompatible
+> with a trixie or newer image. A migration to the new approach during the upgrade might be possible
+> but is currently not implemented. Feel free to write a feature request in case your existing project
+> would benefit from such a feature.
+
 ## Basic Usage
 
 ### Preparation

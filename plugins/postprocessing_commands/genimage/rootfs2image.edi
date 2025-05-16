@@ -34,6 +34,7 @@ PARTITION_IMAGE="{{ pp_partition_image }}"
 WORKDIR="{{ edi_work_directory }}"
 HOSTNAME="{{ hostname }}"
 ARTIFACT_NAME="${BUILD_TIMESTAMP}-{{ edi_configuration_name }}-{{ debian_distribution_release }}-{{ edi_bootstrap_architecture }}"
+MENDER_DEVICE_TYPE="{{ mender_device_type }}"
 
 print_error()
 {
@@ -89,8 +90,14 @@ if [ -d "rootfs/boot/image-firmware" ]; then
     sed -i 's@__ROOTFS_PARTITION__@3@' rootfs/boot/firmware/p3/cmdline.txt
     cp rootfs/boot/image-firmware/config.txt rootfs/boot/firmware/config.txt
     sed -i 's@__ROOTFS_PARTITION__@3@' rootfs/boot/firmware/config.txt
-    cp rootfs/boot/image-firmware/start4.elf rootfs/boot/firmware/p3start4.elf
-    cp rootfs/boot/image-firmware/fixup4.dat rootfs/boot/firmware/p3fixup4.dat
+    if [ "${MENDER_DEVICE_TYPE}" == "pi3-v3" ]; then
+        cp rootfs/boot/image-firmware/bootcode.bin rootfs/boot/firmware/bootcode.bin
+        cp rootfs/boot/image-firmware/start.elf rootfs/boot/firmware/p3start.elf
+        cp rootfs/boot/image-firmware/fixup.dat rootfs/boot/firmware/p3fixup.dat
+    elif [ "${MENDER_DEVICE_TYPE}" == "pi4-v3" ]; then
+        cp rootfs/boot/image-firmware/start4.elf rootfs/boot/firmware/p3start4.elf
+        cp rootfs/boot/image-firmware/fixup4.dat rootfs/boot/firmware/p3fixup4.dat
+    fi
 fi
 
 # Remove /etc/machine-id and /var/lib/dbus/machine-id (it should be unique for each system).

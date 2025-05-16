@@ -28,6 +28,7 @@ set -o pipefail
 
 TRYBOOT_TXT=/boot/firmware/tryboot.txt
 NEXT_ROOT_MNT=""
+source /data/mender/device_type
 
 print_and_exit()
 {
@@ -97,8 +98,15 @@ sed -i "s@^BOOTLOADER_DIRECTORY=.*@BOOTLOADER_DIRECTORY=\"/boot/firmware/p${NEXT
 cp "${NEXT_ROOT_MNT}/boot/image-firmware/cmdline.txt" "${NEXT_BOOT_FOLDER}/cmdline.txt"
 sed -i "s@__ROOTFS_PARTITION__@${NEXT_BOOT_PART}@" "${NEXT_BOOT_FOLDER}/cmdline.txt"
 
-cp "${NEXT_ROOT_MNT}/boot/image-firmware/start4.elf" "/boot/firmware/p${NEXT_BOOT_PART}start4.elf"
-cp "${NEXT_ROOT_MNT}/boot/image-firmware/fixup4.dat" "/boot/firmware/p${NEXT_BOOT_PART}fixup4.dat"
+if [ "${device_type}" == "pi3-v3-arm64" ]
+then
+    cp "${NEXT_ROOT_MNT}/boot/image-firmware/start.elf" "/boot/firmware/p${NEXT_BOOT_PART}start.elf"
+    cp "${NEXT_ROOT_MNT}/boot/image-firmware/fixup.dat" "/boot/firmware/p${NEXT_BOOT_PART}fixup.dat"
+elif [ "${device_type}" == "pi4-v3-arm64" ]
+then
+    cp "${NEXT_ROOT_MNT}/boot/image-firmware/start4.elf" "/boot/firmware/p${NEXT_BOOT_PART}start4.elf"
+    cp "${NEXT_ROOT_MNT}/boot/image-firmware/fixup4.dat" "/boot/firmware/p${NEXT_BOOT_PART}fixup4.dat"
+fi
 
 cp "${NEXT_ROOT_MNT}/boot/image-firmware/config.txt" "${TRYBOOT_TXT}"
 sed -i "s@__ROOTFS_PARTITION__@${NEXT_BOOT_PART}@" "${TRYBOOT_TXT}"

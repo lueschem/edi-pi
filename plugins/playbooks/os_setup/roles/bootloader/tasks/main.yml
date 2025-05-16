@@ -32,22 +32,22 @@
   when: ebs_bootloader_type == "u-boot"
 
 - name: Setup boot configuration (raspberry-pi).
-  copy:
+  template:
     src: config.txt.{{ ebs_bootloader_type }}.{{ edi_bootstrap_architecture }}
     dest: "{{ bootloader_image_location }}/config.txt"
   when: ebs_bootloader_type == "raspberry-pi"
 
 - name: Setup the kernel command line (u-boot).
   copy:
-    src: cmdline.txt.{{ ebs_bootloader_type }}.rpi4
+    src: cmdline.txt.{{ ebs_bootloader_type }}
     dest: "{{ bootloader_location }}/cmdline.txt"
   when: (mender_device_type in ["pi4", "pi4-v2", "pi4-v3", "pi5-v3"]) and ebs_bootloader_type == "u-boot"
 
 - name: Setup the kernel command line.
-  copy:
-    src: cmdline.txt.{{ ebs_bootloader_type }}.rpi4
+  template:
+    src: cmdline.txt.{{ ebs_bootloader_type }}
     dest: "{{ bootloader_image_location }}/cmdline.txt"
-  when: (mender_device_type in ["pi4", "pi4-v2", "pi4-v3", "pi5-v3"]) and ebs_bootloader_type == "raspberry-pi"
+  when: ebs_bootloader_type == "raspberry-pi"
 
 - name: Install the raspberrypi bootloader to the image location.
   unarchive:
