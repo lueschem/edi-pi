@@ -10,11 +10,23 @@ required_packages=(
 "mmdebstrap 1.3.5"
 )
 
+required_submodules=(
+"get_edi_io/debian_setup"
+)
+
 is_package_installed()
 {
     local package="${1}"
     # shellcheck disable=SC2091
     dpkg -s "${package}" > /dev/null 2>&1
+}
+
+is_submodule_cloned()
+{
+    local submodule="${1}"
+    local submodule_path="${script_dir}/../../../submodules/ansible_collections/${submodule}"
+
+    [ -d "${submodule_path}/roles" ]
 }
 
 version_greater_equal()
@@ -25,6 +37,7 @@ version_greater_equal()
 }
 
 check_passed=0
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 for item in "${required_packages[@]}"
 do
@@ -34,15 +47,28 @@ do
         actual_version=$(dpkg-query --showformat='${Version}' --show "${package}")
         if version_greater_equal "${actual_version}" "${required_version}"
         then
-            echo "${package} $actual_version: OK"
+            echo "Package ${package} $actual_version: OK"
         else
-            echo "${package} $actual_version: NOK"
+            echo "Package ${package} $actual_version: NOK"
             >&2 echo "Error: Package ${package} does not meet the version requirements (>= ${required_version})!"
             check_passed=1
         fi
     else
-        echo "${package} (missing): NOK"
+        echo "Package ${package} (missing): NOK"
         >&2 echo "Error: Package ${package} is not installed!"
+        check_passed=1
+    fi
+done
+
+for submodule in "${required_submodules[@]}"
+do
+    if is_submodule_cloned "${submodule}"
+    then
+        echo "Submodule ${submodule}: OK"
+    else
+        echo "Submodule ${submodule}: NOK"
+        >&2 echo "Error: Submodule ${submodule} is missing!"
+        >&2 echo "Hint: Did you forget 'git submodule update --init'?"
         check_passed=1
     fi
 done
