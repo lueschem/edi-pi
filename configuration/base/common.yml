@@ -15,7 +15,7 @@ general:
 bootstrap:
     tool: debootstrap
     repository: deb http://deb.debian.org/debian/ bookworm main
-    repository_key: https://ftp-master.debian.org/keys/archive-key-11.asc
+    repository_key: https://ftp-master.debian.org/keys/archive-key-12.asc
     additional_packages:
       - python3
       - python3-apt
