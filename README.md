@@ -5,8 +5,8 @@ Debian tool chain and image generation for the Raspberry Pi 2, 3, 4 and 5.
 <img alt="Raspberry Pi" src=https://www.get-edi.io/assets/images/blog/pi-hardware.png width="75%"/>
 
 > [!NOTE]
-> The *master* branch is **experimental** and currently based on Debian *trixie*.
-> To get the stable Debian *bookworm* configuration please check out the *debian_bookworm* branch.
+> The *master* branch is currently based on Debian *trixie*.
+> To get the Debian *bookworm* configuration please check out the *debian_bookworm* branch.
 
 ## Introduction
 
