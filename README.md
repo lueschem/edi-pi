@@ -1,6 +1,6 @@
 # edi Project Configuration for Raspberry Pi Devices
 
-Debian tool chain and image generation for the Raspberry Pi 2, 3, 4 and 5.
+Debian tool chain and image generation for the Raspberry Pi 2, 3, 4, 5 and CM5.
 
 <img alt="Raspberry Pi" src=https://www.get-edi.io/assets/images/blog/pi-hardware.png width="75%"/>
 
@@ -13,10 +13,10 @@ Debian tool chain and image generation for the Raspberry Pi 2, 3, 4 and 5.
 The edi configuration contained in this repository can be used to
 generate the following artifacts:
 
-* A Debian trixie arm64 (64bit) image suitable for the Raspberry Pi 3, 4 or 5.
+* A Debian trixie arm64 (64bit) image suitable for the Raspberry Pi 3, 4, 5 or CM5.
 * A Debian trixie armhf (32bit) image suitable for the Raspberry Pi 2.
 * Matching Mender update artifacts for the above configurations.
-* A Podman/Docker image with a pre-installed cross development toolchains (armhf/arm64) for C and C++.
+* A Podman/Docker image with pre-installed cross development toolchains (armhf/arm64) for C and C++.
 
 > [!NOTE]
 > The Raspberry Pi 3 images are now making use of the tryboot feature too and do no longer
@@ -77,13 +77,13 @@ add the tenant token to the version control system you can also copy `configurat
 
 A Raspberry Pi image can be created using the following command:
 
-For Raspberry Pi 5, arm64:
+For Raspberry Pi 5 or CM5, arm64:
 
 ``` bash
 edi -v project make pi5.yml
 ```
 
-For Raspberry Pi 5, arm64, prepared for GitOps (git and Ansible preinstalled):
+For Raspberry Pi 5 or CM5, arm64, prepared for GitOps (Ansible preinstalled):
 
 ``` bash
 edi -v project make pi5-gitops.yml
@@ -95,7 +95,7 @@ For Raspberry Pi 4, arm64:
 edi -v project make pi4.yml
 ```
 
-For Raspberry Pi 4, arm64, prepared for GitOps (git and Ansible preinstalled):
+For Raspberry Pi 4, arm64, prepared for GitOps (Ansible preinstalled):
 
 ``` bash
 edi -v project make pi4-gitops.yml
