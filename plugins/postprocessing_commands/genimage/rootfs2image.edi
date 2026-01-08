@@ -61,12 +61,12 @@ if [ "${LOG_LEVEL}" == "DEBUG" ]; then
     set -x
 fi
 
-if touch /etc/edi-fakeroot-check > /dev/null 2>&1; then
-    print_error_and_exit "This script must not be run as real root - please use fakeroot."
+if touch /etc/edi-root-check > /dev/null 2>&1; then
+    print_error_and_exit "This script must not be run as real root - please use fakeroot or unshare."
 fi
 
 if [[ ${EUID} -ne 0 ]]; then
-    print_error_and_exit "This script must be run using fakeroot."
+    print_error_and_exit "This script must be run using fakeroot or unshare."
 fi
 
 TEMPDIR="$(mktemp -p "${WORKDIR}" -d -t .tmp.XXXXXXXX)"
