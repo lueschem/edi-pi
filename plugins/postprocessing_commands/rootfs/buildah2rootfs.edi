@@ -54,7 +54,7 @@ TEMPDIR="$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)"
 trap "unexpected_exit ${TEMPDIR}" EXIT
 
 TEMP_ARCHIVE="${TEMPDIR}/archive.tar"
-NESTED_COMMAND="tar --numeric-owner -C "'"${container_root}"'" -acf ${TEMP_ARCHIVE} ."
+NESTED_COMMAND="tar --xattrs --numeric-owner -C "'"${container_root}"'" -acf ${TEMP_ARCHIVE} ."
 buildah unshare --mount container_root="${CONTAINER_NAME}" -- bash -c "${NESTED_COMMAND}"
 
 mv "${TEMP_ARCHIVE}" "${ROOTFS_ARCHIVE}"

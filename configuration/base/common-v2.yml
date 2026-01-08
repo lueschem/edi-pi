@@ -49,7 +49,7 @@ postprocessing_commands:
                 type: path
     300_rootfs2image:
         path: postprocessing_commands/genimage/rootfs2image.edi
-        require_root: "fakeroot"
+        require_root: "unshare"
         output:
             pp_image:
                 location: {{ edi_configuration_name }}.img

@@ -6,6 +6,7 @@ bare_metal_packages:
   - haveged
   - initramfs-tools
   - iproute2
+  - iputils-ping
   - "{{ kernel_image }}"
   - network-manager
   - systemd-timesyncd

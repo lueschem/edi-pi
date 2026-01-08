@@ -76,7 +76,7 @@ pushd "${TEMPDIR}" > /dev/null
 
 mkdir rootfs
 
-tar --numeric-owner --exclude-from "${PLUGIN_DIRECTORY}/exclude-patterns" -C rootfs/ -axf "${INPUT_ARCHIVE}"
+tar --numeric-owner --xattrs --xattrs-include='*' --exclude-from "${PLUGIN_DIRECTORY}/exclude-patterns" -C rootfs/ -axf "${INPUT_ARCHIVE}"
 
 # Copy kernel, initrd and dtbs to firmware partition
 if [ -d "rootfs/boot/image-kernel" ]; then
