@@ -27,7 +27,6 @@ set -o nounset
 source "{{ pp_timestamp }}"
 
 LOG_LEVEL="{{ edi_log_level }}"
-INPUT_ARCHIVE="{{ pp_rootfs_archive }}"
 PLUGIN_DIRECTORY="{{ edi_current_plugin_directory }}"
 DISK_IMAGE="{{ pp_image }}"
 PARTITION_IMAGE="{{ pp_partition_image }}"
@@ -69,6 +68,10 @@ if [[ ${EUID} -ne 0 ]]; then
     print_error_and_exit "This script must be run using fakeroot or unshare."
 fi
 
+if [ -z "${edi_project_container_root:-}" ]; then
+    print_error_and_exit "Missing environment variable 'edi_project_container_root'."
+fi
+
 TEMPDIR="$(mktemp -p "${WORKDIR}" -d -t .tmp.XXXXXXXX)"
 trap "unexpected_exit ${TEMPDIR}" EXIT
 
@@ -76,7 +79,7 @@ pushd "${TEMPDIR}" > /dev/null
 
 mkdir rootfs
 
-tar --numeric-owner --xattrs --xattrs-include='*' --exclude-from "${PLUGIN_DIRECTORY}/exclude-patterns" -C rootfs/ -axf "${INPUT_ARCHIVE}"
+rsync --numeric-ids --exclude-from "${PLUGIN_DIRECTORY}/exclude-patterns" --xattrs --acls --atimes --hard-links --archive "${edi_project_container_root}/" rootfs/
 
 # Copy kernel, initrd and dtbs to firmware partition
 if [ -d "rootfs/boot/image-kernel" ]; then
