@@ -21,39 +21,12 @@ print_error_and_exit()
     exit 1
 }
 
-unexpected_exit()
-{
-    local TEMPDIR="${1}"
-    print_error "Going to clean up after abnormal script termination."
-    clean_up "${TEMPDIR}"
-    trap - EXIT
-    print_error_and_exit "Abnormal script termination."
-}
-
-clean_up()
-{
-    local TEMPDIR="${1}"
-    rm -rf "${TEMPDIR}"
-}
-
 if [ "${LOG_LEVEL}" == "DEBUG" ]; then
     set -x
 fi
 
-if [[ ${EUID} -eq 0 ]]; then
-   print_error_and_exit "This script must not be run as root."
+if [ -z "${edi_project_container_root:-}" ]; then
+    print_error_and_exit "Missing environment variable 'edi_project_container_root'."
 fi
 
-TEMPDIR="$(mktemp -p ${WORKDIR} -d -t .tmp.XXXXXXXX)"
-
-trap "unexpected_exit ${TEMPDIR}" EXIT
-
-pushd "${TEMPDIR}" > /dev/null
-tar -xf "{{ pp_rootfs_archive }}" ./usr/share/doc
-popd > /dev/null
-
-{{ edi_current_plugin_directory }}/write_doc --project "{{ edi_configuration_name }}-{{ debian_distribution_release }}-{{ edi_bootstrap_architecture }}" --release "${BUILD_TIMESTAMP}" --author "{{ author }}" --input "${TEMPDIR}/usr/share/doc" --output "{{ pp_documentation }}" --config "{{ edi_project_directory }}/{{ edi_configuration_name }}.yml" --log "{{ edi_log_level }}"
-
-clean_up "${TEMPDIR}"
-
-trap - EXIT
+{{ edi_current_plugin_directory }}/write_doc --project "{{ edi_configuration_name }}-{{ debian_distribution_release }}-{{ edi_bootstrap_architecture }}" --release "${BUILD_TIMESTAMP}" --author "{{ author }}" --input "${edi_project_container_root}/usr/share/doc" --output "{{ pp_documentation }}" --config "{{ edi_project_directory }}/{{ edi_configuration_name }}.yml" --log "{{ edi_log_level }}"

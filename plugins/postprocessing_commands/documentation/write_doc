@@ -104,10 +104,6 @@ if [ "${LOG_LEVEL}" == "DEBUG" ]; then
     set -x
 fi
 
-if [[ ${EUID} -eq 0 ]]; then
-   print_error_and_exit "This script should not be run as root."
-fi
-
 if [ -d "${RENDERED_OUTPUT}" ]; then
     print_error_and_exit "The directory ${RENDERED_OUTPUT} already exists."
 fi

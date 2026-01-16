@@ -1,5 +1,5 @@
 general:
-    edi_required_minimal_edi_version: 1.19.0
+    edi_required_minimal_edi_version: 2.2.0
     parameters:
         mender_device_type: generic
         ansible_pipelining: true
@@ -46,15 +46,9 @@ postprocessing_commands:
             pp_timestamp:
                 location: {{ edi_configuration_name }}_timestamp
                 type: path
-    200_buildah2rootfs:
-        path: postprocessing_commands/rootfs/buildah2rootfs.edi
-        output:
-            pp_rootfs_archive:
-                location: {{ edi_configuration_name }}_configured-rootfs.tar
-                type: path
     300_rootfs2image:
         path: postprocessing_commands/genimage/rootfs2image.edi
-        require_root: "fakeroot"
+        require_root: unshare
         output:
             pp_image:
                 location: {{ edi_configuration_name }}.img
@@ -72,6 +66,7 @@ postprocessing_commands:
                 type: path
     500_documentation:
         path: postprocessing_commands/documentation/write_doc.edi
+        require_root: unshare
         output:
             pp_documentation:
                 location: {{ edi_configuration_name }}_documentation

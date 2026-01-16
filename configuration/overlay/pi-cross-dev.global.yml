@@ -30,8 +30,6 @@ playbooks:
 postprocessing_commands:
     100_timestamp:
         skip: True
-    200_buildah2rootfs:
-        skip: True
     200_buildah2image:
         path: postprocessing_commands/container_image/buildah2image.edi
         output:
