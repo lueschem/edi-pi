@@ -10,17 +10,23 @@
     name: ca-certificates
     install_recommends: no
 
-- name: Add edi repository key.
+- name: Add additional repository keys.
   copy:
-    src: get-edi-io-archive-keyring.gpg
+    src: "{{ item }}"
     dest: /usr/share/keyrings/
     mode: 0644
+  loop:
+    - get-edi-io-archive-keyring.gpg
+    - raspberrypi-archive-keyring.gpg
 
-- name: Add edi repository.
+- name: Add additional repositories.
   template:
-    src: get-edi-io.list
-    dest: /etc/apt/sources.list.d/get-edi-io.list
+    src: "{{ item }}"
+    dest: /etc/apt/sources.list.d/
     mode: 0644
+  loop:
+    - get-edi-io.list
+    - raspberrypi.sources
 
 # TODO: Remove preference as soon as packages are available directly from Mender or Debian.
 - name: Prefer packages from get-edi-io repository.
