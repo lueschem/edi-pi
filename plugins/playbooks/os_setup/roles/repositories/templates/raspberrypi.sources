@@ -1,9 +1,9 @@
-{% if edi_bootstrap_architecture == "arm64" %}
+{% if edi_bootstrap_architecture == "arm64" and target_is_bare_metal %}
 Types: deb
 URIs: http://archive.raspberrypi.com/debian/
 Suites: {{ ansible_distribution_release }}
 Components: main
 Signed-By: /usr/share/keyrings/raspberrypi-archive-keyring.gpg
 {% else %}
-# The Raspberry Pi archive only gets enabled for arm64 targets.
+# The Raspberry Pi archive only gets enabled for arm64 bare metal targets.
 {% endif %}
