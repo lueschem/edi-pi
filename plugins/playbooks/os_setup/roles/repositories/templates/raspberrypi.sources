@@ -1,7 +1,7 @@
 {% if edi_bootstrap_architecture == "arm64" and target_is_bare_metal %}
 Types: deb
 URIs: http://archive.raspberrypi.com/debian/
-Suites: {{ ansible_distribution_release }}
+Suites: {{ ansible_facts['distribution_release'] }}
 Components: main
 Signed-By: /usr/share/keyrings/raspberrypi-archive-keyring.gpg
 {% else %}
