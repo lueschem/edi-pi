@@ -40,7 +40,7 @@ The artifact generation requires some additional tools. On
 Ubuntu 24.04 and newer those tools can be installed as follows:
 
 ``` bash
-sudo apt install buildah containers-storage crun curl distrobox dosfstools e2fsprogs fakeroot genimage git mender-artifact mmdebstrap mtools parted python3-sphinx python3-testinfra podman rsync zerofree
+sudo apt install buildah containers-storage crun curl debian-archive-keyring distrobox dosfstools e2fsprogs fakeroot genimage git mender-artifact mmdebstrap mtools parted python3-sphinx python3-testinfra podman rsync zerofree
 ```
 
 ### Cloning this Repository
