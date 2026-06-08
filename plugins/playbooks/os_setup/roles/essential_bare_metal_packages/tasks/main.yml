@@ -5,6 +5,24 @@
     state: present
     install_recommends: no
 
+- name: Install kernel {{ kernel_image }} from repository.
+  apt:
+    name: "{{ kernel_image }}"
+    state: present
+    install_recommends: no
+  when: not kernel_image.endswith(".deb")
+
+- name: Copy local kernel {{ kernel_image }}.
+  copy:
+    src: "{{ kernel_image }}"
+    dest: /tmp
+  when: kernel_image.endswith(".deb")
+
+- name: Install local kernel {{ kernel_image }}.
+  apt:
+    deb: "/tmp/{{ kernel_image }}"
+  when: kernel_image.endswith(".deb")
+
 - name: Install wpasupplicant on devices that have WiFi.
   apt:
     name: wpasupplicant

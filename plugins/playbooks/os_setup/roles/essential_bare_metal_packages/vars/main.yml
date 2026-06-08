@@ -5,7 +5,6 @@ bare_metal_packages:
   - firmware-brcm80211
   - haveged
   - iproute2
-  - "{{ kernel_image }}"
   - kmod
   - network-manager
   - systemd-timesyncd

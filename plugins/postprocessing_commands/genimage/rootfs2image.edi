@@ -125,7 +125,7 @@ genimage --rootpath rootfs --config "${PLUGIN_DIRECTORY}/genimage.cfg" --tmppath
 popd > /dev/null
 
 mv "${TEMPDIR}/images/disk-image.img" "${DISK_IMAGE}"
-mv "${TEMPDIR}/images/root.ext4" "${PARTITION_IMAGE}"
+mv "${TEMPDIR}/images/root.btrfs" "${PARTITION_IMAGE}"
 
 rm -rf "${TEMPDIR}"
 trap - EXIT
