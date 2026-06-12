@@ -1,5 +1,6 @@
 ---
 bare_metal_packages:
+  - btrfs-progs
   - edi-resize-rootfs
   - edi-set-hostname
   - firmware-brcm80211
