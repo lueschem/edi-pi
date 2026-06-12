@@ -54,7 +54,7 @@ postprocessing_commands:
                 location: {{ edi_configuration_name }}.img
                 type: path
             pp_partition_image:
-                location: {{ edi_configuration_name }}_rootfs.ext4
+                location: {{ edi_configuration_name }}_rootfs.partition
                 type: path
         parameters:
             hostname: raspberry
