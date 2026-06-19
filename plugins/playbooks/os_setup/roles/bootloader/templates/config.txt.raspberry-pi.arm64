@@ -40,6 +40,7 @@ disable_overscan=1
 arm_boost=1
 
 kernel=vmlinuz
+initramfs initrd.img followkernel
 os_prefix=p__ROOTFS_PARTITION__/
 
 [cm4]

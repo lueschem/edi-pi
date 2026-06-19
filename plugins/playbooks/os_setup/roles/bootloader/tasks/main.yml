@@ -9,6 +9,12 @@
     src: multiboot.cfg
     dest: /etc/edi-boot-shim/edi-boot-shim.cfg.d
 
+- name: Install boot spec with initrd.
+  copy:
+    src: boot.spec.rpi4.arm64.dracut
+    dest: /etc/edi-boot-shim/
+  when: ebs_bootloader_type == "raspberry-pi"
+
 - name: Install edi-boot-shim.
   apt:
     name: edi-boot-shim

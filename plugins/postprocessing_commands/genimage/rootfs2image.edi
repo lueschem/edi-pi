@@ -78,47 +78,48 @@ trap "unexpected_exit ${TEMPDIR}" EXIT
 
 pushd "${TEMPDIR}" > /dev/null
 
-mkdir rootfs
+ROOTFS_DIR="rootfs/@"
+mkdir -p "${ROOTFS_DIR}"
 
-rsync --numeric-ids --exclude-from "${PLUGIN_DIRECTORY}/exclude-patterns" --xattrs --acls --atimes --hard-links --archive "${edi_project_container_root}/" rootfs/
+rsync --numeric-ids --exclude-from "${PLUGIN_DIRECTORY}/exclude-patterns" --xattrs --acls --atimes --hard-links --archive "${edi_project_container_root}/" "${ROOTFS_DIR}"/
 
 # Copy kernel, initrd and dtbs to firmware partition
-if [ -d "rootfs/boot/image-kernel" ]; then
-    cp -r -L rootfs/boot/image-kernel rootfs/boot/firmware/p3
-    sed -i "s@^BOOTLOADER_DIRECTORY=.*@BOOTLOADER_DIRECTORY=\"/boot/firmware/p3\"@" "rootfs/etc/edi-boot-shim/edi-boot-shim.cfg.d/multiboot.cfg"
+if [ -d "${ROOTFS_DIR}/boot/image-kernel" ]; then
+    cp -r -L "${ROOTFS_DIR}"/boot/image-kernel "${ROOTFS_DIR}"/boot/firmware/p3
+    sed -i "s@^BOOTLOADER_DIRECTORY=.*@BOOTLOADER_DIRECTORY=\"/boot/firmware/p3\"@" "${ROOTFS_DIR}/etc/edi-boot-shim/edi-boot-shim.cfg.d/multiboot.cfg"
 fi
 
-if [ -d "rootfs/boot/image-firmware" ]; then
-    cp rootfs/boot/image-firmware/cmdline.txt rootfs/boot/firmware/p3/cmdline.txt
-    sed -i 's@__ROOTFS_PARTITION__@3@' rootfs/boot/firmware/p3/cmdline.txt
-    cp rootfs/boot/image-firmware/config.txt rootfs/boot/firmware/config.txt
-    sed -i 's@__ROOTFS_PARTITION__@3@' rootfs/boot/firmware/config.txt
+if [ -d "${ROOTFS_DIR}/boot/image-firmware" ]; then
+    cp "${ROOTFS_DIR}"/boot/image-firmware/cmdline.txt "${ROOTFS_DIR}"/boot/firmware/p3/cmdline.txt
+    sed -i 's@__ROOTFS_PARTITION__@3@' "${ROOTFS_DIR}"/boot/firmware/p3/cmdline.txt
+    cp "${ROOTFS_DIR}"/boot/image-firmware/config.txt "${ROOTFS_DIR}"/boot/firmware/config.txt
+    sed -i 's@__ROOTFS_PARTITION__@3@' "${ROOTFS_DIR}"/boot/firmware/config.txt
     if [ "${MENDER_DEVICE_TYPE}" == "pi3-v3" ]; then
-        cp rootfs/boot/image-firmware/bootcode.bin rootfs/boot/firmware/bootcode.bin
-        cp rootfs/boot/image-firmware/start.elf rootfs/boot/firmware/p3start.elf
-        cp rootfs/boot/image-firmware/fixup.dat rootfs/boot/firmware/p3fixup.dat
+        cp "${ROOTFS_DIR}"/boot/image-firmware/bootcode.bin "${ROOTFS_DIR}"/boot/firmware/bootcode.bin
+        cp "${ROOTFS_DIR}"/boot/image-firmware/start.elf "${ROOTFS_DIR}"/boot/firmware/p3start.elf
+        cp "${ROOTFS_DIR}"/boot/image-firmware/fixup.dat "${ROOTFS_DIR}"/boot/firmware/p3fixup.dat
     elif [ "${MENDER_DEVICE_TYPE}" == "pi4-v3" ]; then
-        cp rootfs/boot/image-firmware/start4.elf rootfs/boot/firmware/p3start4.elf
-        cp rootfs/boot/image-firmware/fixup4.dat rootfs/boot/firmware/p3fixup4.dat
+        cp "${ROOTFS_DIR}"/boot/image-firmware/start4.elf "${ROOTFS_DIR}"/boot/firmware/p3start4.elf
+        cp "${ROOTFS_DIR}"/boot/image-firmware/fixup4.dat "${ROOTFS_DIR}"/boot/firmware/p3fixup4.dat
     fi
 fi
 
 # Remove /etc/machine-id and /var/lib/dbus/machine-id (it should be unique for each system).
-rm rootfs/etc/machine-id
-rm rootfs/var/lib/dbus/machine-id
+rm "${ROOTFS_DIR}"/etc/machine-id
+rm "${ROOTFS_DIR}"/var/lib/dbus/machine-id
 # Add fstab.
-cp "${PLUGIN_DIRECTORY}/fstab" rootfs/etc/
+cp "${PLUGIN_DIRECTORY}/fstab" "${ROOTFS_DIR}"/etc/
 
 # Add artifact information to rootfs.
-mkdir -p "rootfs/etc/mender/"
-echo "artifact_name=${ARTIFACT_NAME}" > rootfs/etc/mender/artifact_info
+mkdir -p "${ROOTFS_DIR}/etc/mender/"
+echo "artifact_name=${ARTIFACT_NAME}" > "${ROOTFS_DIR}"/etc/mender/artifact_info
 
 # Adjust hostname.
-cp "${PLUGIN_DIRECTORY}/hosts" rootfs/etc/
-chmod 0644 rootfs/etc/hosts
-sed -i "s@__HOSTNAME__@${HOSTNAME}@" rootfs/etc/hosts
-cp "${PLUGIN_DIRECTORY}/hostname" rootfs/etc/
-sed -i "s@__HOSTNAME__@${HOSTNAME}@" rootfs/etc/hostname
+cp "${PLUGIN_DIRECTORY}/hosts" "${ROOTFS_DIR}"/etc/
+chmod 0644 "${ROOTFS_DIR}"/etc/hosts
+sed -i "s@__HOSTNAME__@${HOSTNAME}@" "${ROOTFS_DIR}"/etc/hosts
+cp "${PLUGIN_DIRECTORY}/hostname" "${ROOTFS_DIR}"/etc/
+sed -i "s@__HOSTNAME__@${HOSTNAME}@" "${ROOTFS_DIR}"/etc/hostname
 
 genimage --rootpath rootfs --config "${PLUGIN_DIRECTORY}/genimage.cfg" --tmppath genimage-workdir
 

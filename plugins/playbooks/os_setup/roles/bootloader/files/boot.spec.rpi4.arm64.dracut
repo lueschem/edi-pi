@@ -1,0 +1,16 @@
+kernel_image=/boot/vmlinuz-__KERNEL_PACKAGE_VERSION__
+initramfs_image=/boot/initrd.img-__KERNEL_PACKAGE_VERSION__
+device_tree_binaries=(
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/broadcom/bcm2711-rpi-4-b.dtb
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/broadcom/bcm2711-rpi-400.dtb
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/broadcom/bcm2711-rpi-cm4.dtb
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/broadcom/bcm2711-rpi-cm4-io.dtb
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/broadcom/bcm2711-rpi-cm4s.dtb
+)
+device_tree_binary_overlays=(
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/overlays/vc4-fkms-v3d.dtbo
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/overlays/vc4-kms-v3d.dtbo
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/overlays/gpio-ir-tx.dtbo
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/overlays/gpio-ir.dtbo
+)
+
