@@ -93,7 +93,8 @@ mount "/dev/mmcblk0p${NEXT_BOOT_PART}" "${NEXT_ROOT_MNT}"
 
 rm -rf "${NEXT_BOOT_FOLDER}"
 cp -r -L "${NEXT_ROOT_MNT}/boot/image-kernel" "${NEXT_BOOT_FOLDER}"
-sed -i "s@^BOOTLOADER_DIRECTORY=.*@BOOTLOADER_DIRECTORY=\"/boot/firmware/p${NEXT_BOOT_PART}\"@" "${NEXT_ROOT_MNT}/etc/edi-boot-shim/edi-boot-shim.cfg.d/multiboot.cfg"
+# TODO: Fix edi-boot-shim setup on first boot.
+#sed -i "s@^BOOTLOADER_DIRECTORY=.*@BOOTLOADER_DIRECTORY=\"/boot/firmware/p${NEXT_BOOT_PART}\"@" "${NEXT_ROOT_MNT}/etc/edi-boot-shim/edi-boot-shim.cfg.d/multiboot.cfg"
 
 cp "${NEXT_ROOT_MNT}/boot/image-firmware/cmdline.txt" "${NEXT_BOOT_FOLDER}/cmdline.txt"
 sed -i "s@__ROOTFS_PARTITION__@${NEXT_BOOT_PART}@" "${NEXT_BOOT_FOLDER}/cmdline.txt"

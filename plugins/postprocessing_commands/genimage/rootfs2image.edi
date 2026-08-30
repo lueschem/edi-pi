@@ -78,7 +78,7 @@ trap "unexpected_exit ${TEMPDIR}" EXIT
 
 pushd "${TEMPDIR}" > /dev/null
 
-ROOTFS_DIR="rootfs/@"
+ROOTFS_DIR="rootfs/factory"
 mkdir -p "${ROOTFS_DIR}"
 
 rsync --numeric-ids --exclude-from "${PLUGIN_DIRECTORY}/exclude-patterns" --xattrs --acls --atimes --hard-links --archive "${edi_project_container_root}/" "${ROOTFS_DIR}"/

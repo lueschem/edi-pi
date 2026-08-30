@@ -1,4 +1,13 @@
 ---
+- name: Install dracut btrfs snapshot module.
+  copy:
+    src: "{{ item }}"
+    dest: /usr/lib/dracut/modules.d/95rootfs-snapshot/
+    mode: 0755
+  loop:
+    - module-setup.sh
+    - snapshot-rootfs.sh
+
 - name: Install packages that are essential for running on bare metal.
   apt:
     name: "{{ bare_metal_packages }}"
