@@ -9,6 +9,7 @@ DISTRIBUTION_RELEASE="{{ debian_distribution_release }}"
 DEBIAN_ARCHITECTURE="{{ edi_bootstrap_architecture }}"
 WORKDIR="{{ edi_work_directory }}"
 QEMU_EMULATED_CPU="{{ qemu_emulated_cpu }}"
+export SOURCE_DATE_EPOCH="{{ source_date_epoch }}"
 
 print_error()
 {

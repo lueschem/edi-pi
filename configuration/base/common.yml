@@ -8,6 +8,8 @@ general:
         default_user_group_name: pi
         debian_distribution_release: trixie
         ansible_python_interpreter: /usr/bin/python3
+        # Initial release of Debian trixie (09 August 2025)
+        source_date_epoch: "1754690400"
 
 preprocessing_commands:
     100_prerequisites:

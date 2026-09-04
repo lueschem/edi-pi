@@ -34,6 +34,7 @@
     qemu_emulated_cpu: max
   environment:
     QEMU_CPU: "{{ qemu_emulated_cpu }}"
+    SOURCE_DATE_EPOCH: "{{ source_date_epoch }}"
   roles:
     - role: get_edi_io.debian_setup.proxy_settings
       become: True

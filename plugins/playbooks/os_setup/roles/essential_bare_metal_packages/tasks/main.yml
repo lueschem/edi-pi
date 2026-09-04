@@ -8,6 +8,12 @@
     - module-setup.sh
     - snapshot-rootfs.sh
 
+- name: Enable reproducible initramfs builds.
+  copy:
+    src: "50-reproducible.conf"
+    dest: /etc/dracut.conf.d/
+    mode: 0644
+
 - name: Install packages that are essential for running on bare metal.
   apt:
     name: "{{ bare_metal_packages }}"
