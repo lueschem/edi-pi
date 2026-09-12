@@ -1,0 +1,138 @@
+#!/bin/bash
+
+set -o nounset
+set -o errexit
+set -o pipefail
+
+print_error()
+{
+    local MESSAGE="${1}"
+    >&2 echo -e "\033[91mError: ${MESSAGE}\033[0m"
+}
+
+print_error_and_exit()
+{
+    local MESSAGE="${1}"
+    print_error "${MESSAGE}"
+    exit 1
+}
+
+unexpected_exit()
+{
+    print_error "Going to clean up after abnormal script termination."
+    "${SUDO_COMMAND}" umount "${TEMPDIR}"/old_mnt/ || true
+    "${SUDO_COMMAND}" umount "${TEMPDIR}"/new_mnt/ || true
+    rm -rf "${TEMPDIR}"
+    trap - EXIT
+    print_error_and_exit "Abnormal script termination."
+}
+
+if [[ $# -ne 2 ]]
+then
+    print_error_and_exit "Usage: sudo ${0} OLD_ARTIFACT.mender NEW_ARTIFACT.mender"
+fi
+
+SUDO_COMMAND=""
+if [ "$EUID" -ne 0 ]
+then
+    SUDO_COMMAND="sudo"
+fi
+
+"${SUDO_COMMAND}" true
+
+OLD_ARTIFACT="${1}"
+NEW_ARTIFACT="${2}"
+
+if [ ! -f "${OLD_ARTIFACT}"  ]
+then
+    print_error_and_exit "Old artifact ${OLD_ARTIFACT} not found."
+fi
+
+if [ ! -f "${NEW_ARTIFACT}"  ]
+then
+    print_error_and_exit "New artifact ${NEW_ARTIFACT} not found."
+fi
+
+WORKDIR="$(pwd)"
+TEMPDIR="$(mktemp -p "${WORKDIR}/artifacts/" -d -t .tmp.XXXXXXXX)"
+CURRENT_USER="$(id -u -n)"
+CURRENT_GROUP="$(id -g -n)"
+ROOTFS_DELTA=rootfs-delta.btrfs
+trap "unexpected_exit" EXIT
+
+mkdir -p "${TEMPDIR}"/old/files
+mkdir -p "${TEMPDIR}"/old_mnt
+mkdir -p "${TEMPDIR}"/new/files
+mkdir -p "${TEMPDIR}"/new/scripts
+mkdir -p "${TEMPDIR}"/new_mnt
+
+OLD_ARTIFACT_YAML="$(mender-artifact read "${OLD_ARTIFACT}")"
+NEW_ARTIFACT_YAML="$(mender-artifact read "${NEW_ARTIFACT}")"
+OLD_UPDATE_TYPE="$(echo "${OLD_ARTIFACT_YAML}" | yq '.Updates[0].Type' | tr -d '"')"
+NEW_UPDATE_TYPE="$(echo "${NEW_ARTIFACT_YAML}" | yq '.Updates[0].Type' | tr -d '"')"
+OLD_ROOTFS_FILE="$(echo "${OLD_ARTIFACT_YAML}" | yq '.Updates[0].Files[0].name' | tr -d '"')"
+NEW_ROOTFS_FILE="$(echo "${NEW_ARTIFACT_YAML}" | yq '.Updates[0].Files[0].name' | tr -d '"')"
+OLD_SNAPSHOT="$(echo "${OLD_ARTIFACT_YAML}" | yq '.Updates[0].Provides."rootfs-image.snapshot"' | tr -d '"')"
+NEW_ROOTFS_VERSION="$(echo "${NEW_ARTIFACT_YAML}" | yq '.Updates[0].Provides."rootfs-image.version"' | tr -d '"')"
+NEW_NAME="$(echo "${NEW_ARTIFACT_YAML}" | yq '."Mender Artifact".Name' | tr -d '"')"
+
+
+if [ "${OLD_UPDATE_TYPE}" != "rootfs-image" ]
+then
+    print_error_and_exit "Old mender artifact has wrong type: ${OLD_UPDATE_TYPE}"
+fi
+
+if [ "${NEW_UPDATE_TYPE}" != "rootfs-image" ]
+then
+    print_error_and_exit "Old mender artifact has wrong type: ${NEW_UPDATE_TYPE}"
+fi
+
+COMPATIBLE_DEVICES=()
+for type in $(echo "${NEW_ARTIFACT_YAML}" | yq '."Mender Artifact"."Compatible types"[]')
+do
+    DEVICE_TYPE="$(echo "${type}" | tr -d '"')"
+    COMPATIBLE_DEVICES+=( "--compatible-types" "${DEVICE_TYPE}" )
+done
+
+STATE_SCRIPTS=()
+for script in $(echo "${NEW_ARTIFACT_YAML}" | yq '."Mender Artifact"."State scripts"[]')
+do
+    STATE_SCRIPT="${TEMPDIR}"/new/scripts/"$(echo "${script}" | tr -d '"')"
+    STATE_SCRIPTS+=( "--script" "${STATE_SCRIPT}" )
+done
+
+mender-artifact dump --files "${TEMPDIR}"/old/files/ "${OLD_ARTIFACT}"
+mender-artifact dump --files "${TEMPDIR}"/new/files/ "${NEW_ARTIFACT}"
+mender-artifact dump --scripts "${TEMPDIR}"/new/scripts/ "${NEW_ARTIFACT}"
+
+"${SUDO_COMMAND}" mount -t btrfs -o subvolid=5 -o noatime "${TEMPDIR}"/old/files/"${OLD_ROOTFS_FILE}" "${TEMPDIR}"/old_mnt/
+"${SUDO_COMMAND}" mount -t btrfs -o subvolid=5 -o noatime "${TEMPDIR}"/new/files/"${NEW_ROOTFS_FILE}" "${TEMPDIR}"/new_mnt/
+"${SUDO_COMMAND}" btrfs subvolume snapshot "${TEMPDIR}"/old_mnt/factory "${TEMPDIR}"/old_mnt/work
+"${SUDO_COMMAND}" rsync --numeric-ids --xattrs --acls --hard-links --archive --no-times --checksum "${TEMPDIR}"/new_mnt/factory/ "${TEMPDIR}"/old_mnt/work/
+"${SUDO_COMMAND}" btrfs subvolume snapshot -r "${TEMPDIR}"/old_mnt/work "${TEMPDIR}"/old_mnt/factory_plus_delta
+"${SUDO_COMMAND}" btrfs send --proto 2 -p "${TEMPDIR}"/old_mnt/factory "${TEMPDIR}"/old_mnt/factory_plus_delta -f "${TEMPDIR}"/"${ROOTFS_DELTA}"
+"${SUDO_COMMAND}" chown "${CURRENT_USER}":"${CURRENT_GROUP}" "${TEMPDIR}"/"${ROOTFS_DELTA}"
+"${SUDO_COMMAND}" umount "${TEMPDIR}"/old_mnt/
+"${SUDO_COMMAND}" umount "${TEMPDIR}"/new_mnt/
+
+DELTA_ARTIFACT_NAME="${NEW_NAME}-delta-${OLD_SNAPSHOT}.mender"
+
+mender-artifact write module-image --type btrfs-delta-rootfs-image \
+    "${COMPATIBLE_DEVICES[@]}" \
+    --depends "rootfs-image.snapshot:${OLD_SNAPSHOT}" \
+    --artifact-name "${DELTA_ARTIFACT_NAME}" \
+    --file "${TEMPDIR}"/"${ROOTFS_DELTA}" --version 3 \
+    --no-default-software-version \
+    --no-default-clears-provides \
+    --provides rootfs-image.version:"${NEW_ROOTFS_VERSION}" \
+    --provides rootfs-image.snapshot:"${OLD_SNAPSHOT}" \
+    --clears-provides "rootfs-image.*" \
+    --clears-provides artifact_group \
+    --clears-provides rootfs_image_checksum \
+    "${STATE_SCRIPTS[@]}" \
+    --output-path "${TEMPDIR}"/"${DELTA_ARTIFACT_NAME}"
+
+mv "${TEMPDIR}"/"${DELTA_ARTIFACT_NAME}" "${WORKDIR}/artifacts/"
+rm -r "${TEMPDIR}"
+
+trap - EXIT
