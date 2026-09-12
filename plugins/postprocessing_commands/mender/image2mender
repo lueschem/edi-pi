@@ -140,29 +140,21 @@ else
     COMPATIBLE_DEVICE=()
 fi
 
-INPUT_OPTION="--file"
-MENDER_ARTIFACT_VERSION=$(mender-artifact --version)
-MENDER_ARTIFACT_MAJOR_VERSION=$(echo "${MENDER_ARTIFACT_VERSION}" | cut -d' ' -f 3 | cut -d'.' -f 1)
-
-if [[ ${MENDER_ARTIFACT_MAJOR_VERSION} -eq 2 ]]
-then
-    INPUT_OPTION="--update"
-fi
-
-# Special treatment for the Debian buster mender-artifact package:
-if [[ ${MENDER_ARTIFACT_VERSION} == *"really2"* ]]
-then
-    INPUT_OPTION="--update"
-fi
-
 BOOTPARTITION_SETUP_SCRIPT=()
 if [ "${BOOTLOADER}" == "raspberry-pi" ]
 then
     BOOTPARTITION_SETUP_SCRIPT=( "--script" "${SCRIPTDIR}/ArtifactInstall_Enter_50_BootpartitionSetup" )
 fi
 
-mender-artifact write rootfs-image --device-type "${DEVICE_TYPE}" "${COMPATIBLE_DEVICE[@]}" \
-    --artifact-name "${ARTIFACT_NAME}" ${INPUT_OPTION} "${INPUT_IMAGE}" --version 3 \
+mender-artifact write module-image --type rootfs-image --device-type "${DEVICE_TYPE}" "${COMPATIBLE_DEVICE[@]}" \
+    --artifact-name "${ARTIFACT_NAME}" --file "${INPUT_IMAGE}" --version 3 \
+    --no-default-software-version \
+    --no-default-clears-provides \
+    --provides rootfs-image.version:"${ARTIFACT_NAME}" \
+    --provides rootfs-image.snapshot:"${ARTIFACT_NAME}" \
+    --clears-provides "rootfs-image.*" \
+    --clears-provides artifact_group \
+    --clears-provides rootfs_image_checksum \
     --script "${SCRIPTDIR}/ArtifactInstall_Leave_50_ConfigurationBackup" \
     --script "${SCRIPTDIR}/ArtifactReboot_Leave_50_ConfigurationRestore" \
     "${BOOTPARTITION_SETUP_SCRIPT[@]}" \
