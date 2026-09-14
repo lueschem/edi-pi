@@ -115,7 +115,7 @@ mender-artifact dump --scripts "${TEMPDIR}"/new/scripts/ "${NEW_ARTIFACT}"
 "${SUDO_COMMAND}" umount "${TEMPDIR}"/old_mnt/
 "${SUDO_COMMAND}" umount "${TEMPDIR}"/new_mnt/
 
-DELTA_ARTIFACT_NAME="${NEW_NAME}-delta-${OLD_SNAPSHOT}.mender"
+DELTA_ARTIFACT_NAME="${NEW_NAME}-delta-${OLD_SNAPSHOT}"
 
 mender-artifact write module-image --type btrfs-delta-rootfs-image \
     "${COMPATIBLE_DEVICES[@]}" \
@@ -126,13 +126,14 @@ mender-artifact write module-image --type btrfs-delta-rootfs-image \
     --no-default-clears-provides \
     --provides rootfs-image.version:"${NEW_ROOTFS_VERSION}" \
     --provides rootfs-image.snapshot:"${OLD_SNAPSHOT}" \
+    --provides rootfs-image.delta_snapshot:"${DELTA_ARTIFACT_NAME}" \
     --clears-provides "rootfs-image.*" \
     --clears-provides artifact_group \
     --clears-provides rootfs_image_checksum \
     "${STATE_SCRIPTS[@]}" \
-    --output-path "${TEMPDIR}"/"${DELTA_ARTIFACT_NAME}"
+    --output-path "${TEMPDIR}"/"${DELTA_ARTIFACT_NAME}.mender"
 
-mv "${TEMPDIR}"/"${DELTA_ARTIFACT_NAME}" "${WORKDIR}/artifacts/"
+mv "${TEMPDIR}"/"${DELTA_ARTIFACT_NAME}.mender" "${WORKDIR}/artifacts/"
 rm -r "${TEMPDIR}"
 
 trap - EXIT
