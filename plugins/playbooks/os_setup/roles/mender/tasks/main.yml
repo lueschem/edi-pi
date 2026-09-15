@@ -96,6 +96,12 @@
   with_fileglob:
     - "{{ mender_config_directory }}/identity/*"
 
+- name: Copy the btrfs-delta-roofs-image module script.
+  copy:
+    src: btrfs-delta-rootfs-image
+    dest: /usr/share/mender/modules/v3/
+    mode: 0755
+
 - name: Create various integration directories.
   file:
     path: "{{ item }}"
