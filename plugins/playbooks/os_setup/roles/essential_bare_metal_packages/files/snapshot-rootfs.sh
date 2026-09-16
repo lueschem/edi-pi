@@ -25,6 +25,9 @@ snapshot_rootfs() {
         info "no snapshot needed, root ${_root} already got snapshot ${_snapshot}"
     else
         info "snapshot needed, root ${_root}: ${_snapshot} --> ${_rw_snapshot}"
+        if [ -e "${_rootmnt}"/"${_rw_snapshot}" ] ; then
+            btrfs subvolume delete --commit-after "${_rootmnt}"/"${_rw_snapshot}"
+        fi
         btrfs subvolume snapshot "${_rootmnt}"/"${_snapshot}" "${_rootmnt}"/"${_rw_snapshot}"
         btrfs subvolume set-default "${_rootmnt}"/"${_rw_snapshot}"
     fi
