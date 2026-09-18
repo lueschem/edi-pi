@@ -10,6 +10,12 @@ print_error()
     >&2 echo -e "\033[91mError: ${MESSAGE}\033[0m"
 }
 
+print_success()
+{
+    local MESSAGE="${1}"
+    echo -e "\033[32mSuccess: ${MESSAGE}\033[0m"
+}
+
 print_error_and_exit()
 {
     local MESSAGE="${1}"
@@ -36,6 +42,13 @@ SUDO_COMMAND=""
 if [ "$EUID" -ne 0 ]
 then
     SUDO_COMMAND="sudo"
+fi
+
+MENDER_ARTIFACT_MAJOR="$(mender-artifact --version | cut -d" " -f3 | cut -d"." -f1)"
+
+if [ ! "${MENDER_ARTIFACT_MAJOR}" -ge 4 ]
+then
+    print_error_and_exit "The mender-artifact binary is too old (>= 4.0.0 required)."
 fi
 
 "${SUDO_COMMAND}" true
@@ -101,22 +114,24 @@ do
     STATE_SCRIPTS+=( "--script" "${STATE_SCRIPT}" )
 done
 
+echo "Extracting existing artifacts..."
 mender-artifact dump --files "${TEMPDIR}"/old/files/ "${OLD_ARTIFACT}"
 mender-artifact dump --files "${TEMPDIR}"/new/files/ "${NEW_ARTIFACT}"
 mender-artifact dump --scripts "${TEMPDIR}"/new/scripts/ "${NEW_ARTIFACT}"
 
+echo "Creating btrfs delta artifact..."
 "${SUDO_COMMAND}" mount -t btrfs -o subvolid=5 -o noatime "${TEMPDIR}"/old/files/"${OLD_ROOTFS_FILE}" "${TEMPDIR}"/old_mnt/
 "${SUDO_COMMAND}" mount -t btrfs -o subvolid=5 -o noatime "${TEMPDIR}"/new/files/"${NEW_ROOTFS_FILE}" "${TEMPDIR}"/new_mnt/
 "${SUDO_COMMAND}" mv "${TEMPDIR}"/old_mnt/factory "${TEMPDIR}"/old_mnt/baseline
-"${SUDO_COMMAND}" btrfs subvolume snapshot "${TEMPDIR}"/old_mnt/baseline "${TEMPDIR}"/old_mnt/work
+"${SUDO_COMMAND}" btrfs -q subvolume snapshot "${TEMPDIR}"/old_mnt/baseline "${TEMPDIR}"/old_mnt/work
 "${SUDO_COMMAND}" rsync --numeric-ids --xattrs --acls --hard-links --archive --no-times --checksum "${TEMPDIR}"/new_mnt/factory/ "${TEMPDIR}"/old_mnt/work/
-"${SUDO_COMMAND}" btrfs subvolume snapshot -r "${TEMPDIR}"/old_mnt/work "${TEMPDIR}"/old_mnt/factory
-"${SUDO_COMMAND}" btrfs send --proto 2 -p "${TEMPDIR}"/old_mnt/baseline "${TEMPDIR}"/old_mnt/factory -f "${TEMPDIR}"/"${ROOTFS_DELTA}"
+"${SUDO_COMMAND}" btrfs -q subvolume snapshot -r "${TEMPDIR}"/old_mnt/work "${TEMPDIR}"/old_mnt/factory
+"${SUDO_COMMAND}" btrfs -q send --proto 2 -p "${TEMPDIR}"/old_mnt/baseline "${TEMPDIR}"/old_mnt/factory -f "${TEMPDIR}"/"${ROOTFS_DELTA}"
 "${SUDO_COMMAND}" chown "${CURRENT_USER}":"${CURRENT_GROUP}" "${TEMPDIR}"/"${ROOTFS_DELTA}"
 "${SUDO_COMMAND}" umount "${TEMPDIR}"/old_mnt/
 "${SUDO_COMMAND}" umount "${TEMPDIR}"/new_mnt/
 
-DELTA_ARTIFACT_NAME="${NEW_NAME}-delta-${BASELINE}"
+DELTA_ARTIFACT_NAME="${NEW_NAME}-baseline-${BASELINE}"
 
 mender-artifact write module-image --type btrfs-delta-rootfs-image \
     "${COMPATIBLE_DEVICES[@]}" \
@@ -136,5 +151,7 @@ mender-artifact write module-image --type btrfs-delta-rootfs-image \
 
 mv "${TEMPDIR}"/"${DELTA_ARTIFACT_NAME}.mender" "${WORKDIR}/artifacts/"
 rm -r "${TEMPDIR}"
+
+print_success "${WORKDIR}/artifacts/${DELTA_ARTIFACT_NAME}.mender created!"
 
 trap - EXIT
