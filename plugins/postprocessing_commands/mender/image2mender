@@ -151,7 +151,8 @@ mender-artifact write module-image --type rootfs-image --device-type "${DEVICE_T
     --no-default-software-version \
     --no-default-clears-provides \
     --provides rootfs-image.version:"${ARTIFACT_NAME}" \
-    --provides rootfs-image.snapshot:"${ARTIFACT_NAME}" \
+    --provides rootfs-image.baseline:"${ARTIFACT_NAME}" \
+    --provides rootfs-image.factory:"${ARTIFACT_NAME}" \
     --clears-provides "rootfs-image.*" \
     --clears-provides artifact_group \
     --clears-provides rootfs_image_checksum \

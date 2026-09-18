@@ -177,9 +177,14 @@ case "$STATE" in
         mkfs.btrfs -f "$passive"
         mount -t btrfs -o subvolid=5 -o noatime "$passive" "$PASSIVE_MNT"
         mount -t btrfs -o subvolid=5 -o noatime "$active" "$ACTIVE_MNT"
-        btrfs send --proto 2 "$ACTIVE_MNT"/factory/ | sudo btrfs receive "$PASSIVE_MNT"
+        if [ -e "$ACTIVE_MNT"/baseline ] ; then
+            btrfs send --proto 2 "$ACTIVE_MNT"/baseline/ | sudo btrfs receive "$PASSIVE_MNT"
+        else
+            btrfs send --proto 2 "$ACTIVE_MNT"/factory/ | sudo btrfs receive "$PASSIVE_MNT"
+            mv "$PASSIVE_MNT"/factory "$PASSIVE_MNT"/baseline
+        fi
         < "$file" btrfs receive "$PASSIVE_MNT"
-        btrfs subvolume set-default "$PASSIVE_MNT"/factory_plus_delta/
+        btrfs subvolume set-default "$PASSIVE_MNT"/factory/
         umount "$ACTIVE_MNT"
         umount "$PASSIVE_MNT"
 

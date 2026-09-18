@@ -72,7 +72,7 @@ OLD_UPDATE_TYPE="$(echo "${OLD_ARTIFACT_YAML}" | yq '.Updates[0].Type' | tr -d '
 NEW_UPDATE_TYPE="$(echo "${NEW_ARTIFACT_YAML}" | yq '.Updates[0].Type' | tr -d '"')"
 OLD_ROOTFS_FILE="$(echo "${OLD_ARTIFACT_YAML}" | yq '.Updates[0].Files[0].name' | tr -d '"')"
 NEW_ROOTFS_FILE="$(echo "${NEW_ARTIFACT_YAML}" | yq '.Updates[0].Files[0].name' | tr -d '"')"
-OLD_SNAPSHOT="$(echo "${OLD_ARTIFACT_YAML}" | yq '.Updates[0].Provides."rootfs-image.snapshot"' | tr -d '"')"
+BASELINE="$(echo "${OLD_ARTIFACT_YAML}" | yq '.Updates[0].Provides."rootfs-image.baseline"' | tr -d '"')"
 NEW_ROOTFS_VERSION="$(echo "${NEW_ARTIFACT_YAML}" | yq '.Updates[0].Provides."rootfs-image.version"' | tr -d '"')"
 NEW_NAME="$(echo "${NEW_ARTIFACT_YAML}" | yq '."Mender Artifact".Name' | tr -d '"')"
 
@@ -107,26 +107,27 @@ mender-artifact dump --scripts "${TEMPDIR}"/new/scripts/ "${NEW_ARTIFACT}"
 
 "${SUDO_COMMAND}" mount -t btrfs -o subvolid=5 -o noatime "${TEMPDIR}"/old/files/"${OLD_ROOTFS_FILE}" "${TEMPDIR}"/old_mnt/
 "${SUDO_COMMAND}" mount -t btrfs -o subvolid=5 -o noatime "${TEMPDIR}"/new/files/"${NEW_ROOTFS_FILE}" "${TEMPDIR}"/new_mnt/
-"${SUDO_COMMAND}" btrfs subvolume snapshot "${TEMPDIR}"/old_mnt/factory "${TEMPDIR}"/old_mnt/work
+"${SUDO_COMMAND}" mv "${TEMPDIR}"/old_mnt/factory "${TEMPDIR}"/old_mnt/baseline
+"${SUDO_COMMAND}" btrfs subvolume snapshot "${TEMPDIR}"/old_mnt/baseline "${TEMPDIR}"/old_mnt/work
 "${SUDO_COMMAND}" rsync --numeric-ids --xattrs --acls --hard-links --archive --no-times --checksum "${TEMPDIR}"/new_mnt/factory/ "${TEMPDIR}"/old_mnt/work/
-"${SUDO_COMMAND}" btrfs subvolume snapshot -r "${TEMPDIR}"/old_mnt/work "${TEMPDIR}"/old_mnt/factory_plus_delta
-"${SUDO_COMMAND}" btrfs send --proto 2 -p "${TEMPDIR}"/old_mnt/factory "${TEMPDIR}"/old_mnt/factory_plus_delta -f "${TEMPDIR}"/"${ROOTFS_DELTA}"
+"${SUDO_COMMAND}" btrfs subvolume snapshot -r "${TEMPDIR}"/old_mnt/work "${TEMPDIR}"/old_mnt/factory
+"${SUDO_COMMAND}" btrfs send --proto 2 -p "${TEMPDIR}"/old_mnt/baseline "${TEMPDIR}"/old_mnt/factory -f "${TEMPDIR}"/"${ROOTFS_DELTA}"
 "${SUDO_COMMAND}" chown "${CURRENT_USER}":"${CURRENT_GROUP}" "${TEMPDIR}"/"${ROOTFS_DELTA}"
 "${SUDO_COMMAND}" umount "${TEMPDIR}"/old_mnt/
 "${SUDO_COMMAND}" umount "${TEMPDIR}"/new_mnt/
 
-DELTA_ARTIFACT_NAME="${NEW_NAME}-delta-${OLD_SNAPSHOT}"
+DELTA_ARTIFACT_NAME="${NEW_NAME}-delta-${BASELINE}"
 
 mender-artifact write module-image --type btrfs-delta-rootfs-image \
     "${COMPATIBLE_DEVICES[@]}" \
-    --depends "rootfs-image.snapshot:${OLD_SNAPSHOT}" \
+    --depends "rootfs-image.baseline:${BASELINE}" \
     --artifact-name "${DELTA_ARTIFACT_NAME}" \
     --file "${TEMPDIR}"/"${ROOTFS_DELTA}" --version 3 \
     --no-default-software-version \
     --no-default-clears-provides \
     --provides rootfs-image.version:"${NEW_ROOTFS_VERSION}" \
-    --provides rootfs-image.snapshot:"${OLD_SNAPSHOT}" \
-    --provides rootfs-image.delta_snapshot:"${DELTA_ARTIFACT_NAME}" \
+    --provides rootfs-image.baseline:"${BASELINE}" \
+    --provides rootfs-image.factory:"${DELTA_ARTIFACT_NAME}" \
     --clears-provides "rootfs-image.*" \
     --clears-provides artifact_group \
     --clears-provides rootfs_image_checksum \

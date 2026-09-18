@@ -21,7 +21,7 @@ snapshot_rootfs() {
     local _snapshot
     _snapshot="$(btrfs subvolume get-default "${_rootmnt}")"
     _snapshot="${_snapshot##* }"
-    if [ "${_snapshot}" != "factory" ] && [ "${_snapshot}" != "factory_plus_delta" ] ; then
+    if [ "${_snapshot}" != "factory" ] ; then
         info "no snapshot needed, root ${_root} already got snapshot ${_snapshot}"
     else
         info "snapshot needed, root ${_root}: ${_snapshot} --> ${_rw_snapshot}"
