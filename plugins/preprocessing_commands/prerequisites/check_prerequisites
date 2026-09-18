@@ -9,6 +9,7 @@ required_packages=(
 "buildah 1.28.2"
 "mmdebstrap 1.3.5"
 "genimage 19-1"
+"mender-artifact 3.9.0"
 )
 
 required_submodules=(

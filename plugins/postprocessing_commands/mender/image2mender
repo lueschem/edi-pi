@@ -119,14 +119,6 @@ then
     print_error_and_exit "Missing bootloader parameter."
 fi
 
-if ! which mender-artifact > /dev/null
-then
-    print_error "Missing mender-artifact executable. Mender update artifact will not be built."
-    # Ignore this error for now since the update image might not be needed for every use case.
-    echo "Mender update artifact not built due to missing mender-artifact executable." >> "${MENDER_ARTIFACT}"
-    exit 0
-fi
-
 if [ "${DEVICE_TYPE}" == "pi2-armhf" ]
 then
     COMPATIBLE_DEVICE=( "--device-type" "rpi-armhf" )

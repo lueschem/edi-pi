@@ -34,6 +34,7 @@ WORKDIR="{{ edi_work_directory }}"
 HOSTNAME="{{ hostname }}"
 ARTIFACT_NAME="${BUILD_TIMESTAMP}-{{ edi_configuration_name }}-{{ debian_distribution_release }}-{{ edi_bootstrap_architecture }}"
 MENDER_DEVICE_TYPE="{{ mender_device_type }}"
+FULL_MENDER_DEVICE_TYPE="{{ mender_device_type }}-{{ edi_bootstrap_architecture }}"
 
 print_error()
 {
@@ -112,7 +113,15 @@ cp "${PLUGIN_DIRECTORY}/fstab" "${ROOTFS_DIR}"/etc/
 
 # Add artifact information to rootfs.
 mkdir -p "${ROOTFS_DIR}/etc/mender/"
+# Legacy - artifact_info file is not required anymore:
 echo "artifact_name=${ARTIFACT_NAME}" > "${ROOTFS_DIR}"/etc/mender/artifact_info
+mender-artifact write bootstrap-artifact \
+    --device-type "${FULL_MENDER_DEVICE_TYPE}" \
+    --artifact-name "${ARTIFACT_NAME}" \
+    --provides rootfs-image.version:"${ARTIFACT_NAME}" \
+    --provides rootfs-image.baseline:"${ARTIFACT_NAME}" \
+    --provides rootfs-image.factory:"${ARTIFACT_NAME}" \
+    --output-path "${ROOTFS_DIR}"/data/mender/bootstrap.mender
 
 # Adjust hostname.
 cp "${PLUGIN_DIRECTORY}/hosts" "${ROOTFS_DIR}"/etc/
