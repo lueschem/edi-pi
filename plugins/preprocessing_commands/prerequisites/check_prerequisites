@@ -8,6 +8,7 @@ required_packages=(
 "ansible-core 2.14.16"
 "buildah 1.28.2"
 "mmdebstrap 1.3.5"
+"genimage 19-1"
 )
 
 required_submodules=(
