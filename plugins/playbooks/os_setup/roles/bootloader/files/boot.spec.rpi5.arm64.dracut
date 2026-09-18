@@ -1,0 +1,18 @@
+kernel_image=/boot/vmlinuz-__KERNEL_PACKAGE_VERSION__
+initramfs_image=/boot/initrd.img-__KERNEL_PACKAGE_VERSION__
+device_tree_binaries=(
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/broadcom/bcm2712-rpi-5-b.dtb
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/broadcom/bcm2712d0-rpi-5-b.dtb
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/broadcom/bcm2712-rpi-cm5-cm4io.dtb
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/broadcom/bcm2712-rpi-cm5-cm5io.dtb
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/broadcom/bcm2712-rpi-cm5l-cm4io.dtb
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/broadcom/bcm2712-rpi-cm5l-cm5io.dtb
+)
+device_tree_binary_overlays=(
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/overlays/vc4-fkms-v3d.dtbo
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/overlays/vc4-kms-v3d.dtbo
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/overlays/gpio-ir-tx.dtbo
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/overlays/gpio-ir.dtbo
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/overlays/bcm2712d0.dtbo
+    /usr/lib/linux-image-__KERNEL_PACKAGE_VERSION__/overlays/dwc2.dtbo
+)
