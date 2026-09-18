@@ -31,7 +31,6 @@ snapshot_rootfs() {
         btrfs subvolume snapshot "${_rootmnt}"/"${_snapshot}" "${_rootmnt}"/"${_rw_snapshot}"
         btrfs subvolume set-default "${_rootmnt}"/"${_rw_snapshot}"
     fi
-    umount "${_rootmnt}"
     return 0
 }
 
