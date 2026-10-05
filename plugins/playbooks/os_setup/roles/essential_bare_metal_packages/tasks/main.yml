@@ -58,6 +58,11 @@
     path: /var/log/journal
     state: absent
 
+- name: Configure journald storage to volatile to prevent logging also on btrfs.
+  copy:
+    src: 40-edi-volatile-storage.conf
+    dest: /usr/lib/systemd/journald.conf.d/
+
 - name: Disable DUMP_OBSS on brcmfmac.
   copy:
     src: brcmfmac.conf
