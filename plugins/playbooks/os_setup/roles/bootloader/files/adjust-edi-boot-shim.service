@@ -1,0 +1,17 @@
+[Unit]
+Description=Adjust edi-boot-shim setup on first boot or after factory reset
+DefaultDependencies=no
+Conflicts=shutdown.target
+After=systemd-remount-fs.service
+Before=sysinit.target first-boot-complete.target shutdown.target
+Wants=first-boot-complete.target
+ConditionPathIsReadWrite=/etc
+ConditionFirstBoot=yes
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/bin/adjust-edi-boot-shim
+
+[Install]
+WantedBy=sysinit.target

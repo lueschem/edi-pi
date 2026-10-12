@@ -7,7 +7,35 @@
 - name: Configure edi-boot-shim for multiboot.
   template:
     src: multiboot.cfg
-    dest: /etc/edi-boot-shim/edi-boot-shim.cfg.d
+    dest: /etc/edi-boot-shim/edi-boot-shim.cfg.d/
+
+- name: Add script that adjusts the edi-boot-shim configuration.
+  ansible.builtin.copy:
+    src: adjust-edi-boot-shim
+    dest: /usr/bin/
+    mode: '0755'
+  when: ebs_bootloader_type == "raspberry-pi"
+
+- name: Add a systemd service that adjusts the edi-boot-shim configuration.
+  ansible.builtin.copy:
+    src: adjust-edi-boot-shim.service
+    dest: /lib/systemd/system/
+    mode: '0644'
+  when: ebs_bootloader_type == "raspberry-pi"
+
+- name: Create a directory that will receive the systemd symbolic link.
+  ansible.builtin.file:
+    path: /etc/systemd/system/sysinit.target.wants
+    state: directory
+    mode: '0755'
+  when: ebs_bootloader_type == "raspberry-pi"
+
+- name: Enable the systemd service that adjusts the edi-boot-shim configuration.
+  ansible.builtin.file:
+    src: /lib/systemd/system/adjust-edi-boot-shim.service
+    dest: /etc/systemd/system/sysinit.target.wants/adjust-edi-boot-shim.service
+    state: link
+  when: ebs_bootloader_type == "raspberry-pi"
 
 - name: Install edi-boot-shim.
   apt:
