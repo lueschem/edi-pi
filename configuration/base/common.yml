@@ -10,6 +10,8 @@ general:
         ansible_python_interpreter: /usr/bin/python3
         # Initial release of Debian trixie (09 August 2025)
         source_date_epoch: "1754690400"
+        initramfs_tool: noinitramfs
+        rootfs_partition_type: ext4
 
 preprocessing_commands:
     100_prerequisites:

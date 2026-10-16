@@ -6,8 +6,9 @@ set -o pipefail
 
 PLUGIN_DIRECTORY="{{ edi_current_plugin_directory }}"
 OUTPUT="{{ edi_prerequisites_log }}"
+ROOTFS_PARTITION_TYPE="{{ rootfs_partition_type }}"
 
-if result=$("${PLUGIN_DIRECTORY}"/check_prerequisites)
+if result=$("${PLUGIN_DIRECTORY}"/check_prerequisites "${ROOTFS_PARTITION_TYPE}")
 then
     echo "${result}" > "${OUTPUT}"
     exit 0

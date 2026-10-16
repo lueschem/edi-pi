@@ -37,6 +37,7 @@ Required arguments:
  -b BOOTLOADER, --bootloader=BOOTLOADER    : The selected bootloader ("u-boot" or "raspberry-pi").
 Optional arguments:
  -h, --help                                : Print help text.
+ -p PARTITION_TYPE, --partition-type=PARTITION_TYPE : The rootfs partition type ("ext4" (default) or "btrfs").
  --log=LEVEL                               : Use --log=DEBUG to trace all commands.
 EOF
 }
@@ -62,7 +63,7 @@ unexpected_exit()
     print_error_and_exit "Abnormal script termination."
 }
 
-if ! options=$(getopt -o hi:o:a:t:b: -l help,log:,input:,output:,artifact:,type:,bootloader: -- "$@")
+if ! options=$(getopt -o hi:o:a:t:b:p: -l help,log:,input:,output:,artifact:,type:,bootloader:,partition-type: -- "$@")
 then
     print_usage
     print_error_and_exit "Invalid option."
@@ -76,18 +77,20 @@ ARTIFACT_NAME=""
 DEVICE_TYPE=""
 LOG_LEVEL="INFO"
 BOOTLOADER=""
+ROOTFS_PARTITION_TYPE="ext4"
 
 while true
 do
     case "${1}" in
-        -h|--help)          print_usage && exit 0;;
-        -i|--input)         INPUT_IMAGE="${2}"; shift 2;;
-        -o|--output)        MENDER_ARTIFACT="${2}"; shift 2;;
-        -a|--artifact)      ARTIFACT_NAME="${2}"; shift 2;;
-        -t|--type)          DEVICE_TYPE="${2}"; shift 2;;
-        -b|--bootloader)    BOOTLOADER="${2}"; shift 2;;
-        --log)              LOG_LEVEL="${2}"; shift 2;;
-        *)                  break ;;
+        -h|--help)           print_usage && exit 0;;
+        -i|--input)          INPUT_IMAGE="${2}"; shift 2;;
+        -o|--output)         MENDER_ARTIFACT="${2}"; shift 2;;
+        -a|--artifact)       ARTIFACT_NAME="${2}"; shift 2;;
+        -t|--type)           DEVICE_TYPE="${2}"; shift 2;;
+        -b|--bootloader)     BOOTLOADER="${2}"; shift 2;;
+        -p|--partition-type) ROOTFS_PARTITION_TYPE="${2}"; shift 2;;
+        --log)               LOG_LEVEL="${2}"; shift 2;;
+        *)                   break ;;
     esac
 done
 
@@ -138,13 +141,17 @@ then
     BOOTPARTITION_SETUP_SCRIPT=( "--script" "${SCRIPTDIR}/ArtifactInstall_Enter_50_BootpartitionSetup" )
 fi
 
+BTRFS_BONUS_PROVIDES=()
+if [ "${ROOTFS_PARTITION_TYPE}" == "btrfs" ]; then
+    BTRFS_BONUS_PROVIDES=("--provides" "rootfs-image.baseline:${ARTIFACT_NAME}" "--provides" "rootfs-image.factory:${ARTIFACT_NAME}")
+fi
+
 mender-artifact write module-image --type rootfs-image --device-type "${DEVICE_TYPE}" "${COMPATIBLE_DEVICE[@]}" \
     --artifact-name "${ARTIFACT_NAME}" --file "${INPUT_IMAGE}" --version 3 \
     --no-default-software-version \
     --no-default-clears-provides \
     --provides rootfs-image.version:"${ARTIFACT_NAME}" \
-    --provides rootfs-image.baseline:"${ARTIFACT_NAME}" \
-    --provides rootfs-image.factory:"${ARTIFACT_NAME}" \
+    "${BTRFS_BONUS_PROVIDES[@]}" \
     --clears-provides "rootfs-image.*" \
     --clears-provides artifact_group \
     --clears-provides rootfs_image_checksum \

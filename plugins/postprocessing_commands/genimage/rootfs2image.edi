@@ -35,6 +35,7 @@ HOSTNAME="{{ hostname }}"
 ARTIFACT_NAME="${BUILD_TIMESTAMP}-{{ edi_configuration_name }}-{{ debian_distribution_release }}-{{ edi_bootstrap_architecture }}"
 MENDER_DEVICE_TYPE="{{ mender_device_type }}"
 FULL_MENDER_DEVICE_TYPE="{{ mender_device_type }}-{{ edi_bootstrap_architecture }}"
+ROOTFS_PARTITION_TYPE="{{ rootfs_partition_type }}"
 
 print_error()
 {
@@ -109,18 +110,23 @@ fi
 rm "${ROOTFS_DIR}"/etc/machine-id
 rm "${ROOTFS_DIR}"/var/lib/dbus/machine-id
 # Add fstab.
-cp "${PLUGIN_DIRECTORY}/fstab" "${ROOTFS_DIR}"/etc/
+cp "${PLUGIN_DIRECTORY}/fstab.${ROOTFS_PARTITION_TYPE}" "${ROOTFS_DIR}"/etc/fstab
 
 # Add artifact information to rootfs.
 mkdir -p "${ROOTFS_DIR}/etc/mender/"
 # Legacy - artifact_info file is not required anymore:
 echo "artifact_name=${ARTIFACT_NAME}" > "${ROOTFS_DIR}"/etc/mender/artifact_info
+
+BTRFS_BONUS_PROVIDES=()
+if [ "${ROOTFS_PARTITION_TYPE}" == "btrfs" ]; then
+    BTRFS_BONUS_PROVIDES=("--provides" "rootfs-image.baseline:${ARTIFACT_NAME}" "--provides" "rootfs-image.factory:${ARTIFACT_NAME}")
+fi
+
 mender-artifact write bootstrap-artifact \
     --device-type "${FULL_MENDER_DEVICE_TYPE}" \
     --artifact-name "${ARTIFACT_NAME}" \
     --provides rootfs-image.version:"${ARTIFACT_NAME}" \
-    --provides rootfs-image.baseline:"${ARTIFACT_NAME}" \
-    --provides rootfs-image.factory:"${ARTIFACT_NAME}" \
+    "${BTRFS_BONUS_PROVIDES[@]}" \
     --output-path "${ROOTFS_DIR}"/data/mender/bootstrap.mender
 
 # Adjust hostname.
@@ -130,12 +136,12 @@ sed -i "s@__HOSTNAME__@${HOSTNAME}@" "${ROOTFS_DIR}"/etc/hosts
 cp "${PLUGIN_DIRECTORY}/hostname" "${ROOTFS_DIR}"/etc/
 sed -i "s@__HOSTNAME__@${HOSTNAME}@" "${ROOTFS_DIR}"/etc/hostname
 
-genimage --rootpath rootfs --config "${PLUGIN_DIRECTORY}/genimage.cfg" --tmppath genimage-workdir
+genimage --rootpath rootfs --config "${PLUGIN_DIRECTORY}/genimage.cfg.${ROOTFS_PARTITION_TYPE}" --tmppath genimage-workdir
 
 popd > /dev/null
 
 mv "${TEMPDIR}/images/disk-image.img" "${DISK_IMAGE}"
-mv "${TEMPDIR}/images/root.btrfs" "${PARTITION_IMAGE}"
+mv "${TEMPDIR}/images/root.partition" "${PARTITION_IMAGE}"
 
 rm -rf "${TEMPDIR}"
 trap - EXIT

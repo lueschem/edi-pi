@@ -25,7 +25,7 @@ image disk-image.img {
 
     partition root {
         partition-type = 0x83
-        image = "root.btrfs"
+        image = "root.partition"
     }
 }
 
@@ -48,7 +48,7 @@ image data.ext4 {
     mountpoint = "factory/data"
 }
 
-image root.btrfs {
+image root.partition {
     name = "root"
     btrfs {
         label = "root"

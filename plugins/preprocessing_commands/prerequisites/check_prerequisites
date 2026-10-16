@@ -4,11 +4,19 @@ set -o nounset
 set -o errexit
 set -o pipefail
 
+ROOTFS_PARTITION_TYPE="${1}"
+
+GENIMAGE_VERSION="16-2"
+if [ "${ROOTFS_PARTITION_TYPE}" == "btrfs" ]
+then
+    GENIMAGE_VERSION="19-1"
+fi
+
 required_packages=(
 "ansible-core 2.14.16"
 "buildah 1.28.2"
 "mmdebstrap 1.3.5"
-"genimage 19-1"
+"genimage ${GENIMAGE_VERSION}"
 "mender-artifact 3.9.0"
 )
 

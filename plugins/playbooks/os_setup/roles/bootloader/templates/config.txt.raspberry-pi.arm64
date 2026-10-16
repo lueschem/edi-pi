@@ -40,7 +40,9 @@ disable_overscan=1
 arm_boost=1
 
 kernel=vmlinuz
+{% if initramfs_tool != "noinitramfs" %}
 initramfs initrd.img followkernel
+{% endif %}
 os_prefix=p__ROOTFS_PARTITION__/
 
 [cm4]

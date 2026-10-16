@@ -101,6 +101,7 @@
     src: btrfs-delta-rootfs-image
     dest: /usr/share/mender/modules/v3/
     mode: 0755
+  when: rootfs_partition_type == "btrfs"
 
 - name: Create various integration directories.
   file:
