@@ -9,11 +9,6 @@
     bare_metal_packages: "{{ bare_metal_packages + ['dracut'] }}"
   when: initramfs_tool == "dracut"
 
-- name: Add the kernel {{ kernel_image }} to the list of bare metal packages.
-  set_fact:
-    bare_metal_packages: "{{ bare_metal_packages + [kernel_image] }}"
-  when: not kernel_image.endswith(".deb")
-
 - name: Install dracut btrfs snapshot module.
   copy:
     src: "{{ item }}"
@@ -36,6 +31,14 @@
     name: "{{ bare_metal_packages }}"
     state: present
     install_recommends: no
+
+# Workaround: Install the kernel after dracut to make sure edi-boot-shim finds the initramfs image.
+- name: Install kernel {{ kernel_image }} from repository.
+  apt:
+    name: "{{ kernel_image }}"
+    state: present
+    install_recommends: no
+  when: not kernel_image.endswith(".deb")
 
 - name: Copy local kernel {{ kernel_image }}.
   copy:
