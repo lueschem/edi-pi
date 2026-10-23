@@ -88,7 +88,6 @@ rsync --numeric-ids --exclude-from "${PLUGIN_DIRECTORY}/exclude-patterns" --xatt
 # Copy kernel, initrd and dtbs to firmware partition
 if [ -d "${ROOTFS_DIR}/boot/image-kernel" ]; then
     cp -r -L "${ROOTFS_DIR}"/boot/image-kernel "${ROOTFS_DIR}"/boot/firmware/p3
-    sed -i "s@^BOOTLOADER_DIRECTORY=.*@BOOTLOADER_DIRECTORY=\"/boot/firmware/p3\"@" "${ROOTFS_DIR}/etc/edi-boot-shim/edi-boot-shim.cfg.d/multiboot.cfg"
     # Do not use initramfs when booting from mender update artifact.
     INITRD_IMAGE="${ROOTFS_DIR}"/boot/image-kernel/initrd.img
     if [ -f "${INITRD_IMAGE}" ]; then
