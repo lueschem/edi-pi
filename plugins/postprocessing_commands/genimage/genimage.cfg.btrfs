@@ -2,6 +2,7 @@ config {
     mkdosfs = "/sbin/mkdosfs"
     mke2fs = "/sbin/mke2fs"
     e2fsck = "/sbin/e2fsck"
+    # mkfsbtrfs = "/sbin/mkfs.btrfs" (see https://github.com/pengutronix/genimage/pull/348)
 }
 
 image disk-image.img {
