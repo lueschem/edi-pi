@@ -1,3 +1,4 @@
+/boot/System.map*
 /dev/*
 /proc/*
 /sys/*
