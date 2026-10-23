@@ -89,7 +89,8 @@ fi
 NEXT_BOOT_FOLDER="/boot/firmware/p${NEXT_BOOT_PART}"
 NEXT_ROOT_MNT=$(mktemp -d -t next-root-XXXXXXXX --tmpdir=/tmp)
 
-mount "/dev/mmcblk0p${NEXT_BOOT_PART}" "${NEXT_ROOT_MNT}"
+NEXT_ROOT_DEVICE="/dev/mmcblk0p${NEXT_BOOT_PART}"
+mount "${NEXT_ROOT_DEVICE}" "${NEXT_ROOT_MNT}"
 
 rm -rf "${NEXT_BOOT_FOLDER}"
 cp -r -L "${NEXT_ROOT_MNT}/boot/image-kernel" "${NEXT_BOOT_FOLDER}"
@@ -111,5 +112,16 @@ cp "${NEXT_ROOT_MNT}/boot/image-firmware/config.txt" "${TRYBOOT_TXT}"
 sed -i "s@__ROOTFS_PARTITION__@${NEXT_BOOT_PART}@" "${TRYBOOT_TXT}"
 
 umount "${NEXT_ROOT_MNT}"
+
+NEXT_ROOTFS_TYPE="$(blkid -o value -s TYPE "${NEXT_ROOT_DEVICE}")"
+if [ "${NEXT_ROOTFS_TYPE}" == "btrfs" ] ; then
+    RW_SNAPSHOT="@"
+    mount -t btrfs -o subvolid=5 -o noatime "${NEXT_ROOT_DEVICE}" "${NEXT_ROOT_MNT}"
+    mount --bind "${NEXT_ROOT_MNT}" "${NEXT_ROOT_MNT}"/factory/mnt/
+    chroot "${NEXT_ROOT_MNT}"/factory btrfs subvolume snapshot /mnt/factory /mnt/"${RW_SNAPSHOT}"
+    chroot "${NEXT_ROOT_MNT}"/factory btrfs subvolume set-default /mnt/"${RW_SNAPSHOT}"
+    umount "${NEXT_ROOT_MNT}"/factory/mnt/
+    umount "${NEXT_ROOT_MNT}"
+fi
 
 trap - EXIT
