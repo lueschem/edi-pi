@@ -26,8 +26,8 @@ print_error_and_exit()
 unexpected_exit()
 {
     print_error "Going to clean up after abnormal script termination."
-    "${SUDO_COMMAND}" umount "${TEMPDIR}"/old_mnt/ || true
-    "${SUDO_COMMAND}" umount "${TEMPDIR}"/new_mnt/ || true
+    ${SUDO_COMMAND} umount "${TEMPDIR}"/old_mnt/ || true
+    ${SUDO_COMMAND} umount "${TEMPDIR}"/new_mnt/ || true
     rm -rf "${TEMPDIR}"
     trap - EXIT
     print_error_and_exit "Abnormal script termination."
@@ -51,7 +51,7 @@ then
     print_error_and_exit "The mender-artifact binary is too old (>= 4.0.0 required)."
 fi
 
-"${SUDO_COMMAND}" true
+${SUDO_COMMAND} true
 
 OLD_ARTIFACT="${1}"
 NEW_ARTIFACT="${2}"
@@ -120,16 +120,16 @@ mender-artifact dump --files "${TEMPDIR}"/new/files/ "${NEW_ARTIFACT}"
 mender-artifact dump --scripts "${TEMPDIR}"/new/scripts/ "${NEW_ARTIFACT}"
 
 echo "Creating btrfs delta artifact..."
-"${SUDO_COMMAND}" mount -t btrfs -o subvolid=5 -o noatime "${TEMPDIR}"/old/files/"${OLD_ROOTFS_FILE}" "${TEMPDIR}"/old_mnt/
-"${SUDO_COMMAND}" mount -t btrfs -o subvolid=5 -o noatime "${TEMPDIR}"/new/files/"${NEW_ROOTFS_FILE}" "${TEMPDIR}"/new_mnt/
-"${SUDO_COMMAND}" mv "${TEMPDIR}"/old_mnt/factory "${TEMPDIR}"/old_mnt/baseline
-"${SUDO_COMMAND}" btrfs -q subvolume snapshot "${TEMPDIR}"/old_mnt/baseline "${TEMPDIR}"/old_mnt/work
-"${SUDO_COMMAND}" rsync --numeric-ids --xattrs --acls --hard-links --archive --no-times --checksum "${TEMPDIR}"/new_mnt/factory/ "${TEMPDIR}"/old_mnt/work/
-"${SUDO_COMMAND}" btrfs -q subvolume snapshot -r "${TEMPDIR}"/old_mnt/work "${TEMPDIR}"/old_mnt/factory
-"${SUDO_COMMAND}" btrfs -q send --proto 2 -p "${TEMPDIR}"/old_mnt/baseline "${TEMPDIR}"/old_mnt/factory -f "${TEMPDIR}"/"${ROOTFS_DELTA}"
-"${SUDO_COMMAND}" chown "${CURRENT_USER}":"${CURRENT_GROUP}" "${TEMPDIR}"/"${ROOTFS_DELTA}"
-"${SUDO_COMMAND}" umount "${TEMPDIR}"/old_mnt/
-"${SUDO_COMMAND}" umount "${TEMPDIR}"/new_mnt/
+${SUDO_COMMAND} mount -t btrfs -o subvolid=5 -o noatime "${TEMPDIR}"/old/files/"${OLD_ROOTFS_FILE}" "${TEMPDIR}"/old_mnt/
+${SUDO_COMMAND} mount -t btrfs -o subvolid=5 -o noatime "${TEMPDIR}"/new/files/"${NEW_ROOTFS_FILE}" "${TEMPDIR}"/new_mnt/
+${SUDO_COMMAND} mv "${TEMPDIR}"/old_mnt/factory "${TEMPDIR}"/old_mnt/baseline
+${SUDO_COMMAND} btrfs -q subvolume snapshot "${TEMPDIR}"/old_mnt/baseline "${TEMPDIR}"/old_mnt/work
+${SUDO_COMMAND} rsync --numeric-ids --xattrs --acls --hard-links --archive --no-times --delete --checksum "${TEMPDIR}"/new_mnt/factory/ "${TEMPDIR}"/old_mnt/work/
+${SUDO_COMMAND} btrfs -q subvolume snapshot -r "${TEMPDIR}"/old_mnt/work "${TEMPDIR}"/old_mnt/factory
+${SUDO_COMMAND} btrfs -q send --proto 2 -p "${TEMPDIR}"/old_mnt/baseline "${TEMPDIR}"/old_mnt/factory -f "${TEMPDIR}"/"${ROOTFS_DELTA}"
+${SUDO_COMMAND} chown "${CURRENT_USER}":"${CURRENT_GROUP}" "${TEMPDIR}"/"${ROOTFS_DELTA}"
+${SUDO_COMMAND} umount "${TEMPDIR}"/old_mnt/
+${SUDO_COMMAND} umount "${TEMPDIR}"/new_mnt/
 
 DELTA_ARTIFACT_NAME="${NEW_NAME}-baseline-${BASELINE}"
 
