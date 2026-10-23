@@ -1,4 +1,5 @@
 /boot/System.map*
+/etc/resolv.conf
 /dev/*
 /proc/*
 /sys/*
