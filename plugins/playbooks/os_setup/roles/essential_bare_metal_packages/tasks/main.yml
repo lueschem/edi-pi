@@ -93,3 +93,31 @@
     dest: /etc/systemd/system/edi-set-hostname.service.d/override.conf
     mode: 0644
 
+- name: Add a script that deals with read only btrfs snapshot on first boot.
+  ansible.builtin.copy:
+    src: edi-btrfs-firstboot
+    dest: /usr/bin/edi-btrfs-firstboot
+    mode: '0755'
+  when: rootfs_partition_type == "btrfs"
+
+- name: Add a systemd service that handles the first boot on btrfs.
+  ansible.builtin.copy:
+    src: edi-btrfs-firstboot.service
+    dest: /lib/systemd/system/
+    mode: '0644'
+  when: rootfs_partition_type == "btrfs"
+
+- name: Create a directory that will receive the systemd symbolic link.
+  ansible.builtin.file:
+    path: /etc/systemd/system/sysinit.target.wants
+    state: directory
+    mode: '0755'
+  when: rootfs_partition_type == "btrfs"
+
+- name: Enable the systemd service that handles the first boot on btrfs.
+  ansible.builtin.file:
+    src: /lib/systemd/system/edi-btrfs-firstboot.service
+    dest: /etc/systemd/system/sysinit.target.wants/edi-btrfs-firstboot.service
+    state: link
+  when: rootfs_partition_type == "btrfs"
+

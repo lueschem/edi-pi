@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# Small helper script that makes sure that we are booting from a writeable btrfs subvolume.
+
+set -o nounset
+set -o errexit
+set -o pipefail
+
+if [[ $EUID -ne 0 ]] ; then
+   >&2 echo "Error: Use root user to execute this script."
+   exit 1
+fi
+
+CURRENT_ROOT_DEVICE=$(mount | sed -n 's|^\(/dev/.*\) on / .*|\1|p')
+if [ -z "${CURRENT_ROOT_DEVICE}" ] ; then
+    >&2 echo "Error: Unable to identify the current root device."
+   exit 1
+fi
+
+ROOTFS_TYPE="$(blkid -o value -s TYPE "${CURRENT_ROOT_DEVICE}")"
+if [ "${ROOTFS_TYPE}" != "btrfs" ] ; then
+    echo "No snapshot needed, root ${CURRENT_ROOT_DEVICE} is of type ${ROOTFS_TYPE}."
+    exit 0
+fi
+
+SNAPSHOT="$(btrfs subvolume get-default /)"
+SNAPSHOT="${SNAPSHOT##* }"
+if [ "${SNAPSHOT}" != "factory" ] ; then
+    echo "No snapshot needed, root ${CURRENT_ROOT_DEVICE} already got snapshot ${SNAPSHOT}."
+    exit 0
+else
+    ROOT_MOUNT="/mnt"
+    RW_SNAPSHOT="@"
+    echo "Snapshot needed, root ${CURRENT_ROOT_DEVICE}: ${SNAPSHOT} --> ${RW_SNAPSHOT}."
+    mount -t btrfs -o subvolid=5 "${CURRENT_ROOT_DEVICE}" "${ROOT_MOUNT}"
+    if [ -e "${ROOT_MOUNT}"/"${RW_SNAPSHOT}" ] ; then
+        btrfs subvolume delete --commit-after "${ROOT_MOUNT}"/"${RW_SNAPSHOT}"
+    fi
+    btrfs subvolume snapshot "${ROOT_MOUNT}"/"${SNAPSHOT}" "${ROOT_MOUNT}"/"${RW_SNAPSHOT}"
+    btrfs subvolume set-default "${ROOT_MOUNT}"/"${RW_SNAPSHOT}"
+
+    echo "Rebooting system to apply writable snapshot..."
+    /usr/bin/systemctl reboot --no-block
+fi
