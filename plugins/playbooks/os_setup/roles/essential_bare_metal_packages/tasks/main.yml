@@ -1,30 +1,8 @@
 ---
-- name: Add btrfs-progs to the list of bare metal packages.
+- name: Add edi-btrfs-tools to the list of bare metal packages.
   set_fact:
-    bare_metal_packages: "{{ bare_metal_packages + ['btrfs-progs'] }}"
+    bare_metal_packages: "{{ bare_metal_packages + ['edi-btrfs-tools'] }}"
   when: rootfs_partition_type == "btrfs"
-
-- name: Add dracut to the list of bare metal packages.
-  set_fact:
-    bare_metal_packages: "{{ bare_metal_packages + ['dracut'] }}"
-  when: initramfs_tool == "dracut"
-
-- name: Install dracut btrfs snapshot module.
-  copy:
-    src: "{{ item }}"
-    dest: /usr/lib/dracut/modules.d/95rootfs-snapshot/
-    mode: 0755
-  loop:
-    - module-setup.sh
-    - snapshot-rootfs.sh
-  when: initramfs_tool == "dracut"
-
-- name: Enable reproducible initramfs builds.
-  copy:
-    src: "50-reproducible.conf"
-    dest: /etc/dracut.conf.d/
-    mode: 0644
-  when: initramfs_tool == "dracut"
 
 - name: Install packages that are essential for running on bare metal.
   apt:
@@ -92,32 +70,3 @@
     src: edi-set-hostname.override.conf
     dest: /etc/systemd/system/edi-set-hostname.service.d/override.conf
     mode: 0644
-
-- name: Add a script that deals with read only btrfs snapshot on first boot.
-  ansible.builtin.copy:
-    src: edi-btrfs-firstboot
-    dest: /usr/bin/edi-btrfs-firstboot
-    mode: '0755'
-  when: rootfs_partition_type == "btrfs"
-
-- name: Add a systemd service that handles the first boot on btrfs.
-  ansible.builtin.copy:
-    src: edi-btrfs-firstboot.service
-    dest: /lib/systemd/system/
-    mode: '0644'
-  when: rootfs_partition_type == "btrfs"
-
-- name: Create a directory that will receive the systemd symbolic link.
-  ansible.builtin.file:
-    path: /etc/systemd/system/sysinit.target.wants
-    state: directory
-    mode: '0755'
-  when: rootfs_partition_type == "btrfs"
-
-- name: Enable the systemd service that handles the first boot on btrfs.
-  ansible.builtin.file:
-    src: /lib/systemd/system/edi-btrfs-firstboot.service
-    dest: /etc/systemd/system/sysinit.target.wants/edi-btrfs-firstboot.service
-    state: link
-  when: rootfs_partition_type == "btrfs"
-

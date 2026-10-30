@@ -88,13 +88,6 @@ rsync --numeric-ids --exclude-from "${PLUGIN_DIRECTORY}/exclude-patterns" --xatt
 # Copy kernel, initrd and dtbs to firmware partition
 if [ -d "${ROOTFS_DIR}/boot/image-kernel" ]; then
     cp -r -L "${ROOTFS_DIR}"/boot/image-kernel "${ROOTFS_DIR}"/boot/firmware/p3
-    # Do not use initramfs when booting from mender update artifact.
-    INITRD_IMAGE="${ROOTFS_DIR}"/boot/image-kernel/initrd.img
-    if [ -f "${INITRD_IMAGE}" ]; then
-        LINKED_INITRD_IMAGE=$(readlink -f "${INITRD_IMAGE}")
-        rm "${INITRD_IMAGE}"
-        rm "${LINKED_INITRD_IMAGE}"
-    fi
 fi
 
 if [ -d "${ROOTFS_DIR}/boot/image-firmware" ]; then

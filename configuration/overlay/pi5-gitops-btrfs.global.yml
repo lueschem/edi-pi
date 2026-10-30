@@ -4,7 +4,6 @@ general:
         ebs_bootloader_type: "raspberry-pi"
         edi_bootstrap_architecture: arm64
         qemu_emulated_cpu: cortex-a57
-        initramfs_tool: dracut
         rootfs_partition_type: btrfs
 
 playbooks:
