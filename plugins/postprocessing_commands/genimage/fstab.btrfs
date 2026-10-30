@@ -1,4 +1,4 @@
-# Custom fstab added by lxd2rootfs script.
+# Custom fstab added by edi project configuration.
 # <file system> <mount point> <type> <options> <dump> <pass>
 /dev/root / btrfs rw,noatime 0 1
 /dev/mmcblk0p1 /boot/firmware vfat rw 0 2

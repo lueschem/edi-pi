@@ -85,7 +85,7 @@ mkdir -p "${ROOTFS_DIR}"
 
 rsync --numeric-ids --exclude-from "${PLUGIN_DIRECTORY}/exclude-patterns" --xattrs --acls --atimes --hard-links --archive "${edi_project_container_root}/" "${ROOTFS_DIR}"/
 
-# Copy kernel, initrd and dtbs to firmware partition
+# Copy kernel and dtbs to firmware partition
 if [ -d "${ROOTFS_DIR}/boot/image-kernel" ]; then
     cp -r -L "${ROOTFS_DIR}"/boot/image-kernel "${ROOTFS_DIR}"/boot/firmware/p3
 fi
@@ -95,8 +95,6 @@ if [ -d "${ROOTFS_DIR}/boot/image-firmware" ]; then
     sed -i 's@__ROOTFS_PARTITION__@3@' "${ROOTFS_DIR}"/boot/firmware/p3/cmdline.txt
     cp "${ROOTFS_DIR}"/boot/image-firmware/config.txt "${ROOTFS_DIR}"/boot/firmware/config.txt
     sed -i 's@__ROOTFS_PARTITION__@3@' "${ROOTFS_DIR}"/boot/firmware/config.txt
-    # Do not use initramfs when booting from mender update artifact.
-    sed -i 's@\(^initramfs .*\)@#\1@' "${ROOTFS_DIR}"/boot/image-firmware/config.txt
     if [ "${MENDER_DEVICE_TYPE}" == "pi3-v3" ]; then
         cp "${ROOTFS_DIR}"/boot/image-firmware/bootcode.bin "${ROOTFS_DIR}"/boot/firmware/bootcode.bin
         cp "${ROOTFS_DIR}"/boot/image-firmware/start.elf "${ROOTFS_DIR}"/boot/firmware/p3start.elf
